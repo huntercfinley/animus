@@ -7,7 +7,6 @@
     "icon": "./assets/images/logo.png",
     "scheme": "animus",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#0a0812"
     },
