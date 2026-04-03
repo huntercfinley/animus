@@ -1,0 +1,114 @@
+<h2>Tab Bar Style</h2>
+<p class="subtitle">Which tab bar treatment fits the bright cloud aesthetic?</p>
+
+<div class="cards">
+
+  <!-- Option A: Bright solid -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="height: 320px; display: flex; flex-direction: column;">
+        <!-- Mock screen content -->
+        <div style="flex: 1; background: linear-gradient(180deg, #F0F2FF 0%, #E8ECFF 100%); padding: 24px;">
+          <div style="font-size: 22px; font-weight: 600; color: #1E1B4B; font-family: Georgia, serif; margin-bottom: 16px;">Dream Journal</div>
+          <!-- Mock dream cards -->
+          <div style="background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 27</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">The fisherman and the seven seas...</div>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 9</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">I was with some friends of mine...</div>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 8</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">I was a baseball player...</div>
+          </div>
+        </div>
+        <!-- Solid bright tab bar -->
+        <div style="height: 72px; background: #FFFFFF; border-top: 1px solid #E2E4F0; display: flex; align-items: center; justify-content: space-around; padding: 0 8px;">
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#128214;</div>
+            <div style="font-size: 10px; color: #6366F1; font-weight: 600; margin-top: 2px;">Journal</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#127760;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Map</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 44px; height: 44px; border-radius: 22px; border: 2px solid #6366F1; display: flex; align-items: center; justify-content: center; margin-top: -14px; background: white;">
+              <div style="width: 12px; height: 12px; border-radius: 6px; background: #6366F1;"></div>
+            </div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Record</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#11088;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Shadow</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#127759;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">World</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Solid Bright</h3>
+      <p>Clean white tab bar with a subtle top border. Indigo active state. Simple, consistent, familiar. Like Apple's native tab bars.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Frosted translucent -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="height: 320px; display: flex; flex-direction: column; position: relative;">
+        <!-- Mock screen content -->
+        <div style="flex: 1; background: linear-gradient(180deg, #F0F2FF 0%, #E8ECFF 100%); padding: 24px;">
+          <div style="font-size: 22px; font-weight: 600; color: #1E1B4B; font-family: Georgia, serif; margin-bottom: 16px;">Dream Journal</div>
+          <!-- Mock dream cards -->
+          <div style="background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 27</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">The fisherman and the seven seas...</div>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 9</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">I was with some friends of mine...</div>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(30,27,75,0.06);">
+            <div style="font-size: 13px; color: #6366F1; font-weight: 500;">March 8</div>
+            <div style="font-size: 14px; color: #1E1B4B; margin-top: 4px; font-family: Georgia;">I was a baseball player...</div>
+          </div>
+        </div>
+        <!-- Frosted tab bar -->
+        <div style="height: 72px; background: rgba(255,255,255,0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(226,228,240,0.6); display: flex; align-items: center; justify-content: space-around; padding: 0 8px;">
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#128214;</div>
+            <div style="font-size: 10px; color: #6366F1; font-weight: 600; margin-top: 2px;">Journal</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#127760;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Map</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 44px; height: 44px; border-radius: 22px; border: 2px solid #6366F1; display: flex; align-items: center; justify-content: center; margin-top: -14px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
+              <div style="width: 12px; height: 12px; border-radius: 6px; background: #6366F1;"></div>
+            </div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Record</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#11088;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Shadow</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 18px;">&#127759;</div>
+            <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">World</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Frosted Glass</h3>
+      <p>Semi-transparent white with blur effect. Content peeks through slightly. More premium, modern iOS feel. Adds subtle depth without being distracting.</p>
+    </div>
+  </div>
+
+</div>

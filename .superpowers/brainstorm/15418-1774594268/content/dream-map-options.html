@@ -1,0 +1,201 @@
+<h2>Dream Map: How do you navigate your dream history?</h2>
+<p class="subtitle">Tap to select the one that feels more like Animus</p>
+
+<div class="cards" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;">
+
+  <!-- Option B: Constellation Map -->
+  <div class="card" data-choice="b-constellation" onclick="toggleSelect(this)" style="cursor:pointer; border:1px solid rgba(255,255,255,0.1); border-radius:16px; overflow:hidden; background:rgba(255,255,255,0.03); transition:all 0.3s;">
+    <div class="card-image" style="padding:0; height:420px; position:relative; overflow:hidden;">
+      <!-- Constellation Night Sky -->
+      <div style="width:100%; height:100%; background: radial-gradient(ellipse at 30% 40%, #0a0e2e 0%, #030512 60%, #000 100%); position:relative;">
+        <!-- Nebula glow clusters -->
+        <div style="position:absolute; width:180px; height:180px; background:radial-gradient(circle, rgba(147,112,219,0.15) 0%, transparent 70%); top:40px; left:60px; border-radius:50%;"></div>
+        <div style="position:absolute; width:140px; height:140px; background:radial-gradient(circle, rgba(70,130,180,0.12) 0%, transparent 70%); top:180px; right:40px; border-radius:50%;"></div>
+        <div style="position:absolute; width:120px; height:120px; background:radial-gradient(circle, rgba(180,70,70,0.1) 0%, transparent 70%); bottom:60px; left:40%; border-radius:50%;"></div>
+
+        <!-- Stars (dreams) -->
+        <svg viewBox="0 0 400 420" style="position:absolute; top:0; left:0; width:100%; height:100%;">
+          <!-- Connection lines -->
+          <line x1="80" y1="80" x2="140" y2="120" stroke="rgba(147,112,219,0.3)" stroke-width="1"/>
+          <line x1="140" y1="120" x2="100" y2="170" stroke="rgba(147,112,219,0.3)" stroke-width="1"/>
+          <line x1="80" y1="80" x2="100" y2="170" stroke="rgba(147,112,219,0.2)" stroke-width="1"/>
+          <line x1="280" y1="200" x2="320" y2="250" stroke="rgba(70,130,180,0.3)" stroke-width="1"/>
+          <line x1="320" y1="250" x2="270" y2="280" stroke="rgba(70,130,180,0.3)" stroke-width="1"/>
+          <line x1="280" y1="200" x2="270" y2="280" stroke="rgba(70,130,180,0.2)" stroke-width="1"/>
+          <line x1="200" y1="320" x2="160" y2="350" stroke="rgba(180,70,70,0.3)" stroke-width="1"/>
+          <line x1="200" y1="320" x2="240" y2="360" stroke="rgba(180,70,70,0.3)" stroke-width="1"/>
+          <!-- Cross-cluster connections (faint) -->
+          <line x1="140" y1="120" x2="280" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,6"/>
+          <line x1="270" y1="280" x2="200" y2="320" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,6"/>
+
+          <!-- Shadow cluster (purple) -->
+          <circle cx="80" cy="80" r="5" fill="#9370DB" opacity="0.9"/>
+          <circle cx="80" cy="80" r="8" fill="none" stroke="#9370DB" opacity="0.3" stroke-width="1"/>
+          <circle cx="140" cy="120" r="7" fill="#9370DB" opacity="0.8"/>
+          <circle cx="140" cy="120" r="11" fill="none" stroke="#9370DB" opacity="0.2" stroke-width="1"/>
+          <circle cx="100" cy="170" r="4" fill="#9370DB" opacity="0.7"/>
+          <text x="60" y="50" fill="rgba(147,112,219,0.5)" font-size="10" font-family="system-ui">Shadow</text>
+
+          <!-- Water cluster (blue) -->
+          <circle cx="280" cy="200" r="6" fill="#4682B4" opacity="0.9"/>
+          <circle cx="280" cy="200" r="10" fill="none" stroke="#4682B4" opacity="0.3" stroke-width="1"/>
+          <circle cx="320" cy="250" r="4" fill="#4682B4" opacity="0.8"/>
+          <circle cx="270" cy="280" r="5" fill="#4682B4" opacity="0.7"/>
+          <circle cx="270" cy="280" r="8" fill="none" stroke="#4682B4" opacity="0.2" stroke-width="1"/>
+          <text x="310" y="185" fill="rgba(70,130,180,0.5)" font-size="10" font-family="system-ui">Water</text>
+
+          <!-- Childhood cluster (red) -->
+          <circle cx="200" cy="320" r="6" fill="#B44646" opacity="0.9"/>
+          <circle cx="200" cy="320" r="10" fill="none" stroke="#B44646" opacity="0.3" stroke-width="1"/>
+          <circle cx="160" cy="350" r="4" fill="#B44646" opacity="0.7"/>
+          <circle cx="240" cy="360" r="5" fill="#B44646" opacity="0.8"/>
+          <text x="175" y="300" fill="rgba(180,70,70,0.5)" font-size="10" font-family="system-ui">Childhood</text>
+
+          <!-- Scattered solo stars -->
+          <circle cx="50" cy="280" r="3" fill="#fff" opacity="0.4"/>
+          <circle cx="350" cy="100" r="2" fill="#fff" opacity="0.3"/>
+          <circle cx="180" cy="60" r="2" fill="#fff" opacity="0.3"/>
+          <circle cx="360" cy="370" r="3" fill="#fff" opacity="0.4"/>
+          <circle cx="30" cy="380" r="2" fill="#fff" opacity="0.2"/>
+
+          <!-- Tiny ambient stars -->
+          <circle cx="120" cy="40" r="1" fill="#fff" opacity="0.15"/>
+          <circle cx="300" cy="60" r="1" fill="#fff" opacity="0.15"/>
+          <circle cx="220" cy="150" r="1" fill="#fff" opacity="0.1"/>
+          <circle cx="150" cy="250" r="1" fill="#fff" opacity="0.1"/>
+          <circle cx="340" cy="340" r="1" fill="#fff" opacity="0.15"/>
+          <circle cx="60" cy="220" r="1" fill="#fff" opacity="0.1"/>
+        </svg>
+
+        <!-- Label overlay -->
+        <div style="position:absolute; bottom:12px; left:16px; font-size:11px; color:rgba(255,255,255,0.4); font-family:system-ui;">
+          Each star is a dream. Clusters form around recurring themes.
+        </div>
+      </div>
+    </div>
+    <div class="card-body" style="padding:20px;">
+      <h3 style="margin:0 0 8px 0; color:#e0e0e0;">B: Constellation Map</h3>
+      <p style="margin:0 0 12px 0; color:rgba(255,255,255,0.6); font-size:14px; line-height:1.5;">
+        Dreams are stars in a night sky. Clusters form around recurring themes — shadow, water, childhood, pursuit. Lines connect related dreams. Tap any star to revisit that dream.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span style="padding:4px 10px; background:rgba(147,112,219,0.15); border:1px solid rgba(147,112,219,0.3); border-radius:20px; font-size:11px; color:#9370DB;">Magical</span>
+        <span style="padding:4px 10px; background:rgba(70,130,180,0.15); border:1px solid rgba(70,130,180,0.3); border-radius:20px; font-size:11px; color:#4682B4;">Exploratory</span>
+        <span style="padding:4px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:11px; color:rgba(255,255,255,0.5);">Unique to Animus</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option D: Hybrid -->
+  <div class="card" data-choice="d-hybrid" onclick="toggleSelect(this)" style="cursor:pointer; border:1px solid rgba(255,255,255,0.1); border-radius:16px; overflow:hidden; background:rgba(255,255,255,0.03); transition:all 0.3s;">
+    <div class="card-image" style="padding:0; height:420px; position:relative; overflow:hidden; display:flex; flex-direction:column;">
+
+      <!-- Top: Heatmap Calendar -->
+      <div style="flex:0 0 180px; background:#0a0a0f; padding:16px; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:12px; color:rgba(255,255,255,0.4); font-family:system-ui;">March 2026</span>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <span style="font-size:9px; color:rgba(255,255,255,0.3);">Less</span>
+            <div style="width:10px;height:10px;background:rgba(147,112,219,0.1);border-radius:2px;"></div>
+            <div style="width:10px;height:10px;background:rgba(147,112,219,0.3);border-radius:2px;"></div>
+            <div style="width:10px;height:10px;background:rgba(147,112,219,0.5);border-radius:2px;"></div>
+            <div style="width:10px;height:10px;background:rgba(147,112,219,0.8);border-radius:2px;"></div>
+            <span style="font-size:9px; color:rgba(255,255,255,0.3);">More</span>
+          </div>
+        </div>
+        <!-- Day labels -->
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:4px;">
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">M</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">T</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">W</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">T</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">F</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">S</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.2);text-align:center;">S</span>
+        </div>
+        <!-- Calendar grid -->
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px;">
+          <!-- Week 1 -->
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.5);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.1);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.8);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.3);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(255,255,255,0.03);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.6);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.1);border-radius:3px;"></div>
+          <!-- Week 2 -->
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.3);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.7);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(255,255,255,0.03);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.4);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.8);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.2);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.5);border-radius:3px;"></div>
+          <!-- Week 3 -->
+          <div style="aspect-ratio:1;background:rgba(255,255,255,0.03);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.6);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.3);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.9);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.1);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.4);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.7);border-radius:3px;"></div>
+          <!-- Week 4 -->
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.5);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(255,255,255,0.03);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.8);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.2);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.6);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.4);border-radius:3px;"></div>
+          <div style="aspect-ratio:1;background:rgba(147,112,219,0.1);border-radius:3px;border:1px solid rgba(147,112,219,0.5);"></div>
+        </div>
+        <div style="margin-top:8px; display:flex; justify-content:space-between;">
+          <span style="font-size:10px; color:rgba(255,255,255,0.3);">18 dreams this month</span>
+          <span style="font-size:10px; color:rgba(147,112,219,0.6);">7-day streak</span>
+        </div>
+      </div>
+
+      <!-- Bottom: Mini Constellation -->
+      <div style="flex:1; background: radial-gradient(ellipse at 50% 50%, #0a0e2e 0%, #030512 80%); position:relative; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:11px; color:rgba(255,255,255,0.4); font-family:system-ui;">Dream Web</span>
+          <span style="font-size:9px; color:rgba(147,112,219,0.4); font-family:system-ui;">Tap to explore</span>
+        </div>
+        <svg viewBox="0 0 400 180" style="width:100%; height:calc(100% - 20px);">
+          <line x1="80" y1="60" x2="160" y2="90" stroke="rgba(147,112,219,0.3)" stroke-width="1"/>
+          <line x1="160" y1="90" x2="120" y2="130" stroke="rgba(147,112,219,0.3)" stroke-width="1"/>
+          <line x1="260" y1="50" x2="310" y2="100" stroke="rgba(70,130,180,0.3)" stroke-width="1"/>
+          <line x1="310" y1="100" x2="260" y2="130" stroke="rgba(70,130,180,0.3)" stroke-width="1"/>
+          <line x1="160" y1="90" x2="260" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4,6"/>
+          <circle cx="80" cy="60" r="5" fill="#9370DB" opacity="0.9"/>
+          <circle cx="160" cy="90" r="6" fill="#9370DB" opacity="0.8"/>
+          <circle cx="120" cy="130" r="4" fill="#9370DB" opacity="0.7"/>
+          <circle cx="260" cy="50" r="5" fill="#4682B4" opacity="0.9"/>
+          <circle cx="310" cy="100" r="4" fill="#4682B4" opacity="0.8"/>
+          <circle cx="260" cy="130" r="6" fill="#4682B4" opacity="0.7"/>
+          <circle cx="190" cy="150" r="3" fill="#B44646" opacity="0.7"/>
+          <circle cx="350" cy="40" r="2" fill="#fff" opacity="0.3"/>
+          <circle cx="40" cy="140" r="2" fill="#fff" opacity="0.2"/>
+          <text x="65" y="42" fill="rgba(147,112,219,0.4)" font-size="9" font-family="system-ui">Shadow</text>
+          <text x="275" y="35" fill="rgba(70,130,180,0.4)" font-size="9" font-family="system-ui">Water</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body" style="padding:20px;">
+      <h3 style="margin:0 0 8px 0; color:#e0e0e0;">D: Heatmap + Constellation Hybrid</h3>
+      <p style="margin:0 0 12px 0; color:rgba(255,255,255,0.6); font-size:14px; line-height:1.5;">
+        Two views: a heatmap calendar for daily tracking and streaks (practical, motivating), plus the Dream Web constellation for exploring connections between dreams by theme and symbol. Best of both worlds.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span style="padding:4px 10px; background:rgba(147,112,219,0.15); border:1px solid rgba(147,112,219,0.3); border-radius:20px; font-size:11px; color:#9370DB;">Practical + Magical</span>
+        <span style="padding:4px 10px; background:rgba(70,130,180,0.15); border:1px solid rgba(70,130,180,0.3); border-radius:20px; font-size:11px; color:#4682B4;">Streak Motivation</span>
+        <span style="padding:4px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:11px; color:rgba(255,255,255,0.5);">Two Perspectives</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px; padding:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px;">
+  <p style="margin:0; color:rgba(255,255,255,0.5); font-size:13px; line-height:1.6;">
+    <strong style="color:rgba(255,255,255,0.7);">Key difference:</strong> Option B is the constellation as the <em>primary</em> navigation — your whole dream history lives in this night sky. Option D gives you <em>two lenses</em> — the calendar for habit tracking ("am I journaling consistently?") and the constellation for exploration ("what themes connect my dreams?").
+  </p>
+</div>

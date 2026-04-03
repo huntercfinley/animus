@@ -1,0 +1,106 @@
+<h2>Animus Cloud Design — The Depth Concept</h2>
+<p class="subtitle">Your idea: "Being in the clouds and fishing into your subconscious." Let's define how the depth gradient works across the app.</p>
+
+<p style="color:#aaa; margin-bottom: 32px;">The concept: screens start bright (conscious/waking) and get progressively deeper/darker as users dive into interpretation and shadow work. Which of these depth models feels right?</p>
+
+<div class="cards">
+
+  <!-- Option A: 3-Layer -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="display: flex; flex-direction: column; height: 280px;">
+        <!-- Surface layer -->
+        <div style="flex: 1; background: linear-gradient(135deg, #F0F2FF 0%, #E8ECFF 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #D4D8F0;">
+          <div style="text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #1E1B4B; letter-spacing: 1px; text-transform: uppercase;">Surface</div>
+            <div style="font-size: 11px; color: #6366F1; margin-top: 4px;">Journal, Record, My World</div>
+            <div style="font-size: 20px; margin-top: 8px;">&#9925;</div>
+          </div>
+        </div>
+        <!-- Twilight layer -->
+        <div style="flex: 1; background: linear-gradient(135deg, #C7C3E8 0%, #9B95D0 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #7B74B8;">
+          <div style="text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #1E1B4B; letter-spacing: 1px; text-transform: uppercase;">Twilight</div>
+            <div style="font-size: 11px; color: #3730A3; margin-top: 4px;">Interpretation, Dream Map</div>
+            <div style="font-size: 20px; margin-top: 8px;">&#127769;</div>
+          </div>
+        </div>
+        <!-- Deep layer -->
+        <div style="flex: 1; background: linear-gradient(135deg, #2E1B6B 0%, #1E1048 100%); display: flex; align-items: center; justify-content: center;">
+          <div style="text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #C4B5FD; letter-spacing: 1px; text-transform: uppercase;">Deep</div>
+            <div style="font-size: 11px; color: #A78BFA; margin-top: 4px;">Go Deeper, Shadow Work</div>
+            <div style="font-size: 20px; margin-top: 8px;">&#127754;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Three Layers</h3>
+      <p>Surface (cloud-white) &rarr; Twilight (lavender) &rarr; Deep (indigo). Each screen lives at a fixed depth. Clean transitions when navigating between layers.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Continuous Gradient -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="height: 280px; background: linear-gradient(180deg, #F0F2FF 0%, #E0E4FF 15%, #C7C3E8 30%, #9B95D0 50%, #6B5FA0 70%, #3E2E78 85%, #1E1048 100%); display: flex; flex-direction: column; justify-content: space-between; padding: 16px;">
+        <div style="text-align: center;">
+          <div style="font-size: 11px; font-weight: 600; color: #1E1B4B; letter-spacing: 1px; text-transform: uppercase;">Waking</div>
+          <div style="font-size: 10px; color: #4338CA;">Record &bull; Journal</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; font-weight: 600; color: #312E81; letter-spacing: 1px; text-transform: uppercase;">Dreaming</div>
+          <div style="font-size: 10px; color: #4338CA;">Dream Detail &bull; Map</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; font-weight: 600; color: #C4B5FD; letter-spacing: 1px; text-transform: uppercase;">Unconscious</div>
+          <div style="font-size: 10px; color: #A78BFA;">Go Deeper &bull; Shadow</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Continuous Gradient</h3>
+      <p>Smooth, unbroken spectrum from cloud-white to deep indigo. Every screen sits at a specific point on the gradient. Backgrounds shift subtly as you scroll or navigate deeper.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Surface + Dive -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="display: flex; flex-direction: column; height: 280px;">
+        <!-- Bright surface (most of the app) -->
+        <div style="flex: 2; background: linear-gradient(135deg, #F0F2FF 0%, #E8ECFF 50%, #F5F3FF 100%); display: flex; align-items: center; justify-content: center;">
+          <div style="text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #1E1B4B; letter-spacing: 1px; text-transform: uppercase;">Bright Surface</div>
+            <div style="font-size: 11px; color: #6366F1; margin-top: 4px;">Journal, Record, My World, Dream Map, Settings</div>
+            <div style="font-size: 24px; margin-top: 8px;">&#9925; &#127780;</div>
+            <div style="font-size: 10px; color: #818CF8; margin-top: 6px; font-style: italic;">80% of the app lives here</div>
+          </div>
+        </div>
+        <!-- Divider with wave -->
+        <div style="height: 30px; background: linear-gradient(180deg, #E8ECFF 0%, #6B5FA0 100%); display: flex; align-items: center; justify-content: center;">
+          <div style="font-size: 10px; color: white; font-weight: 600; letter-spacing: 2px;">D I V E</div>
+        </div>
+        <!-- Deep (only when you actively go deeper) -->
+        <div style="flex: 1; background: linear-gradient(135deg, #2E1B6B 0%, #1E1048 100%); display: flex; align-items: center; justify-content: center;">
+          <div style="text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #C4B5FD; letter-spacing: 1px; text-transform: uppercase;">The Deep</div>
+            <div style="font-size: 11px; color: #A78BFA; margin-top: 4px;">Go Deeper, Shadow Work</div>
+            <div style="font-size: 20px; margin-top: 4px;">&#127754;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. Surface + Dive (Recommended)</h3>
+      <p>Most of the app is bright and airy. Only "Go Deeper" and Shadow Work pull you into the dark — it's an intentional, dramatic shift. Maximizes the bright identity while making the deep moments feel powerful.</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+  <h3 style="color: #818CF8; margin: 0 0 8px 0; font-size: 14px;">Why I recommend C</h3>
+  <p style="color: #aaa; font-size: 13px; line-height: 1.6; margin: 0;">The more of the app that's bright, the more it stands out in the App Store against every dark-purple competitor. And the contrast makes the "dive" moments genuinely dramatic — like the moment in a movie where the color palette shifts. Three layers (A) dilutes the bright identity. Continuous (B) is beautiful but makes the bright parts less bright by blending everything.</p>
+</div>

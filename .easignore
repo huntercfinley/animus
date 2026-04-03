@@ -1,0 +1,26 @@
+# Large directories not needed for build
+node_modules
+.git
+.expo
+data
+.superpowers
+
+# Build artifacts
+dist
+web-build
+
+# Dev files
+*.md
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# Metro cache
+.metro-health-check*
+
+# NOTE: .env.local is intentionally NOT excluded - EAS needs it for EXPO_PUBLIC_* vars

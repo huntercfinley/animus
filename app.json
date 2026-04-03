@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "Animus",
+    "slug": "animus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "scheme": "animus",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0a0812"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.realitysuites.animus",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Animus needs microphone access to record your dreams via voice.",
+        "NSSpeechRecognitionUsageDescription": "Animus uses speech recognition to transcribe your dream recordings in real-time.",
+        "NSUserTrackingUsageDescription": "Animus uses this to show you relevant ads. You can opt out at any time.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0812"
+      },
+      "package": "com.realitysuites.animus",
+      "permissions": [
+        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sqlite",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Animus needs microphone access to record your dreams via voice."
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "iosAppId": "ca-app-pub-4861675479405621~2504217942"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a7c7552d-c9a5-40f4-813f-d0a6b5c2cb70"
+      }
+    },
+    "owner": "huntercfinley"
+  }
+}
