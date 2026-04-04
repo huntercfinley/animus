@@ -1,0 +1,408 @@
+{
+  "clusters": [
+    {
+      "name": "Father & Inheritance",
+      "color": "#9370DB",
+      "dream_indices": [3, 5, 7, 26, 33, 34, 37, 51],
+      "description": "Dreams centered on paternal authority, family responsibility, inherited patterns, and the burden of being the one who sees what the family cannot"
+    },
+    {
+      "name": "Water & the Unconscious",
+      "color": "#1E90FF",
+      "dream_indices": [1, 14, 23, 45, 47, 48],
+      "description": "Dreams where water -- as tsunami, ocean, underwater labyrinth, or pool -- serves as the primary language of the unconscious surging toward consciousness"
+    },
+    {
+      "name": "Shadow & Violence",
+      "color": "#8B0000",
+      "dream_indices": [12, 13, 15, 16, 18, 20, 40, 43, 46, 53],
+      "description": "Dreams of war, murder, fire, and confrontation with the dark double -- the psyche's Shadow demanding integration through visceral imagery"
+    },
+    {
+      "name": "Anima & the Feminine",
+      "color": "#DC143C",
+      "dream_indices": [2, 8, 9, 17, 28, 30, 38, 49],
+      "description": "Dreams where the feminine soul-image appears as weeping woman, mentor, red-dressed stranger, or ugly creature -- the Anima in her many guises demanding recognition"
+    },
+    {
+      "name": "Professional Persona & Ambition",
+      "color": "#DAA520",
+      "dream_indices": [4, 27, 32, 35, 41, 42, 50],
+      "description": "Dreams staging the tension between institutional belonging and sovereign creative identity -- the professional mask versus the authentic self"
+    },
+    {
+      "name": "Brotherhood & Belonging",
+      "color": "#2E8B57",
+      "dream_indices": [10, 11, 22, 24, 36, 39, 44],
+      "description": "Dreams saturated with nostalgia for male companionship, fraternity bonds, reconciliation with estranged friends, and the architecture of proximity"
+    },
+    {
+      "name": "Ascent & Individuation",
+      "color": "#FF8C00",
+      "dream_indices": [6, 19, 21, 25, 29, 31, 52, 54],
+      "description": "Dreams of pyramids, sunlit cities, trains through Switzerland, and departure into the void -- the psyche mapping the path toward wholeness and transcendence"
+    }
+  ],
+  "connections": [
+    {
+      "dream_a_index": 3,
+      "dream_b_index": 7,
+      "strength": 0.92,
+      "analysis": "Both dreams stage the tension between inherited responsibility and individual agency. The Sequoia carries family baggage through foreign territory; the Newport Beach property sits dormant while vision goes unrecognized. In both, Hunter compensates for his family's passivity -- driving when no one else will, strategizing when no one else sees the value. The Hero is activated not by call but by default."
+    },
+    {
+      "dream_a_index": 3,
+      "dream_b_index": 34,
+      "strength": 0.85,
+      "analysis": "In both dreams, the father occupies a diminished role while Hunter navigates the vehicle. The Sequoia through Russia and the Uber through America share the same reversal: the son drives, the father is passenger. The psyche insists on showing that the generational torch has been passed, whether or not the conscious mind has accepted the transfer."
+    },
+    {
+      "dream_a_index": 3,
+      "dream_b_index": 51,
+      "strength": 0.78,
+      "analysis": "The Nintendo 64 brotherhood in Russia gives way to the knife thrown between brothers in California. These dreams bookend the fraternal relationship -- from uncomplicated childhood play to adult aggression born of resentment. What was once shared joy becomes weaponized frustration, and both dreams locate this transformation within the family system."
+    },
+    {
+      "dream_a_index": 5,
+      "dream_b_index": 14,
+      "strength": 0.82,
+      "analysis": "Both dreams subject the childhood home to elemental assault -- maggots from within, tsunamis from without. The family structure is under siege in both cases, and in both, the dreamer is the only one who perceives the true danger. The parents' blindness to the maggots mirrors the neighborhood's helplessness against the sea. The original container of selfhood is being tested to destruction."
+    },
+    {
+      "dream_a_index": 5,
+      "dream_b_index": 7,
+      "strength": 0.80,
+      "analysis": "Family dysfunction manifests as invisible decay in Dream 5 and as squandered inheritance in Dream 7. In both, the parents cannot see what Hunter sees -- the maggots, the property's untapped value. The dreamer occupies the agonizing position of clarity within a system of blindness, the one whose consciousness has outgrown the family's capacity to acknowledge its own shadows."
+    },
+    {
+      "dream_a_index": 7,
+      "dream_b_index": 33,
+      "strength": 0.76,
+      "analysis": "The inheritance that skipped Hunter and the burgers that ran out before he could eat both dramatize the same wound: the one who gives way to others receives nothing. In Newport Beach, vision goes unrewarded; at the barbecue, generosity leaves the giver hungry. The father is the provider in both -- of property, of burgers -- but the distribution system fails the dreamer."
+    },
+    {
+      "dream_a_index": 7,
+      "dream_b_index": 26,
+      "strength": 0.75,
+      "analysis": "Skyler appears in both dreams as the recipient of what Hunter earns or envisions. In Dream 7, Skyler receives property ownership without agency; in Dream 26, he falls ill while Hunter navigates billionaire dinners. The brother-as-shadow pattern recurs: Skyler embodies receiving without striving, the mirror image of Hunter's striving without receiving."
+    },
+    {
+      "dream_a_index": 1,
+      "dream_b_index": 14,
+      "strength": 0.93,
+      "analysis": "The tsunami dreams form the most direct pair in the entire collection. Manhattan's flood destroys the Honda Accord; Corona's waves batter the childhood home. In both, water is the unconscious rising to overwhelm constructed reality, and in both, the dreamer survives from an elevated position. The psyche's most elemental language -- water as transformation -- speaks its central message: the old structures cannot withstand what is rising."
+    },
+    {
+      "dream_a_index": 1,
+      "dream_b_index": 45,
+      "strength": 0.79,
+      "analysis": "The flood that destroys from above in Dream 1 becomes the labyrinth navigated from below in Dream 45. Water as catastrophe evolves into water as quest. The dreamer's relationship to the unconscious matures across these dreams -- from terrified witness on the sixteenth floor to active hero descending into the underwater city. What once threatened to drown now becomes the territory to be explored."
+    },
+    {
+      "dream_a_index": 1,
+      "dream_b_index": 47,
+      "strength": 0.72,
+      "analysis": "The tidal wave that destroys the Honda Accord and the seven seas that yield swordfish represent opposing faces of the same archetype. Water as annihilator becomes water as provider. The Fisher King has learned what the flood survivor could not yet know: that the unconscious is not only a force of destruction but the source of all nourishment."
+    },
+    {
+      "dream_a_index": 14,
+      "dream_b_index": 48,
+      "strength": 0.68,
+      "analysis": "The childhood home besieged by tsunamis and the pool party of integration share water as their medium but invert its meaning entirely. The unrelenting sea that terrorized becomes the pool where two families merge in play. The pugs breathing underwater -- impossible yet joyful -- suggest that what once seemed lethal can become the element of delight when the psyche is ready."
+    },
+    {
+      "dream_a_index": 14,
+      "dream_b_index": 23,
+      "strength": 0.74,
+      "analysis": "Both dreams return to the scene of lost connection -- the childhood home, the old best friend -- and find them altered beyond recognition. The tsunamis that batter Suncountry Circle and the hands suspended underwater at George's gathering share a quality of helpless suspension, the dreamer caught between what was and what might be salvaged."
+    },
+    {
+      "dream_a_index": 2,
+      "dream_b_index": 9,
+      "strength": 0.88,
+      "analysis": "Two women confront the dreamer with uncomfortable truths. The Zurich woman weeps because he cannot recognize her; the hostel woman points at his navel and names what smells. Both are the Anima as diagnostician -- the feminine soul-image that refuses to let the dreamer remain unconscious. One asks 'Do you recognize me?' and the other says 'It's that!' Both demand that Hunter look at what he has been avoiding."
+    },
+    {
+      "dream_a_index": 2,
+      "dream_b_index": 49,
+      "strength": 0.83,
+      "analysis": "The weeping woman of Zurich and the red-dressed Malek share the Anima's most powerful quality: they appear when the dreamer is ready to be changed by the feminine. The green-eyed woman in the cafe and the recurring figure in the red dress both carry numinous energy that the dreamer cannot fully approach. Switzerland's forcefield and San Francisco's dinner table are both temenos spaces where the encounter becomes possible."
+    },
+    {
+      "dream_a_index": 2,
+      "dream_b_index": 28,
+      "strength": 0.77,
+      "analysis": "Both dreams present the Anima as mentor and guide within a sacred container -- Switzerland's forcefield in Dream 2 and the island temenos in Dream 28. The weeping woman demands recognition; the mentor-who-resembles-Alicia offers wisdom and warmth. Together they show the Anima's evolution from wounded supplicant to generous teacher, tracking the dreamer's growing capacity to receive the feminine."
+    },
+    {
+      "dream_a_index": 8,
+      "dream_b_index": 17,
+      "strength": 0.71,
+      "analysis": "Sami witnesses the aurora in Chile; the ugly cat-creature curls up in France. Both dreams feature the Anima in foreign landscapes, but one radiates beauty while the other repulses. The forgotten indigenous population and the misshapen creature both represent the neglected -- aspects of the soul that civilization has dismissed. Beauty and ugliness are revealed as two faces of the same feminine demand: see what you have overlooked."
+    },
+    {
+      "dream_a_index": 9,
+      "dream_b_index": 30,
+      "strength": 0.65,
+      "analysis": "Both dreams feature encounters with unidentifiable women who carry cryptic messages. The hostel woman diagnoses a problem at the dreamer's center; the blonde at the restaurant accompanies him through illusion and missed fortune. In each, the Anima appears not as beloved but as companion to a revelation the dreamer is not yet ready to fully receive."
+    },
+    {
+      "dream_a_index": 38,
+      "dream_b_index": 49,
+      "strength": 0.80,
+      "analysis": "Ana-Maria vanishes from Camelot; Malek recurs in the red dress across shifting dreamscapes. Both dreams feature the Anima as the woman who cannot be held -- present, magnetic, then gone. The shifting woman who asks about transmission in Dream 38 and the puzzle-game Malek of Dream 49 both suggest that the feminine cannot be possessed, only encountered in fleeting, transformative moments."
+    },
+    {
+      "dream_a_index": 13,
+      "dream_b_index": 53,
+      "strength": 0.86,
+      "analysis": "War erupts in both dreams -- psychic civil war in the ruined Airbnb, mandatory conscription in the Vietnam battlefield. In Dream 13, the dreamer fights everyone and survives; in Dream 53, he feigns illness to escape. These are opposite responses to the Shadow's demand for confrontation: total engagement versus strategic withdrawal. Together they map the full spectrum of the masculine response to violence."
+    },
+    {
+      "dream_a_index": 13,
+      "dream_b_index": 46,
+      "strength": 0.78,
+      "analysis": "Both dreams involve the dreamer as agent of lethal action in concealed or ambiguous circumstances. The war in the Airbnb and the sniper kill in the mountain town share a quality of violence that the dreamer both commits and cannot fully own. In both, the aftermath involves a search -- for meaning in Dream 13's ruined hallways, for the shooter in Dream 46's law enforcement buildup."
+    },
+    {
+      "dream_a_index": 20,
+      "dream_b_index": 46,
+      "strength": 0.84,
+      "analysis": "The Barrett .50 caliber rifle and the sniper rifle are the same archetype in different costumes. Both dreams cast the dreamer as the one who watches through a scope -- observing from lethal distance, possessing the power to destroy. But where Dream 20 follows the shot with grief for lost innocence, Dream 46 follows it with concealment behind Ryan Gosling's mask. The Shadow grows more sophisticated between these dreams."
+    },
+    {
+      "dream_a_index": 20,
+      "dream_b_index": 43,
+      "strength": 0.72,
+      "analysis": "The murderer who yearns for the child's innocence and the soldier who sheds his old identity share the theme of irreversible transformation through violence. In Dream 20, the dreamer runs from what he has become; in Dream 43, he deliberately steps into a new identity. The burned soldier is what the murderer might become if he stops running -- someone who has accepted that the old self is ash."
+    },
+    {
+      "dream_a_index": 15,
+      "dream_b_index": 43,
+      "strength": 0.80,
+      "analysis": "Fire consumes the bedroom; fire has consumed the soldier. These are the only two dreams where flame is the primary transformative element. The burning bedroom is transformation imposed -- the bed falls through the floor, the dreamer is passive. The burned soldier has survived his fire and now departs as a new identity. One is the crisis of transformation; the other is its aftermath."
+    },
+    {
+      "dream_a_index": 12,
+      "dream_b_index": 16,
+      "strength": 0.73,
+      "analysis": "The blue-eyed wolf whose sight is stolen and the shadow figure at the station both represent the dark Other who possesses something the conscious mind lacks. The wolf's blue eyes carry spiritual perception; the shadow man carries the dreamer's unlived life. Both dreams ask the same question: what happens when you confront the figure who holds what you have disowned?"
+    },
+    {
+      "dream_a_index": 40,
+      "dream_b_index": 53,
+      "strength": 0.70,
+      "analysis": "The arena of wild beasts and the Vietnam battlefield are both spaces where survival is the only metric. Chris conquers his beast with direct confrontation; the conscript plays sick to avoid his. The twelve gunshots that close Dream 40 and the battlefield video-game mechanics of Dream 53 both suggest a psyche processing violence through the lens of competition and game -- distancing mechanisms that make the Shadow's reality bearable."
+    },
+    {
+      "dream_a_index": 41,
+      "dream_b_index": 42,
+      "strength": 0.91,
+      "analysis": "Consecutive dreams that form a perfect diptych of mentorship. Jensen Huang offers belonging in the corporate kingdom; Ted Sarandos validates creative sovereignty. The leather jacket and the Italian village represent two models of power -- inherited institutional authority versus earned creative mastery. The dreamer plans exodus from NVIDIA but accepts Netflix's call. The psyche is choosing: not the bigger kingdom, but the one that fits."
+    },
+    {
+      "dream_a_index": 41,
+      "dream_b_index": 27,
+      "strength": 0.77,
+      "analysis": "Stanford's campus and NVIDIA's headquarters are both temples of institutional prestige where the dreamer tests his belonging. At Stanford, he follows lawyer groups as an outsider who secretly belongs; at NVIDIA, he matches Jensen Huang's leather jacket. Both dreams explore the same question: can you inhabit the halls of the powerful without being consumed by them?"
+    },
+    {
+      "dream_a_index": 27,
+      "dream_b_index": 32,
+      "strength": 0.82,
+      "analysis": "The outsider at Stanford and the employee Google wants to keep both stage the seduction of institutional belonging. At Stanford, the dreamer discovers he belongs despite never attending; at Google, the institution offers full-time absorption. Both dreams ask whether legitimacy comes from external validation or internal knowing. The hiking in Chile -- glimpsed mid-Google-dream -- is the wild alternative that beckons."
+    },
+    {
+      "dream_a_index": 32,
+      "dream_b_index": 4,
+      "strength": 0.70,
+      "analysis": "Google's institutional embrace and Berkeley's institutional decay are two phases of the same arc. One dream shows the corporation at peak seduction; the other shows academia in ruin. The dilapidated Berkeley campus is what awaits institutions that lose their vitality, and the Google offer is the dream of perpetual institutional vigor. The ocean at Berkeley and the Chilean hike in the Google dream both point toward the same escape: nature over structure."
+    },
+    {
+      "dream_a_index": 4,
+      "dream_b_index": 50,
+      "strength": 0.65,
+      "analysis": "Levitation over rooftops and baseball in Blade Runner New York both imagine the dreamer in speculative, elevated worlds. Queen Elizabeth's inherited greatness and Aaron Judge's athletic divinity both represent forms of sovereignty the dreamer aspires toward. In both dreams, institutional decay coexists with personal transcendence -- the ruined Berkeley beside the levitating entrepreneur, the dystopian city beside the perfect swing."
+    },
+    {
+      "dream_a_index": 35,
+      "dream_b_index": 50,
+      "strength": 0.62,
+      "analysis": "The flip phone's deliberate regression and Blade Runner's expanded subway both reimagine the dreamer's relationship to technology. One strips it back to essentials; the other builds it into something labyrinthine and overwhelming. The Bitcoin purchase in Dream 35 and the dystopian economy of Dream 50 both suggest a dreamer navigating value systems that operate outside conventional logic."
+    },
+    {
+      "dream_a_index": 6,
+      "dream_b_index": 54,
+      "strength": 0.87,
+      "analysis": "The Mayan pyramid and the space shuttle are the collection's two great ascent images. The pyramid demands the removal of clothing and baggage; the shuttle demands departure from collective consciousness itself. Both promise joy at the summit -- mansions and pool parties atop the pyramid, the void's terrible freedom beyond the atmosphere. These dreams trace the full arc of individuation from personal unburdening to cosmic departure."
+    },
+    {
+      "dream_a_index": 6,
+      "dream_b_index": 25,
+      "strength": 0.79,
+      "analysis": "The pyramid's graduated ascent and the Swiss train's station-by-station journey share the same structure: transformation as sequential progress through distinct stages. Mrs. Fritzsche at the midpoint and Brendan Hsu as travel companion both serve as guides at critical junctures. Both dreams teach that the path to the Self is not a leap but a climb, not a single revelation but a series of thresholds."
+    },
+    {
+      "dream_a_index": 19,
+      "dream_b_index": 31,
+      "strength": 0.85,
+      "analysis": "The sunlit city of coffee and the rain-soaked Buenos Aires are the collection's two visions of the life-that-could-be -- idealized foreign cities where the dreamer is fully alive, known, and creative. Both feature warm encounters with beautiful women, effortless social belonging, and the integration of work and pleasure. One is sun-drenched, the other cyberpunk-rain-washed, but both are the Self's image of home."
+    },
+    {
+      "dream_a_index": 19,
+      "dream_b_index": 42,
+      "strength": 0.75,
+      "analysis": "The sunlit city where Hunter drifts between cafes and the Italian village where he produces projects share a Mediterranean quality of ease and creative flow. In both, the dreamer is embedded in community, known by name, operating at full capacity without strain. These are visions of what Jung called the realized Self -- not achieved through struggle but inhabited through presence."
+    },
+    {
+      "dream_a_index": 25,
+      "dream_b_index": 2,
+      "strength": 0.76,
+      "analysis": "Switzerland appears in both dreams as the sacred landscape of the soul. In Dream 2, it offers a forcefield of protection; in Dream 25, it offers a moving journey of transformation. The Matterhorn's inner clock and the frozen lake at the train station both suggest that within Switzerland's ordered beauty, something ancient and powerful operates by its own timing. The psyche has chosen this country as its image of the temenos."
+    },
+    {
+      "dream_a_index": 21,
+      "dream_b_index": 47,
+      "strength": 0.78,
+      "analysis": "Depleted mana on the warehouse rooftop and the Fisher King's inexhaustible energy on the seven seas represent the before-and-after of the Hero's relationship to his own power. In Dream 21, the dreamer cannot fly high enough; in Dream 47, he sails effortlessly from sea to sea. The father's patient yard work in Dream 21 and the pencil-and-eraser editor in Dream 47 both suggest that mastery comes through humble, repetitive practice."
+    },
+    {
+      "dream_a_index": 29,
+      "dream_b_index": 16,
+      "strength": 0.81,
+      "analysis": "The Boogieman who follows and the shadow figure at the station are the same archetype: the dark pursuer who trails the dreamer through urban space. Grant behind the fence in Dream 29 and the Bob Ross museum in Dream 16 both offer unexpected oases of meaning within the pursuit. Both dreams insist that the Shadow is not merely threat but guide -- what follows you is what you have not yet faced."
+    },
+    {
+      "dream_a_index": 52,
+      "dream_b_index": 6,
+      "strength": 0.73,
+      "analysis": "The mountain house and the Mayan pyramid are both elevated sacred spaces reached through effort. In both, service precedes reward -- climbing and stripping in Dream 6, cleaning dishes in Dream 52. John 3:14 as medicine and the pyramid's summit joy both promise that the highest truth heals. These dreams share the conviction that spiritual ascent requires honest labor."
+    },
+    {
+      "dream_a_index": 11,
+      "dream_b_index": 24,
+      "strength": 0.90,
+      "analysis": "The arcade of lost brotherhood and the fraternity you never had are twin expressions of the same longing -- for effortless male belonging, for the container of shared play. Brad coaching the final boss and the strangers sharing their house code both represent brotherhood as initiation: not earned through credentials but bestowed through presence. The apartment desire in both dreams reveals a psyche that equates home with proximity to friendship."
+    },
+    {
+      "dream_a_index": 11,
+      "dream_b_index": 39,
+      "strength": 0.74,
+      "analysis": "Dylan's casual reconciliation over beers in the arcade and George's demand to kiss the ring represent opposite poles of male friendship. One heals through resumed play; the other poisons through dominance. The dream record maps a spectrum of brotherhood from the generous to the toxic, and the dreamer is learning to distinguish which connections nourish and which consume."
+    },
+    {
+      "dream_a_index": 10,
+      "dream_b_index": 37,
+      "strength": 0.77,
+      "analysis": "Grant's ghost on the grand adventure and the death of Jordan Montgomery on the Pacific Coast both introduce mortality into moments of vitality. The dead friend who says 'we can always meet in dreams' and the fallen athlete whose end haunts a sunset drive both insist that death is not the opposite of the Hero's journey but its constant companion. Joy and grief ride in the same vehicle."
+    },
+    {
+      "dream_a_index": 36,
+      "dream_b_index": 33,
+      "strength": 0.76,
+      "analysis": "The gift the friend could not receive and the burgers that ran out both dramatize the economics of generosity and deprivation. In Dream 36, giving creates resentment; in Dream 33, deferring creates hunger. The dreamer occupies both positions -- too generous to take his share, too proud to admit he is empty. The opposing dugout and the outlaw truck both suggest the dreamer is on the wrong side of the exchange he keeps creating."
+    },
+    {
+      "dream_a_index": 22,
+      "dream_b_index": 53,
+      "strength": 0.82,
+      "analysis": "The sorriest excuse for a private and the conscript who played sick are the collection's two military dreams, and they capture the same shame from different angles. One endures the drill sergeant's contempt; the other feigns illness to escape. Both dramatize the masculine terror of being found inadequate by the collective's standards of toughness. The disappearing Tanner and the parents' house as refuge both offer escape routes that the dreamer knows are cowardly."
+    },
+    {
+      "dream_a_index": 44,
+      "dream_b_index": 18,
+      "strength": 0.67,
+      "analysis": "The forbidden hotel and the attic speakeasy both construct hidden worlds with their own rules. Cologne is contraband in Dream 44 as surely as the speakeasy's secrets are concealed in Dream 18. Dylan outside the hotel and Bruno's accusation both represent the Shadow locked out of the privileged space. Both dreams ask: what are the unwritten laws of the worlds you inhabit, and who gets punished for breaking them?"
+    },
+    {
+      "dream_a_index": 37,
+      "dream_b_index": 43,
+      "strength": 0.75,
+      "analysis": "The sports car on the Pacific Coast and the 0800 departure are both images of the Hero in transit between identities. The joint held but not inhaled and the discarded shirt both represent things voluntarily relinquished. In both dreams, the dreamer is moving toward a threshold -- sunset as symbolic death in Dream 37, military departure as literal transformation in Dream 43 -- and something must be given up before crossing."
+    },
+    {
+      "dream_a_index": 45,
+      "dream_b_index": 47,
+      "strength": 0.82,
+      "analysis": "The underwater labyrinth of Middle-Earth and the Fisher King of the seven seas are the collection's two great water-quest dreams. In Dream 45, the dreamer descends into a submerged city with a woman to protect; in Dream 47, he sails the surface catching fish to feed his crew. One is the underwater descent into the unconscious; the other is the mastery of its surface. Together they map the Hero's full relationship to the oceanic psyche -- depth and breadth."
+    },
+    {
+      "dream_a_index": 48,
+      "dream_b_index": 23,
+      "strength": 0.63,
+      "analysis": "The underwater pugs who breathe impossibly and the hands suspended underwater at George's gathering both present submersion as paradox. The pugs are joyful impossibility; the hands are frozen helplessness. Water as play versus water as paralysis -- these dreams reveal the unconscious's dual nature, offering delight to those who trust it and imprisonment to those who resist."
+    },
+    {
+      "dream_a_index": 28,
+      "dream_b_index": 41,
+      "strength": 0.71,
+      "analysis": "The mentor woman on the island and Jensen Huang at NVIDIA headquarters both offer what the dreamer most craves: recognition from someone whose judgment matters. The feminine mentor nurtures through presence and warmth; the masculine mentor entices through power and belonging. The conductor Hank's vow and Jensen's tech kingdom both represent structures of loyalty -- one chosen freely, the other offered as golden cage."
+    },
+    {
+      "dream_a_index": 54,
+      "dream_b_index": 21,
+      "strength": 0.74,
+      "analysis": "The space shuttle departing into the void and the depleted mana before the rooftop battle both concern the dreamer's relationship to the limits of collective consciousness. In Dream 21, the dreamer cannot fly high enough to compete; in Dream 54, a friend launches beyond the atmosphere entirely. The father figures in both -- doing yard work in Dream 21, Aaron Judge pushing his kid on a skateboard in Dream 54 -- ground these transcendence dreams in paternal tenderness."
+    },
+    {
+      "dream_a_index": 31,
+      "dream_b_index": 32,
+      "strength": 0.78,
+      "analysis": "Buenos Aires and Google represent the two lives competing for the dreamer's commitment. One is the expatriate creative life -- rain, real estate classes, a blonde professor; the other is the corporate life -- an office three days a week, a dating partner, an apartment with a car. The psyche stages these as parallel possibilities, and the dreamer's body knows which one it wants. Chile appears in both as the wild card -- the hike, the place where the soul breathes."
+    },
+    {
+      "dream_a_index": 26,
+      "dream_b_index": 51,
+      "strength": 0.83,
+      "analysis": "Skyler beneath the bed and Skyler throwing the knife are the brother-as-shadow at his most extreme. In Dream 26, the brother is helpless, bedridden, requiring care; in Dream 51, he is aggressive, weaponized, requiring defense. The dreamer oscillates between guilt and rage in response to the brother who cannot be fixed or escaped. These dreams together form the most complete portrait of the fraternal wound in the entire collection."
+    },
+    {
+      "dream_a_index": 17,
+      "dream_b_index": 25,
+      "strength": 0.69,
+      "analysis": "The French town left behind and the Swiss train that would not wait both feature the dreamer losing his way in European landscapes. Lost belongings on the French train and the wallet lost at the Swiss station share the motif of identity stripped away in transit. Cody appears in both as companion, anchoring the dreamer's professional identity within the disorientation of foreign passage."
+    },
+    {
+      "dream_a_index": 10,
+      "dream_b_index": 29,
+      "strength": 0.72,
+      "analysis": "Grant appears in both dreams as a figure who transcends the boundary between the living and the dead. In Dream 10, he promises meetings in dreams; in Dream 29, he stands behind a fence, visible but unreachable. Both placements honor the relationship while acknowledging its impossible geography. The dead friend as guide -- present but separated, wise but ungraspable -- is one of the most moving recurring figures in the collection."
+    },
+    {
+      "dream_a_index": 47,
+      "dream_b_index": 50,
+      "strength": 0.68,
+      "analysis": "The Fisher King and the Blade Runner baseball player both reimagine the dreamer as a heroic figure within a larger-than-life narrative. The seven seas and the dystopian metropolis are both theaters where personal mastery meets collective mythology. Aaron Judge appears in Dream 50 as he does throughout the collection -- the archetypal masculine ideal, the standard against which the dreamer measures his own heroism."
+    },
+    {
+      "dream_a_index": 30,
+      "dream_b_index": 38,
+      "strength": 0.66,
+      "analysis": "The chef who morphs into wild illusions and the woman who shifts shape between encounters both embody the Trickster archetype at its most disorienting. The Victorian house illusion and Camelot's shifting timelines both present reality as unstable, mutable, resistant to the dreamer's desire for certainty. In both dreams, the feminine is present but slippery -- the blonde companion, Ana-Maria who vanishes -- teaching that truth reveals itself through play, not pursuit."
+    },
+    {
+      "dream_a_index": 39,
+      "dream_b_index": 23,
+      "strength": 0.79,
+      "analysis": "George appears in both dreams as the friend-turned-stranger who tests the dreamer's willingness to submit. The hands underwater at lunch and the demand to kiss the ring are both images of a friendship that has curdled into a power dynamic. In both dreams, the dreamer arrives wanting reconnection and discovers that the terms of the relationship have changed in ways that diminish him."
+    },
+    {
+      "dream_a_index": 34,
+      "dream_b_index": 37,
+      "strength": 0.80,
+      "analysis": "The father as Uber driver and the parents calling during the sunset drive both interrupt moments of personal freedom with paternal gravity. In Dream 34, the father's diminished role -- driving for a ride service -- deflates the dreamer's professional storytelling; in Dream 37, the parents' phone call intrudes on the PCH liberation. Both dreams capture the precise moment where the son's flight is tethered by the father's weight."
+    },
+    {
+      "dream_a_index": 18,
+      "dream_b_index": 46,
+      "strength": 0.64,
+      "analysis": "The attic speakeasy's hidden world and the sniper's concealed position both involve the dreamer operating in secret within a larger, unknowing society. Bruno's accusation and the law enforcement search both represent the threat of exposure. Both dreams explore the tension between the dreamer's secret knowledge and the collective's desire to unmask it -- the Shadow's power residing precisely in its hiddenness."
+    },
+    {
+      "dream_a_index": 42,
+      "dream_b_index": 31,
+      "strength": 0.73,
+      "analysis": "The Italian village and Buenos Aires are both Latin environments where the dreamer finds his creative rhythm. Ted Sarandos calling and the blonde professor flirting both represent external validation arriving organically rather than being chased. In both dreams, the dreamer has stopped striving and started inhabiting -- and that is precisely when recognition finds him."
+    }
+  ]
+}

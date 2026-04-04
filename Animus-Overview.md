@@ -36,9 +36,11 @@ Based on research across Reddit, app reviews, and community forums (see `Animus-
 - **Platform:** Expo / React Native (iOS + Android)
 - **Backend:** Supabase (auth, database, storage, edge functions)
 - **AI Interpretation:** Claude Sonnet 4.6 (personalized Jungian analysis)
-- **Image Generation:** Gemini 3.1 Flash Image Preview (adaptive art styles)
+- **Image Generation:** Imagen 4 Fast (free tier, $0.02/image) / Imagen 4 Standard (premium, $0.04/image)
+- **Appearance Analysis:** Gemini 2.0 Flash Vision (premium selfie → physical description for image personalization)
 - **Monetization:** RevenueCat (subscriptions) + Google Mobile Ads (ad-gated free tier)
 - **Bundle ID:** `com.realitysuites.animus`
+- **Apple ID:** 6761337884
 
 ---
 
@@ -52,7 +54,9 @@ Based on research across Reddit, app reviews, and community forums (see `Animus-
 
 **"Go Deeper" Conversations** — Multi-turn conversation with the AI about any dream. 5 exchanges free (ad-gated), 10 premium. Bubble-style chat UI.
 
-**Image Generation** — Auto-generates one image per dream. Adaptive art style based on dream mood (surrealist, dark fantasy, watercolor, magical realism, etc.). 10 style presets with mood mappings. Gemini 3.1 Flash.
+**Image Generation** — Auto-generates one image per dream. Adaptive art style based on dream mood. Free: Imagen 4 Fast (10/month, ad per image). Premium: Imagen 4 Standard (30/month, no ads). Monthly usage tracking via `usage_limits` table.
+
+**Appearance Upload** *(premium)* — Upload 1-3 selfies, Gemini 2.0 Flash Vision extracts a physical description, stored in `profiles.ai_context.appearance`. Description is injected into all future image generation prompts so the dreamer appears as themselves in dream artwork.
 
 **Dream Journal** — Gallery view with dream cards organized by month. Each card shows image, title, preview text, mood-colored spine. Physical journal aesthetic.
 
@@ -74,26 +78,27 @@ Based on research across Reddit, app reviews, and community forums (see `Animus-
 
 - **Archetype Profile** (premium) — evolving portrait of active Jungian archetypes
 - **Dream Patterns AI** (premium) — weekly/monthly analyst reports across all dreams
-- **Dream Connections** — AI explains threads between any two dreams on the Dream Web
 - **Premium audio playback** — replay original voice recordings
 - **Custom Dream Art Styles** (premium) — set preferred aesthetic
 - **Onboarding flow** — guided "Map Your Inner World" intro
 - **Settings screen** — account, subscription, notifications, data export
-- **Usage limit enforcement** — tracking exists in DB, not enforced in UI yet
 - **Offline sync loop** — queue code exists, periodic sync not integrated in app startup
 
 ---
 
 ## Monetization
 
-**Free tier:** All features accessible via ads. Claude Sonnet 4.6 + Gemini Flash. Transparent ad messaging.
+**Free tier:** All features accessible via ads. Claude Sonnet 4.6 + Imagen 4 Fast. Transparent ad messaging.
+- 10 images/month, 5 go-deeper/dream, 1 image refinement/dream, 3 shadow exercises/day, 1 dream insight report
 
-**Premium (~$4.99/month, ~$35.99/year):** Remove all ads + exclusive features:
+**Premium ($4.99/month, $35.99/year via RevenueCat):** Remove all ads + exclusive features:
 - Dream Patterns AI (therapist-level insight reports)
 - Archetype Profile (evolving Jungian portrait)
+- Appearance Upload (personalized dream imagery via Gemini Vision)
 - Dream Audio Playback (replay original recordings)
 - Custom Dream Art Styles
-- Higher usage limits (10 go-deeper/dream, 3 image refinements, 5 shadow exercises/day)
+- Imagen 4 Standard (higher quality images)
+- Higher usage limits (30 images/month, 10 go-deeper/dream, 3 image refinements, 5 shadow exercises/day, unlimited insights)
 
 **Ad-gated actions (free):** Go deeper, shadow work, image refinement, dream connections, monthly insights.
 
@@ -119,14 +124,14 @@ Based on research across Reddit, app reviews, and community forums (see `Animus-
 - **Tables (10):** profiles, dreams, dream_symbols, dream_conversations, shadow_exercises, world_entries, dream_connections, archetype_snapshots, pattern_reports, usage_limits
 - **RLS:** All tables, users can only access their own data
 - **Storage Buckets (4):** dream-images (public), dream-audio (private), report-images (public), avatars (public)
-- **Edge Functions (8):** interpret-dream, generate-image, go-deeper, shadow-exercise (all working), dream-insights, dream-connection, archetype-snapshot, suggest-world-entry (placeholders)
+- **Edge Functions (10):** interpret-dream, generate-image, go-deeper, shadow-exercise, dream-connection, analyze-appearance (all working), dream-insights, archetype-snapshot, suggest-world-entry (placeholders)
 - **Triggers:** auto-create profile on signup, update dream stats/streaks on new dream
 
 ---
 
 ## Design Language
 
-- **Colors:** Dark purples (#9370DB), indigos, ocean blues, warm glows. No bright white.
+- **Colors:** Bright cloud-white aesthetic (not dark indigo like every other dream app). Clean, airy, ethereal.
 - **Typography:** Georgia serif for journal/titles, system sans for UI
 - **Mood colors:** 8 moods mapped to colors (peaceful, anxious, surreal, dark, joyful, mysterious, chaotic, melancholic)
 - **Jungian visuals:** Ouroboros spinner, mandala dividers, archetypal symbol decorations, floating particles
@@ -135,17 +140,27 @@ Based on research across Reddit, app reviews, and community forums (see `Animus-
 
 ---
 
+## Seed Data
+
+- **54 dreams** with full Jungian interpretations, 264 symbols, 162 go-deeper exchanges (`data/seed-dream-content.json`)
+- **54 dream images** generated via Nano Banana (`data/dream-images/dream-{1-54}.png`)
+- **Dream Web constellation data** — 7 thematic clusters, 60 connections (`data/seed-dream-connections.json`)
+- **Import script** ready: `python scripts/import-seed-dreams.py --user-id <UUID>`
+
+---
+
 ## Current Status
 
 **MVP core is feature-complete.** Record → Interpret → Journal → Dream Map → Shadow Work flow is fully built. Auth, subscription context, ad gates, and offline queue are implemented.
 
-**Before alpha testing:**
-1. Configure production API keys (Anthropic, Google AI, RevenueCat, AdMob)
-2. Deploy Supabase edge functions to production
-3. Build out placeholder components (TranscriptOverlay, MonthHeader, ExerciseCard, etc.)
-4. Complete onboarding and settings screens
-5. Integrate offline sync loop into app startup
-6. Test full auth + recording flow on device
+**EAS build** submitted (Apr 3). Privacy policy live at huntercfinley.github.io/animus-legal/. App Store copy written at `docs/app-store-listing.md`.
+
+**Before App Store submission:**
+1. Check EAS build result, install via TestFlight
+2. Deploy updated edge functions (generate-image, analyze-appearance, dream-connection)
+3. Run Supabase seed import for Hunter's account
+4. Enter metadata in App Store Connect
+5. Submit for review
 
 ---
 
@@ -178,4 +193,9 @@ Everything in "Implemented" above, plus completing placeholder features.
 | `Animus-Research.md` | Full market research, competitors, user pain points |
 | `docs/superpowers/specs/2026-03-27-animus-design.md` | Detailed design spec |
 | `docs/superpowers/plans/2026-03-27-animus-implementation.md` | 21-task implementation plan |
+| `data/seed-dream-content.json` | 54 dreams with interpretations, symbols, go-deeper exchanges |
+| `data/seed-dream-connections.json` | Dream Web constellation clusters + 60 connections |
+| `data/dream-images/` | 54 Nano Banana dream images |
+| `scripts/import-seed-dreams.py` | Supabase seed data importer |
+| `docs/app-store-listing.md` | App Store Connect metadata |
 | `Figma` | `figma.com/design/whEsHbXEXuk3H8hBStzVSJ` — 10 UX flow pages |

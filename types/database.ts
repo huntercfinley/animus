@@ -1,6 +1,6 @@
 export type SubscriptionTier = 'free' | 'premium';
 export type WorldEntryCategory = 'person' | 'place' | 'theme' | 'life_event';
-export type LimitType = 'go_deeper' | 'image_refinement' | 'shadow_exercise' | 'dream_connection' | 'dream_insights';
+export type LimitType = 'go_deeper' | 'image_refinement' | 'image_generation' | 'shadow_exercise' | 'dream_connection' | 'dream_insights';
 export type ReportPeriod = 'weekly' | 'monthly';
 export type DreamMood = 'peaceful' | 'anxious' | 'surreal' | 'dark' | 'joyful' | 'mysterious' | 'chaotic' | 'melancholic';
 export type ConversationRole = 'user' | 'assistant';

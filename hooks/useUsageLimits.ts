@@ -4,8 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import type { LimitType } from '@/types/database';
 
 const LIMITS = {
-  free: { go_deeper: 5, image_refinement: 1, shadow_exercise: 3, dream_connection: 999, dream_insights: 1 },
-  premium: { go_deeper: 10, image_refinement: 3, shadow_exercise: 5, dream_connection: 999, dream_insights: 999 },
+  free: { go_deeper: 5, image_refinement: 1, image_generation: 10, shadow_exercise: 3, dream_connection: 999, dream_insights: 1 },
+  premium: { go_deeper: 10, image_refinement: 3, image_generation: 30, shadow_exercise: 5, dream_connection: 999, dream_insights: 999 },
 };
 
 export function useUsageLimits() {
@@ -17,10 +17,14 @@ export function useUsageLimits() {
 
     const maxCount = LIMITS[tier][limitType];
     const isDailyLimit = limitType === 'shadow_exercise';
+    const isMonthlyLimit = limitType === 'image_generation';
 
     let query = supabase.from('usage_limits').select('count').eq('user_id', user.id).eq('limit_type', limitType);
 
-    if (isDailyLimit) {
+    if (isMonthlyLimit) {
+      const monthKey = new Date().toISOString().substring(0, 7) + '-01';
+      query = query.eq('period_date', monthKey);
+    } else if (isDailyLimit) {
       query = query.eq('period_date', new Date().toISOString().split('T')[0]);
     } else if (dreamId) {
       query = query.eq('dream_id', dreamId);
@@ -36,18 +40,24 @@ export function useUsageLimits() {
     if (!user) return;
 
     const isDailyLimit = limitType === 'shadow_exercise';
+    const isMonthlyLimit = limitType === 'image_generation';
     const today = new Date().toISOString().split('T')[0];
+    const monthKey = today.substring(0, 7) + '-01';
 
-    if (!isDailyLimit && !dreamId) {
+    if (!isDailyLimit && !isMonthlyLimit && !dreamId) {
       console.error('incrementLimit called without dreamId for per-dream limit:', limitType);
       return;
     }
+
+    const periodKey = isMonthlyLimit ? monthKey : isDailyLimit ? today : null;
+    const lookupField = (isDailyLimit || isMonthlyLimit) ? 'period_date' : 'dream_id';
+    const lookupValue = (isDailyLimit || isMonthlyLimit) ? periodKey! : dreamId!;
 
     const { data: existing } = await supabase.from('usage_limits')
       .select('id, count')
       .eq('user_id', user.id)
       .eq('limit_type', limitType)
-      .eq(isDailyLimit ? 'period_date' : 'dream_id', isDailyLimit ? today : dreamId!)
+      .eq(lookupField, lookupValue)
       .maybeSingle();
 
     if (existing) {
@@ -55,10 +65,10 @@ export function useUsageLimits() {
     } else {
       await supabase.from('usage_limits').insert({
         user_id: user.id,
-        dream_id: isDailyLimit ? null : dreamId,
+        dream_id: (isDailyLimit || isMonthlyLimit) ? null : dreamId,
         limit_type: limitType,
         count: 1,
-        period_date: isDailyLimit ? today : null,
+        period_date: periodKey,
       });
     }
   }, [user]);
