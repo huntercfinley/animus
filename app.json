@@ -43,7 +43,7 @@
         }
       ],
       [
-        "expo-av",
+        "expo-audio",
         {
           "microphonePermission": "Animus needs microphone access to record your dreams via voice."
         }
@@ -53,7 +53,10 @@
         {
           "iosAppId": "ca-app-pub-4861675479405621~2504217942"
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-image",
+      "expo-sharing"
     ],
     "extra": {
       "router": {},

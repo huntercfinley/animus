@@ -1,5 +1,10 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Audio } from 'expo-av';
+import { useState, useRef, useCallback } from 'react';
+import {
+  useAudioRecorder,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from 'expo-audio';
 import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
@@ -23,9 +28,10 @@ export function useRecording() {
     duration: 0,
     error: null,
   });
-  const recordingRef = useRef<Audio.Recording | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptRef = useRef('');
+
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   useSpeechRecognitionEvent('result', (event) => {
     const text = event.results[0]?.transcript ?? '';
@@ -41,21 +47,19 @@ export function useRecording() {
     try {
       setState(prev => ({ ...prev, error: null, transcript: '', audioUri: null, duration: 0 }));
 
-      const { granted } = await Audio.requestPermissionsAsync();
+      const { granted } = await requestRecordingPermissionsAsync();
       if (!granted) {
         setState(prev => ({ ...prev, error: 'Microphone permission denied' }));
         return;
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      recordingRef.current = recording;
+      await recorder.prepareToRecordAsync();
+      recorder.record();
 
       try {
         const { granted: speechGranted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
@@ -74,22 +78,22 @@ export function useRecording() {
     } catch (err) {
       setState(prev => ({ ...prev, error: `Failed to start recording: ${err}` }));
     }
-  }, []);
+  }, [recorder]);
 
   const pauseRecording = useCallback(async () => {
     try {
-      await recordingRef.current?.pauseAsync();
+      recorder.pause();
       try { ExpoSpeechRecognitionModule.stop(); } catch {}
       if (intervalRef.current) clearInterval(intervalRef.current);
       setState(prev => ({ ...prev, isPaused: true }));
     } catch (err) {
       setState(prev => ({ ...prev, error: `Failed to pause: ${err}` }));
     }
-  }, []);
+  }, [recorder]);
 
   const resumeRecording = useCallback(async () => {
     try {
-      await recordingRef.current?.startAsync();
+      recorder.record();
       try {
         ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: true });
       } catch {}
@@ -100,7 +104,7 @@ export function useRecording() {
     } catch (err) {
       setState(prev => ({ ...prev, error: `Failed to resume: ${err}` }));
     }
-  }, []);
+  }, [recorder]);
 
   const stopRecording = useCallback(async () => {
     try {
@@ -108,12 +112,11 @@ export function useRecording() {
 
       try { ExpoSpeechRecognitionModule.stop(); } catch {}
 
-      if (recordingRef.current) {
-        await recordingRef.current.stopAndUnloadAsync();
-        const uri = recordingRef.current.getURI();
-        recordingRef.current = null;
+      if (recorder.isRecording) {
+        await recorder.stop();
+        const uri = recorder.uri;
 
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+        await setAudioModeAsync({ allowsRecording: false });
 
         setState(prev => ({ ...prev, isRecording: false, isPaused: false, audioUri: uri }));
         return { transcript: transcriptRef.current, audioUri: uri };
@@ -125,7 +128,7 @@ export function useRecording() {
       setState(prev => ({ ...prev, error: `Failed to stop: ${err}`, isRecording: false }));
       return { transcript: transcriptRef.current, audioUri: null };
     }
-  }, []);
+  }, [recorder]);
 
   const updateTranscript = useCallback((text: string) => {
     transcriptRef.current = text;
