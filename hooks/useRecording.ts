@@ -1,6 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Audio } from 'expo-av';
-import Voice, { SpeechResultsEvent } from '@react-native-voice/voice';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 
 interface RecordingState {
   isRecording: boolean;
@@ -24,15 +27,15 @@ export function useRecording() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptRef = useRef('');
 
-  const onSpeechResults = useCallback((e: SpeechResultsEvent) => {
-    const text = e.value?.[0] ?? '';
+  useSpeechRecognitionEvent('result', (event) => {
+    const text = event.results[0]?.transcript ?? '';
     transcriptRef.current = text;
     setState(prev => ({ ...prev, transcript: text }));
-  }, []);
+  });
 
-  const onSpeechError = useCallback((e: { error?: { message?: string } }) => {
-    console.warn('Speech recognition error:', e.error?.message);
-  }, []);
+  useSpeechRecognitionEvent('error', (event) => {
+    console.warn('Speech recognition error:', event.error);
+  });
 
   const startRecording = useCallback(async () => {
     try {
@@ -54,10 +57,11 @@ export function useRecording() {
       );
       recordingRef.current = recording;
 
-      Voice.onSpeechResults = onSpeechResults;
-      Voice.onSpeechError = onSpeechError;
       try {
-        await Voice.start('en-US');
+        const { granted: speechGranted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (speechGranted) {
+          ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: true });
+        }
       } catch {
         console.warn('Voice recognition unavailable — recording audio only');
       }
@@ -70,12 +74,12 @@ export function useRecording() {
     } catch (err) {
       setState(prev => ({ ...prev, error: `Failed to start recording: ${err}` }));
     }
-  }, [onSpeechResults, onSpeechError]);
+  }, []);
 
   const pauseRecording = useCallback(async () => {
     try {
       await recordingRef.current?.pauseAsync();
-      try { await Voice.stop(); } catch {}
+      try { ExpoSpeechRecognitionModule.stop(); } catch {}
       if (intervalRef.current) clearInterval(intervalRef.current);
       setState(prev => ({ ...prev, isPaused: true }));
     } catch (err) {
@@ -87,8 +91,7 @@ export function useRecording() {
     try {
       await recordingRef.current?.startAsync();
       try {
-        Voice.onSpeechResults = onSpeechResults;
-        await Voice.start('en-US');
+        ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: true });
       } catch {}
       intervalRef.current = setInterval(() => {
         setState(prev => ({ ...prev, duration: prev.duration + 1 }));
@@ -97,13 +100,13 @@ export function useRecording() {
     } catch (err) {
       setState(prev => ({ ...prev, error: `Failed to resume: ${err}` }));
     }
-  }, [onSpeechResults]);
+  }, []);
 
   const stopRecording = useCallback(async () => {
     try {
       if (intervalRef.current) clearInterval(intervalRef.current);
 
-      try { await Voice.stop(); await Voice.destroy(); } catch {}
+      try { ExpoSpeechRecognitionModule.stop(); } catch {}
 
       if (recordingRef.current) {
         await recordingRef.current.stopAndUnloadAsync();

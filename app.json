@@ -36,6 +36,13 @@
       "expo-secure-store",
       "expo-sqlite",
       [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Animus needs microphone access to record your dreams via voice.",
+          "speechRecognitionPermission": "Animus uses speech recognition to transcribe your dream recordings in real-time."
+        }
+      ],
+      [
         "expo-av",
         {
           "microphonePermission": "Animus needs microphone access to record your dreams via voice."
