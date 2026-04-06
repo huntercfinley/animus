@@ -13,9 +13,11 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.realitysuites.animus",
+      "buildNumber": "3",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Animus needs microphone access to record your dreams via voice.",
         "NSSpeechRecognitionUsageDescription": "Animus uses speech recognition to transcribe your dream recordings in real-time.",
+        "NSPhotoLibraryUsageDescription": "Animus uses your photos to personalize dream imagery with your appearance.",
         "NSUserTrackingUsageDescription": "Animus uses this to show you relevant ads. You can opt out at any time.",
         "ITSAppUsesNonExemptEncryption": false
       }
