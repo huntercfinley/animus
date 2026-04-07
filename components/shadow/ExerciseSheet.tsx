@@ -14,6 +14,7 @@ export function ExerciseSheet({ prompt, existingResponse, onSave, onClose }: Exe
 
   return (
     <View style={styles.sheet}>
+      <View style={styles.handle} />
       <Text style={styles.label}>Dive deeper</Text>
       <Text style={styles.prompt}>{prompt}</Text>
       <TextInput
@@ -27,9 +28,11 @@ export function ExerciseSheet({ prompt, existingResponse, onSave, onClose }: Exe
         autoFocus
       />
       <View style={styles.buttonRow}>
-        <Pressable style={styles.closeBtn} onPress={onClose}><Text style={styles.closeText}>Close</Text></Pressable>
+        <Pressable style={styles.closeBtn} onPress={onClose}>
+          <Text style={styles.closeText}>Close</Text>
+        </Pressable>
         <Pressable style={styles.saveBtn} onPress={() => { onSave(response); onClose(); }}>
-          <Text style={styles.saveText}>Save reflection</Text>
+          <Text style={styles.saveText}>Save Reflection</Text>
         </Pressable>
       </View>
     </View>
@@ -37,13 +40,68 @@ export function ExerciseSheet({ prompt, existingResponse, onSave, onClose }: Exe
 }
 
 const styles = StyleSheet.create({
-  sheet: { backgroundColor: colors.deepBg, borderTopLeftRadius: borderRadius.xl, borderTopRightRadius: borderRadius.xl, padding: spacing.lg, paddingBottom: 40, borderTopWidth: 1, borderColor: colors.deepBorder },
-  label: { fontFamily: fonts.serif, fontSize: 14, color: colors.deepAccent, fontStyle: 'italic', marginBottom: spacing.sm },
-  prompt: { fontFamily: fonts.serif, fontSize: 18, color: colors.deepTextPrimary, lineHeight: 28, marginBottom: spacing.lg },
-  input: { backgroundColor: colors.deepBgCard, color: colors.deepTextPrimary, borderRadius: borderRadius.md, padding: spacing.md, fontSize: 16, lineHeight: 24, minHeight: 150, textAlignVertical: 'top', borderWidth: 1, borderColor: colors.deepBorder },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.lg },
+  sheet: {
+    backgroundColor: colors.deepBg,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    padding: spacing.lg,
+    paddingBottom: 40,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(196, 181, 253, 0.3)',
+    alignSelf: 'center',
+    marginBottom: spacing.lg,
+  },
+  label: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    color: colors.deepAccent,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
+  prompt: {
+    fontFamily: fonts.serifBold,
+    fontSize: 20,
+    color: colors.deepTextPrimary,
+    lineHeight: 28,
+    marginBottom: spacing.lg,
+  },
+  input: {
+    backgroundColor: colors.deepBgCard,
+    color: colors.deepTextPrimary,
+    fontFamily: fonts.serif,
+    borderRadius: borderRadius.xl,
+    padding: spacing.md,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 150,
+    textAlignVertical: 'top',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
   closeBtn: { padding: spacing.sm },
-  closeText: { color: colors.deepTextSecondary },
-  saveBtn: { backgroundColor: colors.accent, borderRadius: borderRadius.md, paddingHorizontal: 24, paddingVertical: 12 },
-  saveText: { color: '#fff', fontWeight: '600' },
+  closeText: {
+    fontFamily: fonts.sansMedium,
+    color: colors.deepTextSecondary,
+    fontSize: 14,
+  },
+  saveBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  saveText: {
+    fontFamily: fonts.sansSemiBold,
+    color: colors.textOnPrimary,
+    fontSize: 14,
+  },
 });

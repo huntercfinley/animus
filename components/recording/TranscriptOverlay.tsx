@@ -1,6 +1,6 @@
 import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { colors, fonts } from '@/constants/theme';
+import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
 
 interface TranscriptOverlayProps {
   transcript: string;
@@ -11,40 +11,61 @@ interface TranscriptOverlayProps {
 export function TranscriptOverlay({ transcript, isRecording, onTranscriptEdit }: TranscriptOverlayProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  if (!transcript && isRecording) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.listening}>Listening...</Text>
-      </View>
-    );
-  }
-
-  if (!transcript) return null;
+  if (!transcript && !isRecording) return null;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {isEditing || !isRecording ? (
-        <TextInput
-          style={styles.input}
-          value={transcript}
-          onChangeText={onTranscriptEdit}
-          multiline
-          placeholder="Edit your dream transcript..."
-          placeholderTextColor={colors.textMuted}
-          onFocus={() => setIsEditing(true)}
-          onBlur={() => setIsEditing(false)}
-        />
-      ) : (
-        <Text style={styles.transcript}>{transcript}</Text>
-      )}
-    </ScrollView>
+    <View style={styles.card}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {!transcript && isRecording ? (
+          <Text style={styles.placeholder}>Your words will appear here as you speak...</Text>
+        ) : isEditing || !isRecording ? (
+          <TextInput
+            style={styles.input}
+            value={transcript}
+            onChangeText={onTranscriptEdit}
+            multiline
+            placeholder="Edit your dream transcript..."
+            placeholderTextColor={colors.textMuted}
+            onFocus={() => setIsEditing(true)}
+            onBlur={() => setIsEditing(false)}
+          />
+        ) : (
+          <Text style={styles.transcript}>{transcript}</Text>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxHeight: 300 },
-  content: { padding: 16 },
-  listening: { fontFamily: fonts.serif, fontSize: 16, color: colors.textMuted, fontStyle: 'italic', textAlign: 'center' },
-  transcript: { fontFamily: fonts.serif, fontSize: 18, color: colors.textPrimary, lineHeight: 28 },
-  input: { fontFamily: fonts.serif, fontSize: 18, color: colors.textPrimary, lineHeight: 28, textAlignVertical: 'top' },
+  card: {
+    width: '100%',
+    minHeight: 120,
+    maxHeight: 260,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: borderRadius.xl,
+    marginBottom: spacing.xl,
+  },
+  scroll: { flex: 1 },
+  content: { padding: spacing.lg },
+  placeholder: {
+    fontFamily: fonts.sans,
+    fontSize: 16,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  transcript: {
+    fontFamily: fonts.serif,
+    fontSize: 17,
+    color: colors.textPrimary,
+    lineHeight: 28,
+  },
+  input: {
+    fontFamily: fonts.serif,
+    fontSize: 17,
+    color: colors.textPrimary,
+    lineHeight: 28,
+    textAlignVertical: 'top',
+  },
 });

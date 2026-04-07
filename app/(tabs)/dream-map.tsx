@@ -1,60 +1,606 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { callEdgeFunction } from '@/lib/ai';
 import { HeatmapCalendar } from '@/components/dream-map/HeatmapCalendar';
 import { DreamWeb } from '@/components/dream-map/DreamWeb';
-import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
-import type { DreamSymbol } from '@/types/database';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
+import type { DreamSymbol, PatternReport, DreamConnection } from '@/types/database';
 
-type ViewMode = 'calendar' | 'web';
+type ViewMode = 'web' | 'heatmap';
 
 export default function DreamMapScreen() {
   const { dreams, loading } = useDreams();
   const { profile, user } = useAuth();
-  const [view, setView] = useState<ViewMode>('calendar');
+  const [view, setView] = useState<ViewMode>('web');
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
+
+  const [latestReport, setLatestReport] = useState<PatternReport | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase.from('dream_symbols').select('*').eq('user_id', user.id)
       .then(({ data }) => setSymbols(data || []));
+    supabase.from('pattern_reports').select('*').eq('user_id', user.id)
+      .order('created_at', { ascending: false }).limit(1)
+      .then(({ data }) => { if (data?.[0]) setLatestReport(data[0]); });
   }, [user]);
 
+  const generateInsights = useCallback(async (periodType: 'weekly' | 'monthly') => {
+    setInsightsLoading(true);
+    try {
+      const report = await callEdgeFunction<PatternReport>('dream-insights', { period_type: periodType });
+      setLatestReport(report);
+    } catch (err) {
+      // silently fail — user may not be premium or have enough dreams
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, []);
+
+  const [selectedDreams, setSelectedDreams] = useState<string[]>([]);
+  const [connectionResult, setConnectionResult] = useState<DreamConnection | null>(null);
+  const [connectionLoading, setConnectionLoading] = useState(false);
+
+  const toggleDreamSelect = (dreamId: string) => {
+    setSelectedDreams(prev => {
+      if (prev.includes(dreamId)) return prev.filter(id => id !== dreamId);
+      if (prev.length >= 2) return [prev[1], dreamId];
+      return [...prev, dreamId];
+    });
+  };
+
+  const connectDreams = useCallback(async () => {
+    if (selectedDreams.length !== 2) return;
+    setConnectionLoading(true);
+    try {
+      const result = await callEdgeFunction<DreamConnection>('dream-connection', {
+        dream_a_id: selectedDreams[0],
+        dream_b_id: selectedDreams[1],
+      });
+      setConnectionResult(result);
+      setSelectedDreams([]);
+    } catch {
+      // silently fail
+    } finally {
+      setConnectionLoading(false);
+    }
+  }, [selectedDreams]);
+
+  // Compute archetype percentages
+  const archetypeCounts: Record<string, number> = {};
+  symbols.forEach(s => {
+    if (s.archetype) archetypeCounts[s.archetype] = (archetypeCounts[s.archetype] || 0) + 1;
+  });
+  const totalSymbols = symbols.length || 1;
+  const archetypeLabels = ['Shadow', 'Anima', 'Self', 'Wise Old Man', 'Hero', 'Mother', 'Trickster'];
+  const topArchetypes = Object.entries(archetypeCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 7)
+    .map(([name, count]) => ({ name, pct: Math.round((count / totalSymbols) * 100) }));
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Dream Map</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScreenHeader />
 
-      <View style={styles.toggle}>
-        <Pressable style={[styles.toggleBtn, view === 'calendar' && styles.toggleActive]} onPress={() => setView('calendar')}>
-          <Text style={[styles.toggleText, view === 'calendar' && styles.toggleTextActive]}>Calendar</Text>
-        </Pressable>
-        <Pressable style={[styles.toggleBtn, view === 'web' && styles.toggleActive]} onPress={() => setView('web')}>
-          <Text style={[styles.toggleText, view === 'web' && styles.toggleTextActive]}>Dream Web</Text>
-        </Pressable>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-      {view === 'calendar' ? (
-        <HeatmapCalendar
-          dreams={dreams}
-          streakCurrent={profile?.streak_current || 0}
-          streakLongest={profile?.streak_longest || 0}
-        />
-      ) : (
-        <DreamWeb dreams={dreams} symbols={symbols} />
-      )}
+        {/* View Toggle — Stitch: bg-surface-container-high p-1.5 rounded-full */}
+        <View style={styles.toggleWrap}>
+          <View style={styles.toggle}>
+            <Pressable
+              style={[styles.toggleBtn, view === 'web' && styles.toggleActive]}
+              onPress={() => setView('web')}
+            >
+              <Text style={[styles.toggleText, view === 'web' && styles.toggleTextActive]}>Dream Web</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.toggleBtn, view === 'heatmap' && styles.toggleActive]}
+              onPress={() => setView('heatmap')}
+            >
+              <Text style={[styles.toggleText, view === 'heatmap' && styles.toggleTextActive]}>Heatmap</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Section Title — Stitch: serif text-4xl font-bold tracking-tight */}
+        <View style={styles.headerSection}>
+          <Text style={styles.title}>The Constellation</Text>
+          <Text style={styles.subtitle}>
+            Mapping your subconscious archetypes through the collective web of the Animus.
+          </Text>
+        </View>
+
+        {/* Visualization — Stitch: aspect-[4/5] rounded-xxl bg-surface-container-low */}
+        <View style={styles.vizContainer}>
+          {view === 'heatmap' ? (
+            <HeatmapCalendar
+              dreams={dreams}
+              streakCurrent={profile?.streak_current || 0}
+              streakLongest={profile?.streak_longest || 0}
+            />
+          ) : (
+            <DreamWeb dreams={dreams} symbols={symbols} />
+          )}
+        </View>
+
+        {/* Metrics Section — Stitch bento grid */}
+        <View style={styles.metricsRow}>
+          {/* Archetypal Density Chart */}
+          <View style={styles.densityCard}>
+            <Text style={styles.densityTitle}>Archetypal Density</Text>
+            <View style={styles.barsContainer}>
+              {(topArchetypes.length > 0 ? topArchetypes : archetypeLabels.map(n => ({ name: n, pct: Math.random() * 80 + 10 }))).map((a, i) => (
+                <View key={i} style={styles.barCol}>
+                  <View style={[styles.bar, { height: `${Math.min(a.pct, 100)}%`, opacity: 0.2 + (a.pct / 100) * 0.8 }]} />
+                </View>
+              ))}
+            </View>
+            <View style={styles.barLabels}>
+              {archetypeLabels.map((label, i) => (
+                <Text key={i} style={styles.barLabel}>{label}</Text>
+              ))}
+            </View>
+          </View>
+
+          {/* Collective Alignment Card — Stitch: bg-primary, big percentage */}
+          <View style={styles.alignmentCard}>
+            <View style={styles.alignmentGlow} />
+            <MaterialIcons name="public" size={36} color="#ffffff" style={{ marginBottom: 16 }} />
+            <Text style={styles.alignmentPct}>
+              {dreams.length > 0 ? `${Math.min(Math.round((symbols.length / Math.max(dreams.length, 1)) * 20), 100)}%` : '—'}
+            </Text>
+            <Text style={styles.alignmentLabel}>Collective Unconscious Alignment</Text>
+            <Pressable style={styles.alignmentBtn}>
+              <Text style={styles.alignmentBtnText}>Explore Global Nodes</Text>
+              <MaterialIcons name="arrow-forward" size={14} color="#ffffff" />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Insights Section — dream-insights edge function */}
+        <View style={styles.insightsSection}>
+          <Text style={styles.insightsTitle}>Dream Insights</Text>
+          <Text style={styles.insightsDesc}>
+            AI-generated analyst reports from your recent dreams.
+          </Text>
+          <View style={styles.insightsBtns}>
+            <Pressable
+              style={[styles.insightsBtn, insightsLoading && { opacity: 0.5 }]}
+              onPress={() => generateInsights('weekly')}
+              disabled={insightsLoading}
+            >
+              <MaterialIcons name="date-range" size={16} color={colors.primary} />
+              <Text style={styles.insightsBtnText}>
+                {insightsLoading ? 'Generating...' : 'Weekly Report'}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.insightsBtn, insightsLoading && { opacity: 0.5 }]}
+              onPress={() => generateInsights('monthly')}
+              disabled={insightsLoading}
+            >
+              <MaterialIcons name="calendar-month" size={16} color={colors.primary} />
+              <Text style={styles.insightsBtnText}>
+                {insightsLoading ? 'Generating...' : 'Monthly Report'}
+              </Text>
+            </Pressable>
+          </View>
+          {latestReport && (
+            <View style={styles.reportCard}>
+              <View style={styles.reportHeader}>
+                <MaterialIcons name="psychology" size={18} color={colors.primary} />
+                <Text style={styles.reportPeriod}>
+                  {latestReport.period_type === 'weekly' ? 'Weekly' : 'Monthly'} — {latestReport.period_start} to {latestReport.period_end}
+                </Text>
+              </View>
+              <Text style={styles.reportText}>{latestReport.report}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Isolated Nodes + Dream Connection */}
+        {dreams.length > 0 && (
+          <View style={styles.nodesSection}>
+            <Text style={styles.nodesTitle}>Isolated Nodes</Text>
+            <Text style={styles.nodesHint}>
+              Select two dreams to discover hidden connections.
+            </Text>
+            {dreams.slice(0, 6).map(dream => {
+              const isSelected = selectedDreams.includes(dream.id);
+              return (
+                <Pressable
+                  key={dream.id}
+                  style={[styles.nodeRow, isSelected && styles.nodeRowSelected]}
+                  onPress={() => toggleDreamSelect(dream.id)}
+                >
+                  <View style={styles.nodeLeft}>
+                    <View style={[styles.nodeIcon, isSelected && styles.nodeIconSelected]}>
+                      <MaterialIcons
+                        name={isSelected ? 'check-circle' : 'nights-stay'}
+                        size={22}
+                        color={isSelected ? '#ffffff' : colors.primary}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.nodeName}>{dream.title}</Text>
+                      <Text style={styles.nodeMeta}>
+                        {new Date(dream.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                        {dream.mood ? ` • ${dream.mood}` : ''}
+                      </Text>
+                    </View>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={22} color={colors.outlineVariant} />
+                </Pressable>
+              );
+            })}
+
+            {/* Connect button */}
+            {selectedDreams.length === 2 && (
+              <Pressable
+                style={[styles.connectBtn, connectionLoading && { opacity: 0.5 }]}
+                onPress={connectDreams}
+                disabled={connectionLoading}
+              >
+                <MaterialIcons name="link" size={18} color={colors.primary} />
+                <Text style={styles.connectBtnText}>
+                  {connectionLoading ? 'Analyzing...' : 'Connect These Dreams'}
+                </Text>
+              </Pressable>
+            )}
+
+            {/* Connection result */}
+            {connectionResult && (
+              <View style={styles.connectionCard}>
+                <View style={styles.connectionHeader}>
+                  <MaterialIcons name="hub" size={18} color={colors.primary} />
+                  <Text style={styles.connectionLabel}>Dream Connection</Text>
+                </View>
+                <Text style={styles.connectionText}>{connectionResult.analysis}</Text>
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgSurface },
-  title: { fontFamily: fonts.sansBold, fontSize: 28, color: colors.textPrimary, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  toggle: { flexDirection: 'row', marginHorizontal: spacing.lg, marginVertical: spacing.md, backgroundColor: colors.bgCard, borderRadius: borderRadius.sm, padding: 2 },
-  toggleBtn: { flex: 1, paddingVertical: 8, borderRadius: borderRadius.sm - 2, alignItems: 'center' },
-  toggleActive: { backgroundColor: colors.accent },
-  toggleText: { color: colors.textMuted, fontSize: 14 },
-  toggleTextActive: { color: '#fff', fontWeight: '500' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+  },
+
+  // Toggle — Stitch
+  toggleWrap: {
+    alignItems: 'center',
+    marginBottom: 48, // mb-12
+  },
+  toggle: {
+    backgroundColor: colors.surfaceContainerHigh,
+    padding: 6, // p-1.5
+    borderRadius: 999,
+    flexDirection: 'row',
+  },
+  toggleBtn: {
+    paddingHorizontal: 32, // px-8
+    paddingVertical: 10, // py-2.5
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+  toggleActive: {
+    backgroundColor: colors.surfaceContainerLowest,
+    ...shadows.card,
+  },
+  toggleText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  toggleTextActive: {
+    fontFamily: fonts.sansSemiBold,
+    color: colors.primary,
+  },
+
+  // Header
+  headerSection: {
+    paddingHorizontal: 24,
+    marginBottom: 40, // mb-10
+  },
+  title: {
+    fontFamily: fonts.serifBold,
+    fontSize: 36, // text-4xl
+    color: colors.textPrimary,
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontFamily: fonts.sans,
+    fontSize: 18, // text-lg
+    color: colors.textSecondary,
+    lineHeight: 28, // leading-relaxed
+    maxWidth: 400,
+  },
+
+  // Visualization
+  vizContainer: {
+    marginHorizontal: 24,
+    aspectRatio: 4 / 5,
+    borderRadius: 24, // rounded-xxl
+    backgroundColor: colors.surfaceContainerLow,
+    overflow: 'hidden',
+    marginBottom: 48,
+  },
+
+  // Metrics
+  metricsRow: {
+    paddingHorizontal: 24,
+    gap: 24,
+    marginBottom: 64,
+  },
+  densityCard: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 24,
+    padding: 32,
+  },
+  densityTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 24,
+    color: colors.textPrimary,
+    marginBottom: 16,
+  },
+  barsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    height: 128,
+  },
+  barCol: {
+    flex: 1,
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    backgroundColor: colors.primary,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    width: '100%',
+  },
+  barLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  barLabel: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 10,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: -0.5,
+    flex: 1,
+    textAlign: 'center',
+  },
+
+  // Alignment card
+  alignmentCard: {
+    backgroundColor: colors.primary,
+    padding: 32,
+    borderRadius: 24,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  alignmentGlow: {
+    position: 'absolute',
+    right: -40,
+    top: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  alignmentPct: {
+    fontFamily: fonts.serifBold,
+    fontSize: 30,
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  alignmentLabel: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 20,
+  },
+  alignmentBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 24,
+  },
+  alignmentBtnText: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 14,
+    color: '#ffffff',
+  },
+
+  // Insights
+  insightsSection: {
+    paddingHorizontal: 24,
+    marginBottom: 64,
+  },
+  insightsTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 24,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  insightsDesc: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  insightsBtns: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  insightsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: colors.surfaceContainerLow,
+  },
+  insightsBtnText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 13,
+    color: colors.primary,
+  },
+  reportCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: 'rgba(81, 79, 129, 1)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    elevation: 3,
+  },
+  reportHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  reportPeriod: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    color: colors.primary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  reportText: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.textPrimary,
+    lineHeight: 22,
+  },
+
+  // Isolated Nodes
+  nodesSection: {
+    paddingHorizontal: 24,
+  },
+  nodesTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 24,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  nodesHint: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginBottom: 24,
+    lineHeight: 18,
+  },
+  nodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 24,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  nodeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+    flex: 1,
+  },
+  nodeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.surfaceContainerHigh,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nodeName: {
+    fontFamily: fonts.sansBold,
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  nodeMeta: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+  },
+  nodeRowSelected: {
+    backgroundColor: `${colors.primary}0D`,
+    borderRadius: 12,
+  },
+  nodeIconSelected: {
+    backgroundColor: colors.primary,
+  },
+  connectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 999,
+    backgroundColor: colors.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: `${colors.primary}33`,
+  },
+  connectBtnText: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 14,
+    color: colors.primary,
+  },
+  connectionCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    shadowColor: 'rgba(81, 79, 129, 1)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    elevation: 3,
+  },
+  connectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  connectionLabel: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    color: colors.primary,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  connectionText: {
+    fontFamily: fonts.serifItalic,
+    fontSize: 15,
+    color: colors.textPrimary,
+    lineHeight: 24,
+  },
 });

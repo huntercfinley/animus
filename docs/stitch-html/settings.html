@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings — Animus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#c7c3fe",
+                    "on-tertiary-fixed": "#1e0e4e",
+                    "secondary": "#5b598c",
+                    "surface-bright": "#faf9ff",
+                    "primary": "#4648d4",
+                    "on-primary-fixed": "#07006c",
+                    "on-error": "#ffffff",
+                    "surface-container": "#ebedfa",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#6063ee",
+                    "primary-fixed": "#e1e0ff",
+                    "inverse-surface": "#2d303a",
+                    "on-primary-container": "#fffbff",
+                    "surface": "#faf9ff",
+                    "on-tertiary-fixed-variant": "#4a3d7c",
+                    "tertiary-container": "#786bad",
+                    "on-secondary-fixed-variant": "#444173",
+                    "surface-variant": "#e0e2ef",
+                    "secondary-fixed": "#e3dfff",
+                    "surface-container-highest": "#e0e2ef",
+                    "secondary-fixed-dim": "#c4c1fb",
+                    "on-surface-variant": "#464554",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e5e7f4",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f1f3ff",
+                    "inverse-on-surface": "#eef0fd",
+                    "error": "#ba1a1a",
+                    "tertiary": "#5f5293",
+                    "background": "#faf9ff",
+                    "surface-dim": "#d7d9e6",
+                    "outline-variant": "#c7c4d7",
+                    "on-tertiary-container": "#fffbff",
+                    "on-surface": "#181b24",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "on-background": "#181b24",
+                    "inverse-primary": "#c0c1ff",
+                    "on-secondary-container": "#514f81",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "tertiary-fixed-dim": "#ccbeff",
+                    "tertiary-fixed": "#e7deff",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#494bd6",
+                    "outline": "#767586",
+                    "on-secondary-fixed": "#181445"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .serif-text { font-family: 'Noto Serif', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+<!-- Top Navigation Placeholder (Hidden for Transactional/Settings focus) -->
+<!-- The TopAppBar is suppressed to maintain focus on the settings task per UI rules -->
+<main class="w-full max-w-2xl px-6 pt-12 pb-24 md:pt-20">
+<!-- Header Section -->
+<header class="mb-10">
+<button class="group flex items-center gap-2 text-secondary mb-4 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+<span class="font-medium text-sm">Back</span>
+</button>
+<h1 class="serif-text text-3xl font-bold tracking-tight text-on-surface">Settings</h1>
+</header>
+<!-- Account Section -->
+<section class="mb-8">
+<div class="bg-surface-container-low rounded-xl p-6 shadow-[0_8px_32px_rgba(81,79,129,0.06)] flex items-center gap-4 transition-all hover:bg-surface-container-high">
+<div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-white font-semibold text-lg ring-4 ring-surface-container-lowest">
+                    H
+                </div>
+<div class="flex-1">
+<h2 class="font-semibold text-on-surface">Hunter Finley</h2>
+<p class="text-sm text-on-surface-variant">huntercfinley@gmail.com</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</section>
+<!-- Subscription Section -->
+<section class="mb-12">
+<div class="bg-surface-container-low rounded-xl p-6 shadow-[0_8px_32px_rgba(81,79,129,0.06)] flex items-center justify-between">
+<div>
+<h3 class="font-semibold text-on-surface">Free Plan</h3>
+<p class="text-sm text-on-surface-variant">3 dreams analyzed this month</p>
+</div>
+<button class="bg-secondary text-white px-6 py-2 rounded-full font-medium text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-secondary/20">
+                    Upgrade
+                </button>
+</div>
+</section>
+<!-- Data Section -->
+<section class="mb-12">
+<h4 class="text-[11px] font-semibold tracking-[1.5px] text-on-surface-variant uppercase px-1 mb-3">DATA</h4>
+<div class="bg-surface-container-low rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(81,79,129,0.06)]">
+<!-- Row 1 -->
+<button class="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-surface-container-high bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary opacity-70">file_upload</span>
+<span class="font-medium text-on-surface">Import Dreams</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm">arrow_forward</span>
+</button>
+<!-- Row 2 -->
+<button class="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-surface-container-high bg-surface-container-high/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary opacity-70">file_download</span>
+<span class="font-medium text-on-surface">Export Data</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm">arrow_forward</span>
+</button>
+<!-- Row 3 -->
+<button class="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-error/5 bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error opacity-70">delete_forever</span>
+<span class="font-medium text-error">Delete Account</span>
+</div>
+<span class="material-symbols-outlined text-error/30 text-sm">warning</span>
+</button>
+</div>
+</section>
+<!-- Aesthetic Graphic Section -->
+<div class="w-full h-32 rounded-xl mb-12 overflow-hidden relative group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-tertiary/10 mix-blend-overlay z-10"></div>
+<img class="w-full h-full object-cover grayscale opacity-40 group-hover:scale-105 transition-transform duration-1000" data-alt="abstract ethereal scene of flowing silk and soft blue light mimicking the transition from sleep to waking state" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOGL1gR82nNUTHB7IU6Nd1wVLGl2Flmey7O5uswVNVwZvMiUKMw9tN5CtR7Mrt4LIHurWHAYhejCX7qyVCK1xRiZfo-Vfjg6PwlX0u-fZWryBs7dnEyypUJvnicaAHK01mqlrdR_5yAEmrdoL2Fzn-kkVyZMS5Wng8VIbiYNCSL8kUo9hLtceH6cnX1pUF5dtWb6cSEoAhKasKu5lowSEP1sHolsnhvqFhplzqSMXBbnnpCsedfe1-frZ0MQZ-je9yKJgPmddL6Rvp"/>
+<div class="absolute inset-0 flex items-center justify-center z-20 p-8">
+<p class="serif-text italic text-secondary text-center text-sm">"The dream is the small hidden door in the deepest and most intimate sanctum of the soul."</p>
+</div>
+</div>
+<!-- Logout Section -->
+<div class="flex justify-center mb-16">
+<button class="bg-surface-container-low text-on-secondary-fixed-variant px-12 py-3 rounded-full font-medium text-sm transition-all hover:bg-surface-container-high active:scale-95 border border-outline-variant/10">
+                Sign Out
+            </button>
+</div>
+<!-- Footer -->
+<footer class="text-center">
+<p class="text-[10px] tracking-widest text-on-surface-variant/50 uppercase">Animus v1.0 · Reality Suites</p>
+</footer>
+</main>
+<!-- Navigation Shell Placeholder (Suppressed per "The Destination Rule" for task-focused Settings screen) -->
+</body></html>

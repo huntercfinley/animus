@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "background": "#faf9ff",
+                  "on-secondary-container": "#514f81",
+                  "tertiary-fixed-dim": "#ccbeff",
+                  "surface-variant": "#e0e2ef",
+                  "surface-bright": "#faf9ff",
+                  "on-background": "#181b24",
+                  "on-tertiary-fixed-variant": "#4a3d7c",
+                  "error": "#ba1a1a",
+                  "on-error": "#ffffff",
+                  "on-primary-fixed-variant": "#2f2ebe",
+                  "on-primary-container": "#fffbff",
+                  "surface-container-highest": "#e0e2ef",
+                  "outline-variant": "#c7c4d7",
+                  "on-tertiary-container": "#fffbff",
+                  "primary-container": "#6063ee",
+                  "tertiary": "#5f5293",
+                  "secondary-fixed-dim": "#c4c1fb",
+                  "secondary-container": "#c7c3fe",
+                  "surface-container-high": "#e5e7f4",
+                  "secondary-fixed": "#e3dfff",
+                  "primary": "#4648d4",
+                  "outline": "#767586",
+                  "on-primary-fixed": "#07006c",
+                  "surface-container": "#ebedfa",
+                  "primary-fixed": "#e1e0ff",
+                  "on-error-container": "#93000a",
+                  "tertiary-fixed": "#e7deff",
+                  "secondary": "#5b598c",
+                  "surface": "#faf9ff",
+                  "on-surface": "#181b24",
+                  "on-surface-variant": "#464554",
+                  "error-container": "#ffdad6",
+                  "surface-dim": "#d7d9e6",
+                  "surface-container-low": "#f1f3ff",
+                  "on-secondary-fixed": "#181445",
+                  "on-secondary-fixed-variant": "#444173",
+                  "surface-tint": "#494bd6",
+                  "surface-container-lowest": "#ffffff",
+                  "inverse-surface": "#2d303a",
+                  "inverse-primary": "#c0c1ff",
+                  "tertiary-container": "#786bad",
+                  "on-tertiary-fixed": "#1e0e4e",
+                  "on-primary": "#ffffff",
+                  "on-tertiary": "#ffffff",
+                  "primary-fixed-dim": "#c0c1ff",
+                  "on-secondary": "#ffffff",
+                  "inverse-on-surface": "#eef0fd"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "1.5rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Noto Serif"],
+                  "body": ["Inter"],
+                  "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #1E1048; /* Deep Zone Surface */
+    }
+    .deep-zone-glass {
+      background: rgba(120, 107, 173, 0.2);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .message-gradient-user {
+      background: linear-gradient(135deg, #4648d4, #6063ee);
+    }
+    .ink-bleed-bg {
+      background: radial-gradient(circle at top right, rgba(96, 99, 238, 0.15) 0%, transparent 70%),
+                  radial-gradient(circle at bottom left, rgba(120, 107, 173, 0.1) 0%, transparent 50%);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body text-tertiary-fixed min-h-screen flex flex-col selection:bg-primary-container selection:text-white ink-bleed-bg">
+<!-- TopAppBar: Re-styled for Deep Zone -->
+<header class="fixed top-0 w-full z-50 bg-[#1E1048]/80 backdrop-blur-xl">
+<div class="flex justify-between items-center px-6 py-5 w-full">
+<div class="flex items-center gap-4">
+<button class="text-tertiary-fixed hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-tertiary-container/40 border border-tertiary-fixed/10">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h1 class="font-headline font-bold text-xl tracking-tight text-tertiary-fixed">Analyst</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-tertiary-fixed-dim/60 font-medium">Deep Zone Active</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-tertiary-fixed-dim hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</button>
+<button class="text-tertiary-fixed-dim hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content: Chat Interface -->
+<main class="flex-1 mt-24 mb-32 px-6 overflow-y-auto space-y-8 max-w-2xl mx-auto w-full">
+<!-- Context Header -->
+<div class="text-center py-4">
+<span class="inline-block px-4 py-1.5 rounded-full bg-tertiary-container/20 border border-tertiary-fixed/5 text-[11px] font-medium tracking-widest uppercase text-tertiary-fixed-dim">
+        Dream Context: City Above the Clouds
+      </span>
+</div>
+<!-- AI Message -->
+<div class="flex flex-col items-start max-w-[85%] group">
+<div class="mb-2 ml-1 text-[11px] font-medium text-tertiary-fixed-dim/40 uppercase tracking-widest">Analyst</div>
+<div class="deep-zone-glass px-5 py-4 rounded-xl rounded-tl-none border border-tertiary-fixed/5 text-tertiary-fixed leading-relaxed">
+        I've been examining the recurring motifs in your journey through the "City Above the Clouds." The golden architecture suggests an aspiration toward a higher state of consciousness, yet there is a tension present.
+      </div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end max-w-[85%] ml-auto">
+<div class="mb-2 mr-1 text-[11px] font-medium text-tertiary-fixed-dim/40 uppercase tracking-widest">You</div>
+<div class="message-gradient-user px-5 py-4 rounded-xl rounded-tr-none shadow-xl shadow-primary/10 text-white leading-relaxed">
+        Why was the glass path so narrow?
+      </div>
+</div>
+<!-- AI Message -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="mb-2 ml-1 text-[11px] font-medium text-tertiary-fixed-dim/40 uppercase tracking-widest">Analyst</div>
+<div class="deep-zone-glass px-5 py-4 rounded-xl rounded-tl-none border border-tertiary-fixed/5 text-tertiary-fixed leading-relaxed">
+        The fragility of the glass path often represents a sense of vulnerability in your waking life's social structures. Its narrowness suggests that your current path requires extreme focus—one false step feels consequential.
+      </div>
+<div class="mt-4 deep-zone-glass px-5 py-4 rounded-xl rounded-tl-none border border-tertiary-fixed/5 text-tertiary-fixed leading-relaxed">
+        Does this feeling of "walking on glass" resonate with any recent professional decisions or personal boundaries you've been setting?
+      </div>
+</div>
+<!-- Floating Image Suggestion (Deep Zone Style) -->
+<div class="w-full flex justify-center py-4">
+<div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-tertiary-fixed/10 group">
+<img alt="Visualizing the dream path" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60" data-alt="Ethereal digital painting of a glowing glass bridge stretching through thick violet clouds under a deep indigo twilight sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2E5rPv-hrAiLJq73R1Sw6QW5L4B5kvZ9tf8AQvEQx2gpTF5qxWDDIP-QoHJN9fihWA8psXhBvP7zxViO3b91e7PlS9etsE8kFpxqNubm5OKvqg18J7w5BrIrEupBwvvop6kzi7HQ9FZUbIu3gMWQfIOprOyMqf6wzi7DhhAcUSEr8-nfW_gm5leh-GHAF1btATbWjUrIVJq44pCEw22ByzXZN71MnsGTQ3rT7aTf4pd5zlKuruE2YFEAtqkRJesU6d0O5-VUQ8Icw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#1E1048] to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<p class="text-xs italic text-tertiary-fixed-dim">Archetypal Visualization: The Fragile Ascent</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Interactive Zone -->
+<footer class="fixed bottom-0 left-0 w-full z-50">
+<div class="max-w-2xl mx-auto w-full px-6 pb-8 pt-4">
+<!-- Interaction Counter -->
+<div class="flex justify-center mb-4">
+<div class="px-3 py-1 rounded-full bg-[#1E1048]/60 border border-tertiary-fixed/10 flex items-center gap-2">
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-container/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-container/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-container/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-container/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary-container/30"></div>
+</div>
+<span class="text-[10px] font-medium uppercase tracking-tighter text-tertiary-fixed-dim/70">5/10 exchanges left</span>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="relative">
+<div class="deep-zone-glass rounded-full border border-tertiary-fixed/20 p-1 flex items-center shadow-2xl shadow-black/40">
+<button class="p-3 text-tertiary-fixed-dim hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="mic_none">mic_none</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-tertiary-fixed placeholder:text-tertiary-fixed-dim/30 text-sm py-3 px-2" placeholder="Speak to the subconscious..." type="text"/>
+<button class="bg-primary hover:bg-primary-container text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg">
+<span class="material-symbols-outlined !text-[20px]" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<!-- Suggested Prompts -->
+<div class="flex gap-3 mt-4 overflow-x-auto pb-2 no-scrollbar">
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-tertiary-fixed/10 bg-tertiary-container/10 text-[11px] text-tertiary-fixed-dim hover:bg-tertiary-container/20 transition-colors">
+          Explore the shadow figures
+        </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-tertiary-fixed/10 bg-tertiary-container/10 text-[11px] text-tertiary-fixed-dim hover:bg-tertiary-container/20 transition-colors">
+          Interpret the falling sensation
+        </button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full border border-tertiary-fixed/10 bg-tertiary-container/10 text-[11px] text-tertiary-fixed-dim hover:bg-tertiary-container/20 transition-colors">
+          Why now?
+        </button>
+</div>
+</div>
+</footer>
+<style>
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  </style>
+</body></html>

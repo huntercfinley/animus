@@ -8,9 +8,11 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,18 +36,14 @@ export default function ImportScreen() {
         type: ['application/json', 'text/plain', 'text/csv', 'text/comma-separated-values'],
         copyToCacheDirectory: true,
       });
-
       if (result.canceled) return;
-
       const file = result.assets[0];
       const content = await FileSystem.readAsStringAsync(file.uri);
-
       const parsed = parseDreams(content);
       if (parsed.length === 0) {
         Alert.alert('No Dreams Found', 'Could not find any dreams in this file. Try a different format or paste your dreams directly.');
         return;
       }
-
       setDreams(parsed);
       setStep('preview');
     } catch (err: any) {
@@ -72,121 +70,112 @@ export default function ImportScreen() {
     if (!user) return;
     setStep('importing');
     setProgress({ imported: 0, skipped: 0, total: dreams.length });
-
-    // Get existing dreams to avoid duplicates
     const { data: existing } = await supabase
-      .from('dreams')
-      .select('journal_text')
-      .eq('user_id', user.id);
-
-    const existingSet = new Set(
-      (existing || []).map((d: any) => d.journal_text?.slice(0, 100))
-    );
-
+      .from('dreams').select('journal_text').eq('user_id', user.id);
+    const existingSet = new Set((existing || []).map((d: any) => d.journal_text?.slice(0, 100)));
     let imported = 0;
     let skipped = 0;
-
     for (const dream of dreams) {
-      // Check duplicate
       if (existingSet.has(dream.text.slice(0, 100))) {
         skipped++;
         setProgress(p => ({ ...p, skipped }));
         continue;
       }
-
       const title = generateTitle(dream.text);
       const mood = guessMood(dream.text);
       const recordedAt = new Date(dream.date + 'T08:00:00Z').toISOString();
-
       const { error } = await supabase.from('dreams').insert({
-        user_id: user.id,
-        title,
-        journal_text: dream.text,
-        mood,
-        recorded_at: recordedAt,
-        created_at: recordedAt,
+        user_id: user.id, title, journal_text: dream.text, mood,
+        recorded_at: recordedAt, created_at: recordedAt,
         model_used: `${dream.source}-import`,
       });
-
-      if (!error) {
-        imported++;
-        existingSet.add(dream.text.slice(0, 100));
-      }
+      if (!error) { imported++; existingSet.add(dream.text.slice(0, 100)); }
       setProgress(p => ({ ...p, imported }));
     }
-
-    // Dream count is handled by the database trigger (update_dream_stats)
-    if (imported > 0) {
-      await refreshProfile?.();
-    }
-
+    if (imported > 0) await refreshProfile?.();
     setProgress({ imported, skipped, total: dreams.length });
     setStep('done');
   }, [dreams, user, profile, refreshProfile]);
 
   const reset = () => {
-    setStep('choose');
-    setDreams([]);
-    setPasteText('');
-    setShowPaste(false);
-    setProgress({ imported: 0, skipped: 0, total: 0 });
+    setStep('choose'); setDreams([]); setPasteText('');
+    setShowPaste(false); setProgress({ imported: 0, skipped: 0, total: 0 });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Header */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+
+        {/* Header — Stitch: arrow_back + serif title */}
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} hitSlop={12}>
-            <Text style={styles.backText}>← Back</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
+          >
+            <MaterialIcons name="arrow-back" size={20} color={colors.secondary} />
+            <Text style={styles.backText}>Back</Text>
           </Pressable>
           <Text style={styles.title}>Import Dreams</Text>
+          <Text style={styles.subtitle}>
+            Bring your dream journal into Animus. We support multiple formats.
+          </Text>
         </View>
 
         {/* Step: Choose source */}
         {step === 'choose' && (
           <>
-            <Text style={styles.subtitle}>
-              Bring your dream journal into Animus. We support multiple formats.
-            </Text>
+            {/* Option Cards — Stitch: rounded-2xl p-6, icon container, chevron */}
+            <View style={styles.optionStack}>
+              <Pressable
+                style={({ pressed }) => [styles.optionCard, pressed && { transform: [{ scale: 0.98 }] }]}
+                onPress={pickFile}
+              >
+                <View style={styles.optionIconBox}>
+                  <MaterialIcons name="description" size={28} color={colors.primaryContainer} />
+                </View>
+                <View style={styles.optionInfo}>
+                  <Text style={styles.optionTitle}>ChatGPT Export</Text>
+                  <Text style={styles.optionDesc}>JSON file from ChatGPT data export with dream conversations</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={22} color={colors.outlineVariant} />
+              </Pressable>
 
-            <Pressable style={styles.optionCard} onPress={pickFile}>
-              <Text style={styles.optionIcon}>📄</Text>
-              <View style={styles.optionInfo}>
-                <Text style={styles.optionTitle}>ChatGPT Export</Text>
-                <Text style={styles.optionDesc}>
-                  JSON file from ChatGPT data export with dream conversations
-                </Text>
-              </View>
-            </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.optionCard, pressed && { transform: [{ scale: 0.98 }] }]}
+                onPress={pickFile}
+              >
+                <View style={styles.optionIconBox}>
+                  <MaterialIcons name="table-rows" size={28} color={colors.primaryContainer} />
+                </View>
+                <View style={styles.optionInfo}>
+                  <Text style={styles.optionTitle}>Text or CSV File</Text>
+                  <Text style={styles.optionDesc}>Plain text or CSV with date and dream columns</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={22} color={colors.outlineVariant} />
+              </Pressable>
 
-            <Pressable style={styles.optionCard} onPress={pickFile}>
-              <Text style={styles.optionIcon}>📝</Text>
-              <View style={styles.optionInfo}>
-                <Text style={styles.optionTitle}>Text or CSV File</Text>
-                <Text style={styles.optionDesc}>
-                  Plain text (one dream per paragraph) or CSV with date and dream columns
-                </Text>
-              </View>
-            </Pressable>
-
-            <Pressable style={styles.optionCard} onPress={() => setShowPaste(true)}>
-              <Text style={styles.optionIcon}>✍️</Text>
-              <View style={styles.optionInfo}>
-                <Text style={styles.optionTitle}>Paste Text</Text>
-                <Text style={styles.optionDesc}>
-                  Copy and paste dreams directly — separate with blank lines
-                </Text>
-              </View>
-            </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.optionCard, pressed && { transform: [{ scale: 0.98 }] }]}
+                onPress={() => setShowPaste(true)}
+              >
+                <View style={styles.optionIconBox}>
+                  <MaterialIcons name="edit-note" size={28} color={colors.primaryContainer} />
+                </View>
+                <View style={styles.optionInfo}>
+                  <Text style={styles.optionTitle}>Paste Text</Text>
+                  <Text style={styles.optionDesc}>Copy and paste dreams directly — separate with blank lines</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={22} color={colors.outlineVariant} />
+              </Pressable>
+            </View>
 
             {showPaste && (
               <View style={styles.pasteSection}>
                 <TextInput
                   style={styles.pasteInput}
                   multiline
-                  placeholder="Paste your dreams here...&#10;&#10;Separate each dream with a blank line.&#10;Optionally start each with a date (2025-03-15)."
-                  placeholderTextColor={colors.textMuted}
+                  placeholder={'Paste your dreams here...\n\nSeparate each dream with a blank line.\nOptionally start each with a date (2025-03-15).'}
+                  placeholderTextColor={`${colors.textMuted}80`}
                   value={pasteText}
                   onChangeText={setPasteText}
                   textAlignVertical="top"
@@ -197,12 +186,36 @@ export default function ImportScreen() {
               </View>
             )}
 
-            <View style={styles.formatInfo}>
-              <Text style={styles.formatTitle}>Supported formats</Text>
-              <Text style={styles.formatItem}>• ChatGPT data export (conversations JSON)</Text>
-              <Text style={styles.formatItem}>• Plain text (dreams separated by blank lines)</Text>
-              <Text style={styles.formatItem}>• CSV with date + dream_text columns</Text>
-              <Text style={styles.formatItem}>• Any JSON with date + text fields</Text>
+            {/* Decorative Quote — Stitch */}
+            <View style={styles.quoteSection}>
+              <Image
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAIrwSFt9-11ZKx2yf6dr0-hyqpuhXsE5RC1-vu7jLETQrDicYdFRXABXef9ZP5a_bjMx8mKXA9DqhGOJ7lmHI1SppexImdzapKeb8zoFXXPNt9FE80odcweXjxM6Byd6TRmQ_xhjw8Y6cp9KjGqL33HJ17LelJZiLV2nsFPMcA0lOA0WTM-tMpscL54vIjhCNLjyfYKvzoJ9pqrNcQNZCKmcreKK-LkOHXak_7n3siVmMaualcP8TrfFHWVLa8EcdzAg9zaLgq3I4Y' }}
+                style={styles.quoteImage}
+              />
+              <View style={styles.quoteOverlay}>
+                <Text style={styles.quoteText}>
+                  "The dream is the small hidden door in the deepest and most intimate sanctum of the soul."
+                </Text>
+              </View>
+            </View>
+
+            {/* Supported Formats — Stitch */}
+            <View style={styles.formatBox}>
+              <View style={styles.formatHeader}>
+                <MaterialIcons name="info-outline" size={20} color={colors.primary} />
+                <Text style={styles.formatTitle}>Supported formats</Text>
+              </View>
+              {[
+                'ChatGPT data export (conversations.json)',
+                'Plain text (.txt, .md)',
+                'CSV with \'date\' and \'entry\' columns',
+                'Any JSON with date + text fields',
+              ].map((item, i) => (
+                <View key={i} style={styles.formatItem}>
+                  <View style={styles.formatDot} />
+                  <Text style={styles.formatItemText}>{item}</Text>
+                </View>
+              ))}
             </View>
           </>
         )}
@@ -210,37 +223,30 @@ export default function ImportScreen() {
         {/* Step: Preview */}
         {step === 'preview' && (
           <>
-            <Text style={styles.subtitle}>
-              Found {dreams.length} dream{dreams.length !== 1 ? 's' : ''} to import.
-              Review them below, then tap Import.
+            <Text style={styles.previewSubtitle}>
+              Found {dreams.length} dream{dreams.length !== 1 ? 's' : ''} to import. Review below, then tap Import.
             </Text>
-
             {dreams.map((dream, i) => {
               const mood = guessMood(dream.text);
               return (
-                <View key={i} style={[styles.dreamPreview, { backgroundColor: moodTints[mood] || colors.bgCard }]}>
+                <View key={i} style={[styles.dreamPreview, { backgroundColor: moodTints[mood] || colors.surfaceContainerLowest }]}>
                   <View style={styles.dreamPreviewHeader}>
                     <Text style={styles.dreamDate}>{dream.date}</Text>
-                    <View style={[styles.moodBadge, { backgroundColor: moodColors[mood] || colors.accent }]}>
+                    <View style={[styles.moodBadge, { backgroundColor: moodColors[mood] || colors.primary }]}>
                       <Text style={styles.moodText}>{mood}</Text>
                     </View>
                   </View>
                   <Text style={styles.dreamTitle}>{generateTitle(dream.text)}</Text>
-                  <Text style={styles.dreamExcerpt} numberOfLines={3}>
-                    {dream.text}
-                  </Text>
+                  <Text style={styles.dreamExcerpt} numberOfLines={3}>{dream.text}</Text>
                 </View>
               );
             })}
-
             <View style={styles.actionRow}>
               <Pressable style={styles.cancelBtn} onPress={reset}>
                 <Text style={styles.cancelBtnText}>Cancel</Text>
               </Pressable>
               <Pressable style={styles.importBtn} onPress={startImport}>
-                <Text style={styles.importBtnText}>
-                  Import {dreams.length} Dream{dreams.length !== 1 ? 's' : ''}
-                </Text>
+                <Text style={styles.importBtnText}>Import {dreams.length} Dream{dreams.length !== 1 ? 's' : ''}</Text>
               </Pressable>
             </View>
           </>
@@ -249,33 +255,22 @@ export default function ImportScreen() {
         {/* Step: Importing */}
         {step === 'importing' && (
           <View style={styles.progressSection}>
-            <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={styles.progressText}>
-              Importing dreams... {progress.imported + progress.skipped} / {progress.total}
-            </Text>
-            <Text style={styles.progressDetail}>
-              {progress.imported} imported · {progress.skipped} skipped (duplicates)
-            </Text>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.progressText}>Importing dreams... {progress.imported + progress.skipped} / {progress.total}</Text>
+            <Text style={styles.progressDetail}>{progress.imported} imported · {progress.skipped} skipped (duplicates)</Text>
           </View>
         )}
 
         {/* Step: Done */}
         {step === 'done' && (
           <View style={styles.doneSection}>
-            <Text style={styles.doneIcon}>✨</Text>
+            <MaterialIcons name="auto-awesome" size={48} color={colors.primary} />
             <Text style={styles.doneTitle}>Import Complete</Text>
-            <Text style={styles.doneDetail}>
-              {progress.imported} dream{progress.imported !== 1 ? 's' : ''} imported
-            </Text>
+            <Text style={styles.doneDetail}>{progress.imported} dream{progress.imported !== 1 ? 's' : ''} imported</Text>
             {progress.skipped > 0 && (
-              <Text style={styles.doneSkipped}>
-                {progress.skipped} skipped (already in your journal)
-              </Text>
+              <Text style={styles.doneSkipped}>{progress.skipped} skipped (already in your journal)</Text>
             )}
-            <Pressable
-              style={styles.importBtn}
-              onPress={() => router.replace('/(tabs)/journal')}
-            >
+            <Pressable style={styles.importBtn} onPress={() => router.replace('/(tabs)/journal')}>
               <Text style={styles.importBtnText}>View Journal</Text>
             </Pressable>
             <Pressable style={styles.cancelBtn} onPress={reset}>
@@ -289,111 +284,88 @@ export default function ImportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgSurface },
-  content: { padding: spacing.lg, paddingBottom: 100 },
+  container: { flex: 1, backgroundColor: colors.surface },
+  content: { maxWidth: 780, alignSelf: 'center', width: '100%', paddingHorizontal: 24, paddingTop: 32, paddingBottom: 120 },
 
-  header: { marginBottom: spacing.lg },
-  backText: { color: colors.accent, fontSize: 16, marginBottom: spacing.sm },
-  title: { fontFamily: fonts.sansBold, fontSize: 28, color: colors.textPrimary },
+  // Header
+  header: { marginBottom: 48 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 24 },
+  backText: { fontFamily: fonts.sansMedium, fontSize: 14, color: colors.secondary },
+  title: { fontFamily: fonts.serifBold, fontSize: 28, color: colors.textPrimary, letterSpacing: -0.3, marginBottom: 12 },
+  subtitle: { fontFamily: fonts.sans, fontSize: 18, color: colors.textMuted, lineHeight: 28, maxWidth: 400 },
 
-  subtitle: { color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginBottom: spacing.lg },
-
-  // Source options
+  // Option Cards — Stitch
+  optionStack: { gap: 20, marginBottom: 48 },
   optionCard: {
+    backgroundColor: '#F7F7FA',
+    borderRadius: 24,
+    padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    gap: 20,
+    shadowColor: 'rgba(81, 79, 129, 1)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    elevation: 3,
   },
-  optionIcon: { fontSize: 28, marginRight: spacing.md },
+  optionIconBox: {
+    width: 56, height: 56, borderRadius: 16,
+    backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
+  },
   optionInfo: { flex: 1 },
-  optionTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '600', marginBottom: 2 },
-  optionDesc: { color: colors.textMuted, fontSize: 13, lineHeight: 18 },
+  optionTitle: { fontFamily: fonts.sansSemiBold, fontSize: 18, color: colors.textPrimary, marginBottom: 2 },
+  optionDesc: { fontFamily: fonts.sans, fontSize: 14, color: colors.textMuted },
 
-  // Paste section
-  pasteSection: { marginTop: spacing.sm, marginBottom: spacing.md },
+  // Paste
+  pasteSection: { marginBottom: 48 },
   pasteInput: {
-    backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    color: colors.textPrimary,
-    fontSize: 14,
-    minHeight: 160,
-    lineHeight: 20,
+    backgroundColor: colors.surfaceContainerLow, borderRadius: 20, padding: 24,
+    fontFamily: fonts.sans, fontSize: 16, color: colors.textPrimary, minHeight: 160, lineHeight: 24,
   },
-  parseBtn: {
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.sm,
-    paddingVertical: 12,
-    marginTop: spacing.sm,
-    alignItems: 'center',
-  },
-  parseBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  parseBtn: { backgroundColor: colors.primary, borderRadius: 999, paddingVertical: 14, marginTop: 12, alignItems: 'center' },
+  parseBtnText: { fontFamily: fonts.sansSemiBold, color: '#fff', fontSize: 15 },
 
-  // Format info
-  formatInfo: {
-    backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginTop: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  formatTitle: { color: colors.accent, fontSize: 14, fontWeight: '600', marginBottom: spacing.sm },
-  formatItem: { color: colors.textMuted, fontSize: 13, lineHeight: 20 },
+  // Quote section
+  quoteSection: { height: 192, borderRadius: 24, overflow: 'hidden', marginBottom: 48, position: 'relative', backgroundColor: colors.surfaceContainer },
+  quoteImage: { width: '100%', height: '100%', opacity: 0.2, position: 'absolute' },
+  quoteOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 48 },
+  quoteText: { fontFamily: fonts.serifItalic, fontSize: 20, color: colors.textSecondary, textAlign: 'center' },
 
-  // Dream previews
-  dreamPreview: {
-    backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  dreamPreviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
-  dreamDate: { color: colors.textMuted, fontSize: 12 },
-  moodBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: borderRadius.full },
-  moodText: { color: '#fff', fontSize: 11, fontWeight: '600' },
-  dreamTitle: { color: colors.textPrimary, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs },
-  dreamExcerpt: { color: colors.textSecondary, fontSize: 13, lineHeight: 18 },
+  // Format box
+  formatBox: { backgroundColor: colors.surfaceContainerLow, borderRadius: 24, padding: 32 },
+  formatHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+  formatTitle: { fontFamily: fonts.sansMedium, fontSize: 16, color: colors.textPrimary },
+  formatItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
+  formatDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.outlineVariant, marginTop: 6 },
+  formatItemText: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary, flex: 1 },
 
-  // Action buttons
-  actionRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.sm,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelBtnText: { color: colors.textSecondary, fontWeight: '500' },
-  importBtn: {
-    flex: 1,
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.sm,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  importBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  // Preview
+  previewSubtitle: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary, lineHeight: 22, marginBottom: 24 },
+  dreamPreview: { borderRadius: 16, padding: 16, marginBottom: 12 },
+  dreamPreviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  dreamDate: { fontFamily: fonts.sans, color: colors.textMuted, fontSize: 12 },
+  moodBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
+  moodText: { fontFamily: fonts.sansMedium, color: '#fff', fontSize: 11 },
+  dreamTitle: { fontFamily: fonts.sansMedium, color: colors.textPrimary, fontSize: 14, marginBottom: 4 },
+  dreamExcerpt: { fontFamily: fonts.sans, color: colors.textSecondary, fontSize: 13, lineHeight: 18 },
+
+  // Actions
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  cancelBtn: { flex: 1, backgroundColor: colors.surfaceContainerLowest, borderRadius: 999, paddingVertical: 14, alignItems: 'center' },
+  cancelBtnText: { fontFamily: fonts.sansMedium, color: colors.textSecondary },
+  importBtn: { flex: 1, backgroundColor: colors.primary, borderRadius: 999, paddingVertical: 14, alignItems: 'center' },
+  importBtnText: { fontFamily: fonts.sansSemiBold, color: '#fff', fontSize: 15 },
 
   // Progress
-  progressSection: { alignItems: 'center', paddingTop: spacing.xxl },
-  progressText: { color: colors.textPrimary, fontSize: 18, marginTop: spacing.lg },
-  progressDetail: { color: colors.textSecondary, fontSize: 14, marginTop: spacing.xs },
+  progressSection: { alignItems: 'center', paddingTop: 64 },
+  progressText: { fontFamily: fonts.sans, color: colors.textPrimary, fontSize: 18, marginTop: 24 },
+  progressDetail: { fontFamily: fonts.sans, color: colors.textSecondary, fontSize: 14, marginTop: 4 },
 
   // Done
-  doneSection: { alignItems: 'center', paddingTop: spacing.xl },
-  doneIcon: { fontSize: 48, marginBottom: spacing.md },
-  doneTitle: { fontFamily: fonts.serif, fontSize: 24, color: colors.textPrimary, marginBottom: spacing.sm },
-  doneDetail: { color: colors.success, fontSize: 18, fontWeight: '600', marginBottom: spacing.xs },
-  doneSkipped: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.lg },
+  doneSection: { alignItems: 'center', paddingTop: 48, gap: 12 },
+  doneTitle: { fontFamily: fonts.serifBold, fontSize: 24, color: colors.textPrimary },
+  doneDetail: { fontFamily: fonts.sansSemiBold, color: colors.success, fontSize: 18 },
+  doneSkipped: { fontFamily: fonts.sans, color: colors.textMuted, fontSize: 14 },
 });

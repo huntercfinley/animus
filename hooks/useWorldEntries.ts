@@ -33,6 +33,17 @@ export function useWorldEntries() {
     return { data, error };
   }, [user]);
 
+  const updateEntry = useCallback(async (id: string, updates: { name?: string; description?: string; relationship?: string }) => {
+    const { data, error } = await supabase
+      .from('world_entries')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (data) setEntries(prev => prev.map(e => e.id === id ? data : e));
+    return { data, error };
+  }, []);
+
   const deleteEntry = useCallback(async (id: string) => {
     await supabase.from('world_entries').delete().eq('id', id);
     setEntries(prev => prev.filter(e => e.id !== id));
@@ -40,5 +51,5 @@ export function useWorldEntries() {
 
   const byCategory = (cat: WorldEntryCategory) => entries.filter(e => e.category === cat);
 
-  return { entries, loading, fetchEntries, addEntry, deleteEntry, byCategory };
+  return { entries, loading, fetchEntries, addEntry, updateEntry, deleteEntry, byCategory };
 }

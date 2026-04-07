@@ -1,8 +1,11 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
 import { DreamCard } from '@/components/journal/DreamCard';
 import { MonthHeader } from '@/components/journal/MonthHeader';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { colors, fonts, spacing } from '@/constants/theme';
 import type { Dream } from '@/types/database';
 
@@ -36,38 +39,103 @@ function groupDreamsByMonth(dreams: Dream[]): ListItem[] {
 
 export default function JournalScreen() {
   const { dreams, loading, fetchDreams } = useDreams();
-  const items = groupDreamsByMonth(dreams);
+  const [search, setSearch] = useState('');
 
-  if (!loading && dreams.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.empty}>Your dream journal is empty.{'\n'}Record your first dream to begin.</Text>
-      </SafeAreaView>
-    );
-  }
+  const filtered = search.trim()
+    ? dreams.filter(d =>
+        (d.title || '').toLowerCase().includes(search.toLowerCase()) ||
+        (d.journal_text || '').toLowerCase().includes(search.toLowerCase())
+      )
+    : dreams;
+
+  const items = groupDreamsByMonth(filtered);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.screenTitle}>Dream Journal</Text>
-      <FlatList
-        data={items}
-        keyExtractor={(item, index) => item.type === 'header' ? `h-${index}` : `d-${(item as any).dream.id}`}
-        renderItem={({ item }) =>
-          item.type === 'header'
-            ? <MonthHeader month={item.month} year={item.year} count={item.count} />
-            : <DreamCard dream={item.dream} />
-        }
-        onRefresh={fetchDreams}
-        refreshing={loading}
-        contentContainerStyle={styles.list}
-      />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScreenHeader />
+
+      {/* Search Bar — Stitch: bg-surface-container-high rounded-2xl px-6 py-4 */}
+      <View style={styles.searchSection}>
+        <View style={styles.searchBar}>
+          <MaterialIcons name="search" size={22} color={colors.textSecondary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search the subconscious..."
+            placeholderTextColor={`${colors.textSecondary}99`}
+            value={search}
+            onChangeText={setSearch}
+            returnKeyType="search"
+          />
+        </View>
+      </View>
+
+      {!loading && dreams.length === 0 ? (
+        <View style={styles.emptyWrap}>
+          <Text style={styles.empty}>
+            Your dream journal is empty.{'\n'}Record your first dream to begin.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item, index) =>
+            item.type === 'header' ? `h-${index}` : `d-${(item as any).dream.id}`
+          }
+          renderItem={({ item }) =>
+            item.type === 'header'
+              ? <MonthHeader month={item.month} year={item.year} count={item.count} />
+              : <DreamCard dream={item.dream} />
+          }
+          onRefresh={fetchDreams}
+          refreshing={loading}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgSurface },
-  screenTitle: { fontFamily: fonts.sansBold, fontSize: 28, color: colors.textPrimary, paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
-  list: { paddingBottom: 100 },
-  empty: { fontFamily: fonts.serif, fontSize: 18, color: colors.textMuted, textAlign: 'center', marginTop: 100, lineHeight: 28, fontStyle: 'italic' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  searchSection: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: 48, // mb-12
+  },
+  searchBar: {
+    backgroundColor: colors.surfaceContainerHigh, // bg-surface-container-high
+    borderRadius: 24, // rounded-2xl (1.5rem = 24)
+    paddingHorizontal: 24, // px-6
+    paddingVertical: 16, // py-4
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16, // gap-4
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.sans,
+    fontSize: 16,
+    color: colors.textPrimary,
+    padding: 0,
+  },
+  list: {
+    paddingBottom: 120,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  empty: {
+    fontFamily: fonts.serif,
+    fontSize: 18,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 28,
+    fontStyle: 'italic',
+  },
 });

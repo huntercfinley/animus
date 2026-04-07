@@ -37,20 +37,54 @@ export function WorldEntryForm({ onSubmit, onCancel }: WorldEntryFormProps) {
 
   return (
     <View style={styles.form}>
+      <Text style={styles.formTitle}>Add to Your World</Text>
+
+      {/* Category pills */}
       <View style={styles.categoryRow}>
         {CATEGORIES.map(c => (
-          <Pressable key={c.value} style={[styles.categoryChip, category === c.value && styles.categoryActive]} onPress={() => setCategory(c.value)}>
+          <Pressable
+            key={c.value}
+            style={[styles.categoryChip, category === c.value && styles.categoryActive]}
+            onPress={() => setCategory(c.value)}
+          >
             <Text style={[styles.categoryText, category === c.value && styles.categoryTextActive]}>{c.label}</Text>
           </Pressable>
         ))}
       </View>
-      <TextInput style={styles.input} placeholder="Name" placeholderTextColor={colors.textMuted} value={name} onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Description (optional)" placeholderTextColor={colors.textMuted} value={description} onChangeText={setDescription} multiline />
-      <TextInput style={styles.input} placeholder="Relationship (e.g. mother, childhood home)" placeholderTextColor={colors.textMuted} value={relationship} onChangeText={setRelationship} />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        placeholderTextColor={colors.textMuted}
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description (optional)"
+        placeholderTextColor={colors.textMuted}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Relationship (e.g. mother, childhood home)"
+        placeholderTextColor={colors.textMuted}
+        value={relationship}
+        onChangeText={setRelationship}
+      />
+
       <View style={styles.buttonRow}>
-        <Pressable style={styles.cancelBtn} onPress={onCancel}><Text style={styles.cancelText}>Cancel</Text></Pressable>
-        <Pressable style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleSubmit} disabled={saving || !name.trim()}>
-          <Text style={styles.saveText}>{saving ? 'Saving...' : 'Add'}</Text>
+        <Pressable style={styles.cancelBtn} onPress={onCancel}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.saveBtn, (saving || !name.trim()) && { opacity: 0.4 }]}
+          onPress={handleSubmit}
+          disabled={saving || !name.trim()}
+        >
+          <Text style={styles.saveText}>{saving ? 'Saving...' : 'Add Entry'}</Text>
         </Pressable>
       </View>
     </View>
@@ -58,16 +92,73 @@ export function WorldEntryForm({ onSubmit, onCancel }: WorldEntryFormProps) {
 }
 
 const styles = StyleSheet.create({
-  form: { backgroundColor: colors.bgCard, borderRadius: borderRadius.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  categoryRow: { flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.md, flexWrap: 'wrap' },
-  categoryChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.border },
-  categoryActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  categoryText: { color: colors.textMuted, fontSize: 13 },
-  categoryTextActive: { color: '#fff' },
-  input: { backgroundColor: colors.bgSurface, color: colors.textPrimary, borderRadius: borderRadius.sm, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
-  buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.sm, marginTop: spacing.xs },
-  cancelBtn: { padding: spacing.sm },
-  cancelText: { color: colors.textMuted },
-  saveBtn: { backgroundColor: colors.accent, borderRadius: borderRadius.sm, paddingHorizontal: 20, paddingVertical: 10 },
-  saveText: { color: '#fff', fontWeight: '600' },
+  form: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  formTitle: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+    flexWrap: 'wrap',
+  },
+  categoryChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surfaceContainerHigh,
+  },
+  categoryActive: {
+    backgroundColor: colors.primary,
+  },
+  categoryText: {
+    fontFamily: fonts.sansMedium,
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+  categoryTextActive: {
+    color: colors.textOnPrimary,
+  },
+  input: {
+    backgroundColor: colors.surfaceContainerLow,
+    color: colors.textPrimary,
+    fontFamily: fonts.sans,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    marginBottom: spacing.sm,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  cancelBtn: { paddingVertical: 10, paddingHorizontal: spacing.md },
+  cancelText: {
+    fontFamily: fonts.sansMedium,
+    color: colors.textMuted,
+    fontSize: 14,
+  },
+  saveBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  saveText: {
+    fontFamily: fonts.sansSemiBold,
+    color: colors.textOnPrimary,
+    fontSize: 14,
+  },
 });

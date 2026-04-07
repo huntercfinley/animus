@@ -38,6 +38,8 @@ export interface Dream {
   audio_url: string | null;
   model_used: string | null;
   created_at: string;
+  // Computed/joined fields (not always present)
+  themes?: string[];
 }
 
 export interface DreamSymbol {

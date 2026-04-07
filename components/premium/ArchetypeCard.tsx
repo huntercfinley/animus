@@ -1,13 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { ARCHETYPE_MAP } from '@/constants/archetypes';
-import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
+import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { ArchetypeSnapshot } from '@/types/database';
 
 export function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
   const sorted = Object.entries(snapshot.archetypes).sort((a, b) => (b[1] as number) - (a[1] as number));
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, shadows.card]}>
       <Text style={styles.title}>Archetype Profile</Text>
       {snapshot.dominant && (
         <Text style={styles.dominant}>
@@ -32,13 +32,51 @@ export function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.bgCard, borderRadius: borderRadius.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.accent },
-  title: { fontFamily: fonts.sansBold, fontSize: 18, color: colors.textPrimary, marginBottom: spacing.sm },
-  dominant: { fontFamily: fonts.serif, fontSize: 15, color: colors.accent, marginBottom: 4 },
-  rising: { fontSize: 13, color: colors.textSecondary, fontStyle: 'italic', marginBottom: spacing.md },
+  card: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+  },
+  title: {
+    fontFamily: fonts.serifBold,
+    fontSize: 18,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  dominant: {
+    fontFamily: fonts.serif,
+    fontSize: 15,
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  rising: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    marginBottom: spacing.md,
+  },
   bars: { gap: spacing.xs },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  barLabel: { width: 120, fontSize: 12, color: colors.textSecondary },
-  barTrack: { flex: 1, height: 6, backgroundColor: colors.bgSurface, borderRadius: 3 },
-  barFill: { height: 6, backgroundColor: colors.accent, borderRadius: 3 },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  barLabel: {
+    fontFamily: fonts.sansMedium,
+    width: 120,
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  barTrack: {
+    flex: 1,
+    height: 6,
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 3,
+  },
+  barFill: {
+    height: 6,
+    backgroundColor: colors.primary,
+    borderRadius: 3,
+  },
 });

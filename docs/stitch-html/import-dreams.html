@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import Dreams - Animus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif:wght@700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#1e0e4e",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e0e2ef",
+                    "surface-bright": "#faf9ff",
+                    "primary-container": "#6063ee",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#2d303a",
+                    "inverse-primary": "#c0c1ff",
+                    "outline-variant": "#c7c4d7",
+                    "primary": "#4648d4",
+                    "on-surface-variant": "#464554",
+                    "on-primary-fixed": "#07006c",
+                    "surface-container-low": "#f1f3ff",
+                    "tertiary-container": "#786bad",
+                    "secondary": "#5b598c",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#181445",
+                    "background": "#faf9ff",
+                    "surface-tint": "#494bd6",
+                    "tertiary-fixed": "#e7deff",
+                    "surface-dim": "#d7d9e6",
+                    "secondary-container": "#c7c3fe",
+                    "on-surface": "#181b24",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#514f81",
+                    "outline": "#767586",
+                    "on-tertiary-fixed-variant": "#4a3d7c",
+                    "on-tertiary-container": "#fffbff",
+                    "surface-container": "#ebedfa",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "primary-fixed": "#e1e0ff",
+                    "secondary-fixed": "#e3dfff",
+                    "on-secondary-fixed-variant": "#444173",
+                    "inverse-on-surface": "#eef0fd",
+                    "on-primary-container": "#fffbff",
+                    "surface": "#faf9ff",
+                    "surface-container-high": "#e5e7f4",
+                    "secondary-fixed-dim": "#c4c1fb",
+                    "on-background": "#181b24",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#ccbeff",
+                    "tertiary": "#5f5293",
+                    "surface-container-highest": "#e0e2ef",
+                    "on-primary-fixed-variant": "#2f2ebe"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.25rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- Top Navigation Anchor (Manual Implementation of JSON Specs) -->
+<header class="bg-[#faf9ff]/70 dark:bg-[#181b24]/70 backdrop-blur-3xl docked full-width top-0 z-50 sticky">
+<div class="flex items-center w-full px-6 py-4 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#6366F1] dark:text-[#818cf8] cursor-pointer hover:opacity-80 transition-opacity">arrow_back</span>
+<span class="font-['Noto_Serif'] font-bold text-2xl text-[#181b24] dark:text-[#faf9ff]">Import Dreams</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[780px] mx-auto px-6 pt-8">
+<!-- Navigation Back Link -->
+<nav class="mb-6">
+<a class="inline-flex items-center text-secondary font-medium hover:opacity-80 transition-opacity group" href="#">
+<span class="material-symbols-outlined mr-1 text-sm">arrow_back</span>
+                Back
+            </a>
+</nav>
+<!-- Header Section -->
+<section class="mb-12">
+<h1 class="font-headline font-bold text-[28px] leading-tight text-[#1C1A2C] mb-3">Import Dreams</h1>
+<p class="text-[#746F8D] text-lg max-w-lg leading-relaxed">
+                Bring your dream journal into Animus. We support multiple formats.
+            </p>
+</section>
+<!-- Option Cards Stack -->
+<section class="flex flex-col gap-5 mb-12">
+<!-- Option 1: ChatGPT -->
+<button class="w-full text-left bg-[#F7F7FA] rounded-2xl p-6 flex items-center gap-5 shadow-[0_4px_24px_rgba(81,79,129,0.06)] hover:bg-surface-container-low transition-all active:scale-[0.98] duration-200 group">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-primary-container shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">description</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-lg text-on-surface mb-0.5">ChatGPT Export</h3>
+<p class="text-[#746F8D] text-sm">JSON file from ChatGPT data export with dream conversations</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Option 2: Text/CSV -->
+<button class="w-full text-left bg-[#F7F7FA] rounded-2xl p-6 flex items-center gap-5 shadow-[0_4px_24px_rgba(81,79,129,0.06)] hover:bg-surface-container-low transition-all active:scale-[0.98] duration-200 group">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-primary-container shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">table_rows</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-lg text-on-surface mb-0.5">Text or CSV File</h3>
+<p class="text-[#746F8D] text-sm">Plain text or CSV with date and dream columns</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Option 3: Paste Text -->
+<button class="w-full text-left bg-[#F7F7FA] rounded-2xl p-6 flex items-center gap-5 shadow-[0_4px_24px_rgba(81,79,129,0.06)] hover:bg-surface-container-low transition-all active:scale-[0.98] duration-200 group">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-primary-container shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">edit_note</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-lg text-on-surface mb-0.5">Paste Text</h3>
+<p class="text-[#746F8D] text-sm">Copy and paste dreams directly — separate with blank lines</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</section>
+<!-- Decorative Visual Asset (Bento-lite style) -->
+<section class="mb-12 relative overflow-hidden rounded-3xl h-48 bg-surface-container flex items-center justify-center">
+<div class="absolute inset-0 opacity-40 bg-gradient-to-br from-primary/10 to-transparent"></div>
+<img class="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-20" data-alt="Dreamy landscape with surreal glowing clouds and soft atmospheric lighting in shades of lavender and indigo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIrwSFt9-11ZKx2yf6dr0-hyqpuhXsE5RC1-vu7jLETQrDicYdFRXABXef9ZP5a_bjMx8mKXA9DqhGOJ7lmHI1SppexImdzapKeb8zoFXXPNt9FE80odcweXjxM6Byd6TRmQ_xhjw8Y6cp9KjGqL33HJ17LelJZiLV2nsFPMcA0lOA0WTM-tMpscL54vIjhCNLjyfYKvzoJ9pqrNcQNZCKmcreKK-LkOHXak_7n3siVmMaualcP8TrfFHWVLa8EcdzAg9zaLgq3I4Y"/>
+<div class="relative z-10 text-center px-12">
+<p class="font-headline italic text-on-surface-variant text-xl">"The dream is the small hidden door in the deepest and most intimate sanctum of the soul."</p>
+</div>
+</section>
+<!-- Supported Formats Info Box -->
+<section class="bg-surface-container-low rounded-3xl p-8">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-xl">info</span>
+<h2 class="font-medium text-on-surface">Supported formats</h2>
+</div>
+<ul class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
+<li class="flex items-start gap-3 text-on-surface-variant text-sm">
+<div class="mt-1 w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                    ChatGPT data export (conversations.json)
+                </li>
+<li class="flex items-start gap-3 text-on-surface-variant text-sm">
+<div class="mt-1 w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                    Plain text (.txt, .md)
+                </li>
+<li class="flex items-start gap-3 text-on-surface-variant text-sm">
+<div class="mt-1 w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                    CSV with 'date' and 'entry' columns
+                </li>
+<li class="flex items-start gap-3 text-on-surface-variant text-sm">
+<div class="mt-1 w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                    Any JSON with date + text fields
+                </li>
+</ul>
+</section>
+</main>
+<!-- Bottom Navigation Shell (JSON Implementation) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-4 pt-2 bg-[#faf9ff]/70 dark:bg-[#181b24]/70 backdrop-blur-3xl shadow-[0_-4px_24px_rgba(24,27,36,0.04)] z-50 rounded-t-[1.5rem]">
+<!-- Journal Tab -->
+<a class="flex flex-col items-center justify-center text-[#746F8D] p-2 hover:bg-[#6366F1]/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">auto_stories</span>
+<span class="font-['Inter'] text-xs font-medium">Journal</span>
+</a>
+<!-- Import Tab (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-[#6366F1]/10 text-[#6366F1] rounded-2xl p-2 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">file_upload</span>
+<span class="font-['Inter'] text-xs font-medium">Import</span>
+</a>
+<!-- Analyze Tab -->
+<a class="flex flex-col items-center justify-center text-[#746F8D] p-2 hover:bg-[#6366F1]/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">psychology</span>
+<span class="font-['Inter'] text-xs font-medium">Analyze</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-[#746F8D] p-2 hover:bg-[#6366F1]/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-['Inter'] text-xs font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

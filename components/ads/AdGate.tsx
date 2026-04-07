@@ -68,7 +68,7 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
           <Text style={styles.continueText}>
             {adLoaded ? actionLabel : 'Loading...'}
           </Text>
-          {!adLoaded && <ActivityIndicator size="small" color={colors.accent} style={{ marginLeft: 8 }} />}
+          {!adLoaded && <ActivityIndicator size="small" color={colors.primary} style={{ marginLeft: 8 }} />}
         </Pressable>
       </View>
     );
@@ -83,7 +83,24 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
 
 const styles = StyleSheet.create({
   messageContainer: { padding: spacing.lg, alignItems: 'center' },
-  message: { fontFamily: fonts.serif, fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: spacing.lg, fontStyle: 'italic' },
-  continueBtn: { flexDirection: 'row', backgroundColor: colors.bgCard, borderRadius: borderRadius.md, paddingHorizontal: 24, paddingVertical: 12, borderWidth: 1, borderColor: colors.border },
-  continueText: { color: colors.accent, fontWeight: '500' },
+  message: {
+    fontFamily: fonts.serif,
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.lg,
+    fontStyle: 'italic',
+  },
+  continueBtn: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  continueText: {
+    fontFamily: fonts.sansMedium,
+    color: colors.primary,
+  },
 });

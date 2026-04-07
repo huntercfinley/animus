@@ -10,14 +10,31 @@ interface MonthHeaderProps {
 export function MonthHeader({ month, year, count }: MonthHeaderProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{month} {year}</Text>
-      <Text style={styles.count}>{count} {count === 1 ? 'dream' : 'dreams'}</Text>
+      <Text style={styles.month}>{month}</Text>
+      <Text style={styles.count}>{count} {count === 1 ? 'Entry' : 'Entries'}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, marginTop: spacing.md },
-  text: { fontFamily: fonts.sansBold, fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  count: { fontSize: 13, color: colors.textMuted },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 16, // gap-4
+    paddingHorizontal: spacing.lg,
+    marginBottom: 32, // mb-8
+    marginTop: spacing.lg,
+  },
+  month: {
+    fontFamily: fonts.serif, // font-serif (not bold in Stitch)
+    fontSize: 30, // text-3xl
+    color: colors.textPrimary,
+  },
+  count: {
+    fontFamily: fonts.sans,
+    fontSize: 14, // text-sm
+    color: colors.textSecondary,
+    letterSpacing: 2, // tracking-widest
+    textTransform: 'uppercase',
+  },
 });

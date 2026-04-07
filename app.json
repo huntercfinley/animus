@@ -6,14 +6,14 @@
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "animus",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#0a0812"
+      "backgroundColor": "#faf9ff"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.realitysuites.animus",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Animus needs microphone access to record your dreams via voice.",
         "NSSpeechRecognitionUsageDescription": "Animus uses speech recognition to transcribe your dream recordings in real-time.",
@@ -24,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0a0812"
+        "backgroundColor": "#faf9ff"
       },
       "package": "com.realitysuites.animus",
       "permissions": [
@@ -54,6 +54,12 @@
         "react-native-google-mobile-ads",
         {
           "iosAppId": "ca-app-pub-4861675479405621~2504217942"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Animus uses your photos to personalize dream imagery with your appearance."
         }
       ],
       "expo-asset",

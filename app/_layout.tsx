@@ -2,6 +2,9 @@ import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useFonts } from 'expo-font';
+import { NotoSerif_400Regular, NotoSerif_400Regular_Italic, NotoSerif_700Bold } from '@expo-google-fonts/noto-serif';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
@@ -37,7 +40,7 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{
       headerShown: false,
-      contentStyle: { backgroundColor: colors.bgSurface },
+      contentStyle: { backgroundColor: colors.surface },
       animation: 'fade',
     }}>
       <Stack.Screen name="(auth)" />
@@ -51,6 +54,22 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    NotoSerif_400Regular,
+    NotoSerif_400Regular_Italic,
+    NotoSerif_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>

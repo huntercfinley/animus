@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#faf9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e1e0ff",
+                        "on-primary-fixed": "#07006c",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-variant": "#e0e2ef",
+                        "inverse-surface": "#2d303a",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-on-surface": "#eef0fd",
+                        "on-secondary-fixed-variant": "#444173",
+                        "surface": "#faf9ff",
+                        "on-tertiary-fixed-variant": "#4a3d7c",
+                        "secondary-container": "#c7c3fe",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#767586",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-highest": "#e0e2ef",
+                        "secondary-fixed": "#e3dfff",
+                        "tertiary": "#5f5293",
+                        "surface-tint": "#494bd6",
+                        "on-secondary-container": "#514f81",
+                        "tertiary-fixed-dim": "#ccbeff",
+                        "primary-container": "#6063ee",
+                        "secondary": "#5b598c",
+                        "on-primary-container": "#fffbff",
+                        "surface-container": "#ebedfa",
+                        "surface-container-low": "#f1f3ff",
+                        "primary": "#4648d4",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#181b24",
+                        "tertiary-fixed": "#e7deff",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e5e7f4",
+                        "tertiary-container": "#786bad",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c4c1fb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary-fixed": "#181445",
+                        "on-tertiary-fixed": "#1e0e4e",
+                        "on-surface-variant": "#464554",
+                        "on-surface": "#181b24",
+                        "surface-dim": "#d7d9e6",
+                        "surface-bright": "#faf9ff",
+                        "outline-variant": "#c7c4d7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9ff;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-ethereal-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(96, 99, 238, 0.05) 0%, rgba(250, 249, 255, 1) 70%);
+        }
+        .text-shadow-ethereal {
+            text-shadow: 0 4px 12px rgba(70, 72, 212, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+<!-- Subtle Background Elements -->
+<div class="absolute inset-0 z-0 bg-ethereal-glow"></div>
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-fixed/20 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary-fixed/30 blur-[120px]"></div>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-md z-10 space-y-12">
+<!-- Header Section -->
+<header class="text-center space-y-4">
+<div class="flex justify-center mb-6">
+<div class="w-16 h-16 bg-surface-container-lowest rounded-full flex items-center justify-center shadow-2xl shadow-primary/5">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="cloud_queue">cloud_queue</span>
+</div>
+</div>
+<h1 class="text-5xl font-headline font-bold tracking-tighter text-on-surface uppercase">Animus</h1>
+<p class="text-on-surface-variant font-headline italic text-lg opacity-80">Re-enter the space where your conscious and subconscious meet.</p>
+</header>
+<!-- Auth Form -->
+<section class="bg-surface-container-lowest/70 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(70,72,212,0.08)] border border-white/50">
+<form action="#" class="space-y-8" method="POST">
+<!-- Email Input Group -->
+<div class="space-y-3">
+<label class="block text-xs font-label uppercase tracking-widest text-on-surface-variant px-1" for="email">Email Address</label>
+<div class="relative group">
+<input class="w-full px-6 py-4 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary/20 transition-all text-on-surface placeholder:text-outline/50" id="email" name="email" placeholder="navigator@dreamworld.com" required="" type="email"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-outline/30 group-focus-within:text-primary/40 transition-colors">
+<span class="material-symbols-outlined">alternate_email</span>
+</div>
+</div>
+</div>
+<!-- Password Input Group -->
+<div class="space-y-3">
+<div class="flex justify-between items-center px-1">
+<label class="block text-xs font-label uppercase tracking-widest text-on-surface-variant" for="password">Password</label>
+<a class="text-xs font-label text-primary hover:text-primary-container transition-colors font-medium" href="#">Forgot Password?</a>
+</div>
+<div class="relative group">
+<input class="w-full px-6 py-4 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary/20 transition-all text-on-surface placeholder:text-outline/50" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-outline/30 group-focus-within:text-primary/40 transition-colors">
+<span class="material-symbols-outlined">lock_open</span>
+</div>
+</div>
+</div>
+<!-- Sign In Action -->
+<div class="pt-4">
+<button class="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-on-primary font-label font-semibold rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Social/Alternative Divider -->
+<div class="relative py-8">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant/30"></div></div>
+<div class="relative flex justify-center text-xs uppercase tracking-tighter"><span class="bg-surface-container-lowest px-4 text-outline/50 font-label">Return to your ethereal archive.</span></div>
+</div>
+<!-- Alternative Auth -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-high/40 rounded-xl hover:bg-surface-container-high transition-colors group">
+<img alt="" class="w-4 h-4" data-alt="minimalist color icon of the Google 'G' logo on a transparent background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuIG03hNN224IfHey0dT3JPKs__xOPhkBmPEmKlUwYnETfBItMnv16TDir0qKjhkrmZUuE5qh52Xdl11mT884IBmFgRhJJzXABdpzU2vTPJxfZMUyslW9pGA1SV0Ifl51QuTXmcnP3lWS6PHPQMFshW-iIhwtCnFE7w6TnYQcSzUS0nZwl_N4Mttu3iJgAWcClwyO3Rovfzf7jGAFr3eWAoOuY9kY7xwJoX8TQhc19YcZ4jXrLs_3nEnimPc1n_yyd89_4U1MqmGeK"/>
+<span class="text-xs font-medium text-on-surface-variant">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-high/40 rounded-xl hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-lg text-on-surface-variant" style="font-variation-settings: 'FILL' 1;">ios</span>
+<span class="text-xs font-medium text-on-surface-variant">Apple</span>
+</button>
+</div>
+</section>
+<!-- Footer Link -->
+<footer class="text-center">
+<p class="text-on-surface-variant text-sm font-label">
+                Seeking entry for the first time? 
+                <a class="text-primary font-semibold hover:underline underline-offset-4 ml-1" href="#">Create an account</a>
+</p>
+</footer>
+</main>
+<!-- Decorative Image Component (Asymmetric) -->
+<div class="fixed right-[-5%] top-[15%] w-[300px] h-[450px] opacity-20 pointer-events-none hidden lg:block rotate-6">
+<img class="w-full h-full object-cover rounded-3xl" data-alt="ethereal abstract photography of smoke rising in soft lavender and blue light with heavy blur and bokeh effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8zeF5CmGXy7Cd61pIHHGPKt0gf0SMJ_GIXYjTyJ8_TQBxMS53Ql2rv4XYpgE8SThE479w5hRparzdwUSK9zi3sEUYXaLb3rL7VK3WfXdOItKpZI2BwjqcHXMduc3ju-goMHo1eiTjCLpCoD64uQZRPobS1vyAE7LkAB2NQ1n1EGhhqll4D4VuPe8ezr6LLEJqL9iWSw8TrdfBetXmk_yUGuPFAZJlWQVqNqASB-Hm1z92r-SB_zlOP4qnMlPYX9GLV0nk2fr0fxFy"/>
+</div>
+<!-- Navigation Shell Placeholder (Suppressed as per rules for login screen) -->
+</body></html>

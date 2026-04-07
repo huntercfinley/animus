@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Animus Onboarding — Step 1</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,700;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#ebedfa",
+                    "primary-container": "#6063ee",
+                    "surface-dim": "#d7d9e6",
+                    "surface-container-highest": "#e0e2ef",
+                    "on-tertiary": "#ffffff",
+                    "background": "#faf9ff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "surface": "#faf9ff",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#c7c3fe",
+                    "on-tertiary-fixed": "#1e0e4e",
+                    "tertiary-fixed-dim": "#ccbeff",
+                    "surface-tint": "#494bd6",
+                    "primary": "#4648d4",
+                    "on-secondary-container": "#514f81",
+                    "primary-fixed": "#e1e0ff",
+                    "on-surface": "#181b24",
+                    "outline-variant": "#c7c4d7",
+                    "tertiary-container": "#786bad",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-bright": "#faf9ff",
+                    "on-tertiary-fixed-variant": "#4a3d7c",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#464554",
+                    "surface-container-high": "#e5e7f4",
+                    "on-secondary-fixed-variant": "#444173",
+                    "tertiary": "#5f5293",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#e0e2ef",
+                    "secondary-fixed-dim": "#c4c1fb",
+                    "on-primary-container": "#fffbff",
+                    "on-error": "#ffffff",
+                    "on-background": "#181b24",
+                    "secondary": "#5b598c",
+                    "outline": "#767586",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#181445",
+                    "surface-container-low": "#f1f3ff",
+                    "on-primary-fixed": "#07006c",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#e7deff",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#c0c1ff",
+                    "inverse-surface": "#2d303a",
+                    "secondary-fixed": "#e3dfff",
+                    "on-tertiary-container": "#fffbff",
+                    "inverse-on-surface": "#eef0fd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9ff;
+        }
+        .serif {
+            font-family: 'Noto Serif', serif;
+        }
+        /* Custom scrollbar for the textarea */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #e0e2ef;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen text-on-surface antialiased overflow-x-hidden">
+<!-- TopAppBar Execution -->
+<header class="bg-slate-50/70 dark:bg-indigo-950/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">cloud_queue</span>
+<span class="font-serif italic text-indigo-900 dark:text-indigo-100 text-2xl tracking-tight">The Ethereal Archive</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-indigo-900/50 transition-colors p-2 rounded-full transform active:scale-95 duration-300">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center pt-24 pb-32 px-4">
+<!-- Main Content Canvas (780px max-width) -->
+<div class="w-full max-w-[780px] space-y-12">
+<!-- Progress Section -->
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-3">
+<div class="h-1.5 w-10 rounded-full bg-[#5F599B]"></div>
+<div class="h-1.5 w-1.5 rounded-full bg-surface-container-high"></div>
+<div class="h-1.5 w-1.5 rounded-full bg-surface-container-high"></div>
+</div>
+<div class="flex flex-col gap-2">
+<span class="font-medium text-[13px] text-[#9593A5] tracking-wide uppercase">STEP 1 OF 3</span>
+<h1 class="serif text-[28px] font-bold text-[#1C1A2C] leading-tight">Important people</h1>
+</div>
+</div>
+<!-- Interaction Section -->
+<div class="space-y-6">
+<div class="space-y-1.5">
+<p class="text-[16px] text-[#746F8D] leading-relaxed max-w-[580px]">
+                        Who appears in your life most prominently? Name a few key people and their relationship to you.
+                    </p>
+<p class="text-[13px] italic text-[#9593A5]">
+                        One per line. Use — to add a description.
+                    </p>
+</div>
+<div class="relative group">
+<textarea class="w-full h-48 bg-[#F1F3FF] border-none rounded-[20px] p-6 text-[16px] text-on-surface focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-[#9593A5]/50 resize-none" placeholder="e.g., Sarah — partner, Dad — distant but loving"></textarea>
+<!-- Decorative subtle shadow depth as per surface logic -->
+<div class="absolute inset-0 rounded-[20px] shadow-[inset_0_2px_10px_rgba(70,72,212,0.02)] pointer-events-none"></div>
+</div>
+<div class="flex justify-center pt-2">
+<a class="text-[#9593A5] text-[14px] underline underline-offset-4 decoration-1 hover:text-primary transition-colors" href="#">
+                        Skip all — I'll add these later
+                    </a>
+</div>
+</div>
+<!-- Visualization / Graphic Component (Optional visual break) -->
+<div class="grid grid-cols-2 gap-4 mt-8 opacity-40">
+<div class="h-32 rounded-xl bg-surface-container-low flex items-center justify-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest" data-alt="soft blurred circular shape representing a portrait placeholder"></div>
+</div>
+<div class="h-32 rounded-xl bg-surface-container-low flex items-center justify-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest" data-alt="soft blurred circular shape representing a portrait placeholder"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar Execution -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-8 pb-8 pt-4 bg-slate-50/70 dark:bg-indigo-950/70 backdrop-blur-xl shadow-[0_-4px_40px_rgba(70,72,212,0.06)] rounded-t-[1.5rem]">
+<!-- Skip Item (Inactive style) -->
+<button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-6 py-2 hover:text-indigo-800 dark:hover:text-indigo-200 transition-all transform active:scale-105 duration-500 ease-in-out">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+<span class="font-sans uppercase text-[10px] font-bold tracking-widest">Skip</span>
+</button>
+<!-- Next Item (Active style per intent of wizard progression) -->
+<button class="flex flex-row items-center justify-center bg-[#5F599B] text-white rounded-full px-10 py-4 transform hover:scale-105 transition-all duration-500 ease-in-out shadow-lg shadow-primary/10">
+<span class="font-sans uppercase text-[10px] font-bold tracking-[0.15em] mr-2">Next</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+<!-- Imagery Integration (Subtle mood setters) -->
+<div class="fixed top-24 -left-32 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="fixed bottom-32 -right-32 w-80 h-80 bg-secondary/5 rounded-full blur-[100px] pointer-events-none"></div>
+</body></html>

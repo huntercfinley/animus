@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Animus - Record Dream</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e0e2ef",
+                        "secondary": "#5b598c",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e5e7f4",
+                        "secondary-container": "#c7c3fe",
+                        "on-surface-variant": "#464554",
+                        "surface-container-highest": "#e0e2ef",
+                        "surface-dim": "#d7d9e6",
+                        "on-tertiary-fixed": "#1e0e4e",
+                        "surface": "#faf9ff",
+                        "tertiary-fixed": "#e7deff",
+                        "outline-variant": "#c7c4d7",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#494bd6",
+                        "on-secondary-container": "#514f81",
+                        "inverse-primary": "#c0c1ff",
+                        "background": "#faf9ff",
+                        "secondary-fixed": "#e3dfff",
+                        "tertiary": "#5f5293",
+                        "secondary-fixed-dim": "#c4c1fb",
+                        "on-primary-container": "#fffbff",
+                        "on-primary-fixed": "#07006c",
+                        "surface-bright": "#faf9ff",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#786bad",
+                        "inverse-surface": "#2d303a",
+                        "on-tertiary-fixed-variant": "#4a3d7c",
+                        "on-surface": "#181b24",
+                        "inverse-on-surface": "#eef0fd",
+                        "on-primary": "#ffffff",
+                        "primary": "#4648d4",
+                        "on-secondary-fixed-variant": "#444173",
+                        "error-container": "#ffdad6",
+                        "on-background": "#181b24",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ccbeff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "error": "#ba1a1a",
+                        "outline": "#767586",
+                        "surface-container": "#ebedfa",
+                        "primary-fixed": "#e1e0ff",
+                        "primary-container": "#6063ee",
+                        "on-secondary-fixed": "#181445",
+                        "on-tertiary-container": "#fffbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-red {
+            box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(186, 26, 26, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(186, 26, 26, 0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-50/70 dark:bg-indigo-950/70 backdrop-blur-xl flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden bg-surface-container-high ring-2 ring-indigo-100 dark:ring-indigo-900 shadow-sm active:scale-95 duration-300">
+<img alt="user profile avatar" class="h-full w-full object-cover" data-alt="close-up portrait of a woman with calm expression in soft natural lighting with a minimalist aesthetic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPYylf4ShDFMwVsybY3_oEZtoOXb16vWDe0YQ2oQuNWlk8LUOfLFPvTlwvKyMEiLURVwjnmx32CWEtHKYB_fBkupxA7ZpHESi9JvIyiun6TxLh7T82iJdCo9sbkFcpnyLck8emg84sqgsBkxK2rTG22YqulD-qMGd516D95Chu9_-m3HAroUifAtL-7JbeqbZIrqVYAKuz60txbi-pQcloddTI2r-M98hegOWGcEVEbMDAOCEi4Tk-VDD9ZyE2bT8WtNf4i2riwjNb"/>
+</div>
+</div>
+<h1 class="font-serif italic text-2xl text-indigo-900 dark:text-indigo-100 tracking-tight">Animus</h1>
+<button class="text-indigo-600 dark:text-indigo-400 hover:opacity-80 transition-opacity active:scale-95 duration-300">
+<span class="material-symbols-outlined text-3xl" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Content Canvas -->
+<main class="flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-32">
+<!-- Transcription Card -->
+<div class="w-full max-w-lg mb-16 transform transition-all duration-700 ease-out">
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_24px_40px_-4px_rgba(81,79,129,0.06)] min-h-[200px] flex items-center justify-center border border-outline-variant/15">
+<p class="font-headline text-xl text-on-surface-variant italic text-center leading-relaxed opacity-60">
+                    Your words will appear here as you speak...
+                </p>
+</div>
+<!-- Subtle Visualizer Element -->
+<div class="mt-8 flex justify-center items-end gap-1 h-8">
+<div class="w-1 bg-primary/20 rounded-full h-2"></div>
+<div class="w-1 bg-primary/30 rounded-full h-4"></div>
+<div class="w-1 bg-primary/40 rounded-full h-6"></div>
+<div class="w-1 bg-primary/30 rounded-full h-3"></div>
+<div class="w-1 bg-primary/20 rounded-full h-5"></div>
+</div>
+</div>
+<!-- Pulse Button Container -->
+<div class="relative flex flex-col items-center">
+<button class="pulse-red w-32 h-32 rounded-full bg-error flex items-center justify-center text-on-error shadow-lg hover:scale-105 active:scale-90 transition-transform duration-500">
+<span class="material-symbols-outlined text-5xl" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+<div class="mt-8 flex flex-col items-center gap-2">
+<span class="font-body text-sm font-medium tracking-wide text-on-surface-variant uppercase">Tap to start recording</span>
+<span class="font-headline italic text-lg text-primary tracking-widest mt-4">CONSCIOUS ZONE</span>
+</div>
+</div>
+<!-- Ambient decorative element -->
+<div class="fixed top-1/2 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -z-10"></div>
+<div class="fixed bottom-1/4 -right-20 w-80 h-80 bg-secondary/5 rounded-full blur-[100px] -z-10"></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-slate-50/70 dark:bg-indigo-950/70 backdrop-blur-2xl rounded-t-[1.5rem] shadow-[0_-4px_24px_rgba(70,72,212,0.06)]">
+<!-- Stories -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-indigo-400/60 p-3 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors active:scale-90 duration-500 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">Archive</span>
+</a>
+<!-- Explore -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-indigo-400/60 p-3 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors active:scale-90 duration-500 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">Explore</span>
+</a>
+<!-- Record (Active Tab: Mic) -->
+<a class="flex flex-col items-center justify-center bg-indigo-100/50 dark:bg-indigo-800/30 text-indigo-700 dark:text-indigo-200 rounded-full p-3 active:scale-90 duration-500 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">Record</span>
+</a>
+<!-- Deep Zone -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-indigo-400/60 p-3 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors active:scale-90 duration-500 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="nights_stay">nights_stay</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">Abyss</span>
+</a>
+<!-- Community -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-indigo-400/60 p-3 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors active:scale-90 duration-500 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">World</span>
+</a>
+</nav>
+</body></html>
