@@ -18,16 +18,16 @@ import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme
 
 export default function SignIn() {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) return;
+    if (!identifier.trim() || !password.trim()) return;
     setLoading(true);
     setError(null);
-    const { error: err } = await signIn(email.trim(), password);
+    const { error: err } = await signIn(identifier.trim(), password);
     if (err) setError(err);
     setLoading(false);
   };
@@ -62,22 +62,22 @@ export default function SignIn() {
           <View style={styles.card}>
             {error && <Text style={styles.error}>{error}</Text>}
 
-            {/* Email Input Group */}
+            {/* Email or Username Input Group */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>EMAIL ADDRESS</Text>
+              <Text style={styles.label}>EMAIL OR USERNAME</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="navigator@dreamworld.com"
+                  placeholder="email or username"
                   placeholderTextColor={`${colors.outline}80`}
-                  value={email}
-                  onChangeText={setEmail}
+                  value={identifier}
+                  onChangeText={setIdentifier}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  autoComplete="email"
+                  autoComplete="username"
                 />
                 <MaterialIcons
-                  name="alternate-email"
+                  name="person-outline"
                   size={22}
                   color={`${colors.outline}4D`}
                   style={styles.inputIcon}

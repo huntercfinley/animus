@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   imageContainer: {
-    height: 200,
+    aspectRatio: 1,
     overflow: 'hidden',
     position: 'relative',
   },

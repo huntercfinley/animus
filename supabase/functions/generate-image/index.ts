@@ -24,7 +24,7 @@ async function generateWithImagen(prompt: string, model: string): Promise<string
         instances: [{ prompt }],
         parameters: {
           sampleCount: 1,
-          aspectRatio: '1:1',
+          aspectRatio: '3:4',
           personGeneration: 'allow_adult',
         },
       }),

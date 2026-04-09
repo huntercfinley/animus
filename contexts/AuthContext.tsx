@@ -8,7 +8,7 @@ interface AuthState {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (identifier: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -50,7 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (identifier: string, password: string) => {
+    let email = identifier;
+    // If it doesn't look like an email, treat it as a username and look up the email
+    if (!identifier.includes('@')) {
+      const { data: profile, error: lookupError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', identifier)
+        .single();
+      if (lookupError || !profile?.email) {
+        return { error: 'No account found with that username' };
+      }
+      email = profile.email;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
   };
