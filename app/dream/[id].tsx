@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
 
   // Deep Zone
   deepZone: {
-    paddingTop: 96, // pt-24
+    paddingTop: 32, // quick transition — fast shift from light to dark
     paddingBottom: 48,
     paddingHorizontal: 24,
   },
