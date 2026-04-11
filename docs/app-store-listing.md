@@ -45,7 +45,7 @@ Every feature is accessible on the free tier. Ads are shown transparently — we
 
 Premium — $4.99/month or $35.99/year.
 
-Privacy matters. Dream content is deeply personal. Your data is encrypted, secured with row-level access controls, and never sold. Read our full privacy policy at huntercfinley.github.io/animus-legal.
+Privacy matters. Dream content is deeply personal. Your data is encrypted, secured with row-level access controls, and never sold. Read our full privacy policy at huntercfinley.github.io/animus/privacy-policy.html.
 
 Animus is built by Reality Suites.
 
