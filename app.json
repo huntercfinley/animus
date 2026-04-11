@@ -16,7 +16,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.realitysuites.animus",
       "usesAppleSignIn": true,
-      "buildNumber": "5",
+      "buildNumber": "6",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Animus needs microphone access to record your dreams via voice.",
         "NSSpeechRecognitionUsageDescription": "Animus uses speech recognition to transcribe your dream recordings in real-time.",
