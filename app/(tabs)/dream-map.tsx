@@ -233,7 +233,7 @@ export default function DreamMapScreen() {
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.nodeName}>{dream.title}</Text>
+                      <Text style={styles.nodeName}>{dream.title ?? 'Untitled Dream'}</Text>
                       <Text style={styles.nodeMeta}>
                         {new Date(dream.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                         {dream.mood ? ` • ${dream.mood}` : ''}

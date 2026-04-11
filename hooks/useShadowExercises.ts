@@ -10,7 +10,7 @@ export function useShadowExercises() {
   const [loading, setLoading] = useState(true);
 
   const fetchExercises = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase.from('shadow_exercises').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
     setExercises(data || []);

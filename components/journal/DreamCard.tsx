@@ -14,6 +14,8 @@ const accentColors: Record<string, string> = {
   mysterious: `${colors.primary}4D`,         // bg-primary/30
   chaotic: colors.tertiaryContainer,         // bg-tertiary-container
   melancholic: `${colors.secondary}33`,      // bg-secondary/20
+  intense: colors.error,
+  transformative: colors.tertiaryContainer,
 };
 
 interface DreamCardProps {
@@ -59,7 +61,7 @@ export function DreamCard({ dream }: DreamCardProps) {
 
         {/* Preview text */}
         <Text style={styles.preview} numberOfLines={3}>
-          {dream.journal_text}
+          {dream.journal_text ?? ''}
         </Text>
 
         {/* Tags — populated when symbols are joined */}

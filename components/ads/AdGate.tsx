@@ -32,6 +32,7 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
 
     let loadListener: (() => void) | undefined;
     let closeListener: (() => void) | undefined;
+    let errorListener: (() => void) | undefined;
 
     import('react-native-google-mobile-ads').then(({ InterstitialAd, AdEventType }) => {
       const ad = InterstitialAd.createForAdRequest(AD_UNIT_IDS.interstitial!);
@@ -41,12 +42,16 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
         onAdCompleteRef.current();
         setShowingMessage(false);
       });
+      errorListener = ad.addAdEventListener(AdEventType.ERROR, () => {
+        setAdLoaded(false);
+        setInterstitial(null);
+      });
 
       ad.load();
       setInterstitial(ad);
     });
 
-    return () => { loadListener?.(); closeListener?.(); };
+    return () => { loadListener?.(); closeListener?.(); errorListener?.(); };
   }, [isPremium]);
 
   const handlePress = useCallback(() => {

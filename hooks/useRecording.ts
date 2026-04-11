@@ -77,6 +77,7 @@ export function useRecording() {
         console.warn('Voice recognition unavailable — recording audio only');
       }
 
+      if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
         setState(prev => ({ ...prev, duration: prev.duration + 1 }));
       }, 1000);

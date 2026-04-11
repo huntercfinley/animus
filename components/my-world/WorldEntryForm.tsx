@@ -25,14 +25,17 @@ export function WorldEntryForm({ onSubmit, onCancel }: WorldEntryFormProps) {
   const handleSubmit = async () => {
     if (!name.trim()) return;
     setSaving(true);
-    await onSubmit({
-      category,
-      name: name.trim(),
-      description: description.trim() || undefined,
-      relationship: relationship.trim() || undefined,
-    });
-    setSaving(false);
-    setName(''); setDescription(''); setRelationship('');
+    try {
+      await onSubmit({
+        category,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        relationship: relationship.trim() || undefined,
+      });
+      setName(''); setDescription(''); setRelationship('');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

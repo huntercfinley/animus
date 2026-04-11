@@ -9,7 +9,7 @@ export function useWorldEntries() {
   const [loading, setLoading] = useState(true);
 
   const fetchEntries = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from('world_entries')
@@ -34,10 +34,12 @@ export function useWorldEntries() {
   }, [user]);
 
   const updateEntry = useCallback(async (id: string, updates: { name?: string; description?: string; relationship?: string }) => {
+    if (!user) return { data: null, error: null };
     const { data, error } = await supabase
       .from('world_entries')
       .update(updates)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
     if (data) setEntries(prev => prev.map(e => e.id === id ? data : e));
@@ -45,9 +47,10 @@ export function useWorldEntries() {
   }, []);
 
   const deleteEntry = useCallback(async (id: string) => {
-    await supabase.from('world_entries').delete().eq('id', id);
+    if (!user) return;
+    await supabase.from('world_entries').delete().eq('id', id).eq('user_id', user.id);
     setEntries(prev => prev.filter(e => e.id !== id));
-  }, []);
+  }, [user]);
 
   const byCategory = (cat: WorldEntryCategory) => entries.filter(e => e.category === cat);
 

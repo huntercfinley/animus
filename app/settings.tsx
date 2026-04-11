@@ -84,22 +84,7 @@ export default function SettingsScreen() {
                   style: 'destructive',
                   onPress: async () => {
                     try {
-                      const uid = user!.id;
-                      // Delete all user data from tables (order matters for FK constraints)
-                      const { data: userDreams } = await supabase.from('dreams').select('id').eq('user_id', uid);
-                      const dreamIds = (userDreams || []).map((d: any) => d.id);
-                      if (dreamIds.length > 0) {
-                        await supabase.from('dream_conversations').delete().in('dream_id', dreamIds);
-                      }
-                      await supabase.from('dream_symbols').delete().eq('user_id', uid);
-                      await supabase.from('pattern_reports').delete().eq('user_id', uid);
-                      await supabase.from('archetype_snapshots').delete().eq('user_id', uid);
-                      await supabase.from('shadow_exercises').delete().eq('user_id', uid);
-                      await supabase.from('world_entries').delete().eq('user_id', uid);
-                      await supabase.from('usage_limits').delete().eq('user_id', uid);
-                      await supabase.from('dreams').delete().eq('user_id', uid);
-                      await supabase.from('profiles').delete().eq('id', uid);
-                      // Sign out and redirect
+                      await callEdgeFunction('delete-account', {});
                       await signOut();
                       router.replace('/(auth)/sign-in');
                     } catch (err) {
@@ -116,8 +101,9 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = async () => {
+    if (!user) return;
     try {
-      const uid = user!.id;
+      const uid = user.id;
       const { data: dreams } = await supabase.from('dreams').select('*').eq('user_id', uid).order('recorded_at', { ascending: false });
       const { data: symbols } = await supabase.from('dream_symbols').select('*').eq('user_id', uid);
       const { data: worldEntries } = await supabase.from('world_entries').select('*').eq('user_id', uid);

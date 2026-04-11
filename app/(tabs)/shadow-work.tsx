@@ -98,6 +98,11 @@ export default function ShadowWorkScreen() {
                   disabled={!featuredJournal.trim()}
                   onPress={async () => {
                     if (!user) return;
+                    const { allowed } = await checkLimit('shadow_exercise');
+                    if (!allowed) {
+                      Alert.alert('Daily limit reached', 'You\'ve completed your shadow exercises for today. Return tomorrow to continue your inner work.');
+                      return;
+                    }
                     try {
                       const { data, error } = await supabase.from('shadow_exercises').insert({
                         user_id: user.id,
@@ -105,6 +110,7 @@ export default function ShadowWorkScreen() {
                         response: featuredJournal,
                       }).select().single();
                       if (error) throw error;
+                      await incrementLimit('shadow_exercise');
                       Alert.alert('Session Archived', 'Your reflection has been saved.');
                       setFeaturedJournal('');
                       fetchExercises();

@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === 'INITIAL_SESSION') return; // handled by getSession above
       setSession(s);
-      if (s?.user) fetchProfile(s.user.id);
+      if (s?.user) fetchProfile(s.user.id).catch(() => {});
       else setProfile(null);
     });
 

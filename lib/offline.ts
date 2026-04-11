@@ -2,22 +2,24 @@ import * as SQLite from 'expo-sqlite';
 
 const DB_NAME = 'animus_offline.db';
 
-let db: SQLite.SQLiteDatabase | null = null;
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export async function getDb(): Promise<SQLite.SQLiteDatabase> {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync(DB_NAME);
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS offline_dreams (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        transcript TEXT NOT NULL,
-        audio_uri TEXT,
-        created_at TEXT DEFAULT (datetime('now')),
-        synced INTEGER DEFAULT 0
-      );
-    `);
+export function getDb(): Promise<SQLite.SQLiteDatabase> {
+  if (!dbPromise) {
+    dbPromise = SQLite.openDatabaseAsync(DB_NAME).then(async (database) => {
+      await database.execAsync(`
+        CREATE TABLE IF NOT EXISTS offline_dreams (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          transcript TEXT NOT NULL,
+          audio_uri TEXT,
+          created_at TEXT DEFAULT (datetime('now')),
+          synced INTEGER DEFAULT 0
+        );
+      `);
+      return database;
+    });
   }
-  return db;
+  return dbPromise;
 }
 
 export async function queueDream(transcript: string, audioUri: string | null): Promise<number> {

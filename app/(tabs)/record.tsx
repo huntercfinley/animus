@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
+import { View, Text, Pressable, StyleSheet, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -41,22 +41,22 @@ export default function RecordScreen() {
   const handleSave = async () => {
     if (!transcript.trim()) return;
     setSaving(true);
-    const result = await stopRecording();
-
     try {
+      const result = await stopRecording();
       const netState = await NetInfo.fetch();
       if (netState.isConnected) {
         const dream = await processDream(result.transcript, result.audioUri ?? null);
         router.push({ pathname: '/dream/[id]', params: { id: dream.id } });
       } else {
         await saveDreamOffline(result.transcript, result.audioUri ?? null);
-        alert('Dream saved locally. It will be processed when you\'re back online.');
+        Alert.alert('Saved Offline', 'Dream saved locally. It will be processed when you\'re back online.');
       }
     } catch (err) {
-      await saveDreamOffline(result.transcript, result.audioUri ?? null);
-      alert('Dream saved locally. It will be processed shortly.');
+      await saveDreamOffline(transcript, null);
+      Alert.alert('Saved Offline', 'Dream saved locally. It will be processed shortly.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleDiscard = async () => {
@@ -70,18 +70,21 @@ export default function RecordScreen() {
       const netState = await NetInfo.fetch();
       if (netState.isConnected) {
         const dream = await processDream(manualText.trim(), null);
+        setManualText('');
+        setTextMode(false);
         router.push({ pathname: '/dream/[id]', params: { id: dream.id } });
       } else {
         await saveDreamOffline(manualText.trim(), null);
-        alert('Dream saved locally. It will be processed when you\'re back online.');
+        Alert.alert('Saved Offline', 'Dream saved locally. It will be processed when you\'re back online.');
+        setManualText('');
+        setTextMode(false);
       }
     } catch (err) {
       await saveDreamOffline(manualText.trim(), null);
-      alert('Dream saved locally. It will be processed shortly.');
+      Alert.alert('Saved Offline', 'Dream saved locally. It will be processed shortly.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setManualText('');
-    setTextMode(false);
   };
 
   return (
