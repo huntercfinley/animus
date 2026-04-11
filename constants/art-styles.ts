@@ -26,6 +26,8 @@ const MOOD_STYLE_MAP: Record<string, string[]> = {
   mysterious: ['dark_fantasy', 'ethereal', 'gothic'],
   chaotic: ['expressionist', 'surrealist', 'dark_fantasy'],
   melancholic: ['watercolor', 'ink_wash', 'ethereal'],
+  intense: ['expressionist', 'dark_fantasy', 'gothic'],
+  transformative: ['ethereal', 'surrealist', 'magical_realism'],
 };
 
 export function selectArtStyle(mood: string, previousStyleIds: string[]): ArtStyle {

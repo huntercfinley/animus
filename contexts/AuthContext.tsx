@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types/database';
@@ -12,6 +13,9 @@ interface AuthState {
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
+  signInWithApple: () => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -35,13 +39,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-      setSession(s);
-      if (s?.user) await fetchProfile(s.user.id);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(async ({ data: { session: s } }) => {
+        setSession(s);
+        if (s?.user) await fetchProfile(s.user.id);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'INITIAL_SESSION') return; // handled by getSession above
       setSession(s);
       if (s?.user) fetchProfile(s.user.id);
       else setProfile(null);
@@ -82,6 +89,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (session?.user) await fetchProfile(session.user.id);
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { openAuthSessionAsync } = await import('expo-web-browser');
+      const { makeRedirectUri } = await import('expo-auth-session');
+      const redirectTo = makeRedirectUri();
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo, skipBrowserRedirect: true },
+      });
+      if (error) return { error: error.message };
+      if (!data.url) return { error: 'No auth URL returned' };
+
+      const result = await openAuthSessionAsync(data.url, redirectTo);
+      if (result.type === 'success' && result.url) {
+        const url = new URL(result.url);
+        const params = new URLSearchParams(url.hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        if (accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (sessionError) return { error: sessionError.message };
+        }
+      }
+      return { error: null };
+    } catch (err) {
+      return { error: (err as Error).message };
+    }
+  };
+
+  const signInWithApple = async () => {
+    try {
+      if (Platform.OS !== 'ios') return { error: 'Apple Sign In is only available on iOS' };
+      const AppleAuth = await import('expo-apple-authentication');
+      const credential = await AppleAuth.signInAsync({
+        requestedScopes: [
+          AppleAuth.AppleAuthenticationScope.EMAIL,
+          AppleAuth.AppleAuthenticationScope.FULL_NAME,
+        ],
+      });
+      if (!credential.identityToken) return { error: 'No identity token returned from Apple' };
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+      });
+      return { error: error?.message ?? null };
+    } catch (err: any) {
+      if (err?.code === 'ERR_REQUEST_CANCELED') return { error: null };
+      return { error: (err as Error).message };
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    return { error: error?.message ?? null };
+  };
+
   return (
     <AuthContext.Provider value={{
       session,
@@ -92,6 +159,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signOut,
       refreshProfile,
+      signInWithGoogle,
+      signInWithApple,
+      resetPassword,
     }}>
       {children}
     </AuthContext.Provider>

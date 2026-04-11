@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -18,6 +18,8 @@ export default function RecordScreen() {
     startRecording, pauseRecording, resumeRecording, stopRecording, updateTranscript,
   } = useRecording();
   const [saving, setSaving] = useState(false);
+  const [textMode, setTextMode] = useState(false);
+  const [manualText, setManualText] = useState('');
   const { saveDreamOffline } = useOfflineQueue();
 
   const formatDuration = (seconds: number) => {
@@ -59,6 +61,27 @@ export default function RecordScreen() {
 
   const handleDiscard = async () => {
     await stopRecording();
+  };
+
+  const handleTextSave = async () => {
+    if (!manualText.trim()) return;
+    setSaving(true);
+    try {
+      const netState = await NetInfo.fetch();
+      if (netState.isConnected) {
+        const dream = await processDream(manualText.trim(), null);
+        router.push({ pathname: '/dream/[id]', params: { id: dream.id } });
+      } else {
+        await saveDreamOffline(manualText.trim(), null);
+        alert('Dream saved locally. It will be processed when you\'re back online.');
+      }
+    } catch (err) {
+      await saveDreamOffline(manualText.trim(), null);
+      alert('Dream saved locally. It will be processed shortly.');
+    }
+    setSaving(false);
+    setManualText('');
+    setTextMode(false);
   };
 
   return (
@@ -137,11 +160,39 @@ export default function RecordScreen() {
           </View>
         )}
 
-        {/* Switch to text */}
+        {/* Text entry mode */}
+        {textMode && !isRecording && (
+          <View style={styles.textEntrySection}>
+            <TextInput
+              style={styles.textEntryInput}
+              placeholder="Describe your dream..."
+              placeholderTextColor={`${colors.textMuted}80`}
+              value={manualText}
+              onChangeText={setManualText}
+              multiline
+              textAlignVertical="top"
+              autoFocus
+            />
+            <View style={styles.actions}>
+              <Pressable style={styles.discardBtn} onPress={() => { setTextMode(false); setManualText(''); }}>
+                <Text style={styles.discardText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.saveBtn, !manualText.trim() && { opacity: 0.3 }]}
+                onPress={handleTextSave}
+                disabled={!manualText.trim() || saving}
+              >
+                <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {/* Switch to text / Switch to voice */}
         {!isRecording && (
-          <Pressable style={styles.switchBtn}>
-            <MaterialIcons name="edit" size={16} color={colors.primary} />
-            <Text style={styles.switchText}>Switch to Text</Text>
+          <Pressable style={styles.switchBtn} onPress={() => setTextMode(!textMode)}>
+            <MaterialIcons name={textMode ? 'mic' : 'edit'} size={16} color={colors.primary} />
+            <Text style={styles.switchText}>{textMode ? 'Switch to Voice' : 'Switch to Text'}</Text>
           </Pressable>
         )}
       </View>
@@ -294,5 +345,22 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansMedium,
     fontSize: 14,
     color: colors.primary,
+  },
+  textEntrySection: {
+    width: '100%',
+    maxWidth: 512,
+    marginBottom: 24,
+  },
+  textEntryInput: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 24,
+    fontFamily: fonts.sans,
+    fontSize: 16,
+    color: colors.textPrimary,
+    lineHeight: 24,
+    minHeight: 200,
+    borderWidth: 1,
+    borderColor: `${colors.outlineVariant}26`,
   },
 });

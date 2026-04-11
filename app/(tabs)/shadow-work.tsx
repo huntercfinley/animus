@@ -1,20 +1,25 @@
 import { View, Text, FlatList, Pressable, Modal, Alert, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
+import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShadowExercises } from '@/hooks/useShadowExercises';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { ExerciseCard } from '@/components/shadow/ExerciseCard';
 import { ExerciseSheet } from '@/components/shadow/ExerciseSheet';
 import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
 import type { ShadowExercise } from '@/types/database';
 
 export default function ShadowWorkScreen() {
+  const { user } = useAuth();
   const { exercises, loading, fetchExercises, generateExercise, saveResponse } = useShadowExercises();
   const { checkLimit, incrementLimit } = useUsageLimits();
   const [activeExercise, setActiveExercise] = useState<ShadowExercise | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [featuredJournal, setFeaturedJournal] = useState('');
 
   const handleGenerate = async () => {
     const { allowed } = await checkLimit('shadow_exercise');
@@ -82,12 +87,31 @@ export default function ShadowWorkScreen() {
                   placeholderTextColor={`${colors.deepTextPrimary}4D`}
                   multiline
                   textAlignVertical="top"
+                  value={featuredJournal}
+                  onChangeText={setFeaturedJournal}
                 />
               </View>
 
               <View style={styles.featuredActions}>
                 <Pressable
-                  style={({ pressed }) => [styles.archiveBtn, pressed && { transform: [{ scale: 0.95 }] }]}
+                  style={({ pressed }) => [styles.archiveBtn, pressed && { transform: [{ scale: 0.95 }] }, !featuredJournal.trim() && { opacity: 0.4 }]}
+                  disabled={!featuredJournal.trim()}
+                  onPress={async () => {
+                    if (!user) return;
+                    try {
+                      const { data, error } = await supabase.from('shadow_exercises').insert({
+                        user_id: user.id,
+                        prompt: 'The Mirror Aspect: Identify a trait in another person that triggers a strong emotional reaction. What does this reveal about your own unacknowledged qualities?',
+                        response: featuredJournal,
+                      }).select().single();
+                      if (error) throw error;
+                      Alert.alert('Session Archived', 'Your reflection has been saved.');
+                      setFeaturedJournal('');
+                      fetchExercises();
+                    } catch (err) {
+                      Alert.alert('Error', 'Could not archive session.');
+                    }
+                  }}
                 >
                   <LinearGradient
                     colors={[colors.primary, colors.primaryContainer]}
@@ -114,7 +138,7 @@ export default function ShadowWorkScreen() {
                 </Text>
               </Pressable>
 
-              <Pressable style={styles.sideCard}>
+              <Pressable style={styles.sideCard} onPress={() => router.push('/(tabs)/record')}>
                 <MaterialIcons name="mic" size={22} color={colors.tertiaryFixedDim} />
                 <Text style={styles.sideCardTitle}>Vocalize the Void</Text>
                 <Text style={styles.sideCardDesc}>

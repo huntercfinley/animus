@@ -19,6 +19,7 @@ export default function DreamDetail() {
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const shareRef = useRef<View>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [showShareCard, setShowShareCard] = useState(false);
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function DreamDetail() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Image — Stitch: aspect-[4/5] rounded-xl shadow-2xl */}
         {dream.image_url && (
           <View style={styles.heroWrap}>
@@ -128,6 +129,7 @@ export default function DreamDetail() {
               {/* Go Deeper button */}
               <Pressable
                 style={({ pressed }) => [styles.goBtn, pressed && { transform: [{ scale: 1.02 }] }]}
+                onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
               >
                 <LinearGradient
                   colors={[colors.primary, colors.primaryContainer]}

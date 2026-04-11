@@ -8,7 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
   Image,
+  Modal,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,11 +19,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 
 export default function SignIn() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
 
   const handleSignIn = async () => {
     if (!identifier.trim() || !password.trim()) return;
@@ -30,6 +35,35 @@ export default function SignIn() {
     const { error: err } = await signIn(identifier.trim(), password);
     if (err) setError(err);
     setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setSocialLoading(true);
+    setError(null);
+    const { error: err } = await signInWithGoogle();
+    if (err) setError(err);
+    setSocialLoading(false);
+  };
+
+  const handleAppleSignIn = async () => {
+    setSocialLoading(true);
+    setError(null);
+    const { error: err } = await signInWithApple();
+    if (err) setError(err);
+    setSocialLoading(false);
+  };
+
+  const handleForgotPassword = () => {
+    setResetEmail(identifier.includes('@') ? identifier.trim() : '');
+    setResetModalVisible(true);
+  };
+
+  const handleSendReset = async () => {
+    if (!resetEmail.trim()) return;
+    setResetModalVisible(false);
+    const { error: err } = await resetPassword(resetEmail.trim());
+    if (err) Alert.alert('Error', err);
+    else Alert.alert('Check your email', `We sent a password reset link to ${resetEmail.trim()}`);
   };
 
   return (
@@ -89,7 +123,7 @@ export default function SignIn() {
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
                 <Text style={styles.label}>PASSWORD</Text>
-                <Pressable>
+                <Pressable onPress={handleForgotPassword}>
                   <Text style={styles.forgotLink}>Forgot Password?</Text>
                 </Pressable>
               </View>
@@ -140,23 +174,33 @@ export default function SignIn() {
             {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Return to your ethereal archive.</Text>
+              <Text style={styles.dividerText}>or continue with</Text>
               <View style={styles.dividerLine} />
             </View>
 
             {/* Social Auth */}
             <View style={styles.socialRow}>
-              <Pressable style={styles.socialBtn}>
+              <Pressable
+                style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.7 }, socialLoading && { opacity: 0.5 }]}
+                onPress={handleGoogleSignIn}
+                disabled={socialLoading || loading}
+              >
                 <Image
                   source={{ uri: 'https://www.google.com/favicon.ico' }}
                   style={styles.socialIcon}
                 />
                 <Text style={styles.socialText}>Google</Text>
               </Pressable>
-              <Pressable style={styles.socialBtn}>
-                <MaterialIcons name="apple" size={18} color={colors.textSecondary} />
-                <Text style={styles.socialText}>Apple</Text>
-              </Pressable>
+              {Platform.OS === 'ios' && (
+                <Pressable
+                  style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.7 }, socialLoading && { opacity: 0.5 }]}
+                  onPress={handleAppleSignIn}
+                  disabled={socialLoading || loading}
+                >
+                  <MaterialIcons name="apple" size={18} color={colors.textSecondary} />
+                  <Text style={styles.socialText}>Apple</Text>
+                </Pressable>
+              )}
             </View>
           </View>
 
@@ -173,6 +217,34 @@ export default function SignIn() {
           </View>
         </KeyboardAvoidingView>
       </ScrollView>
+
+      {/* Forgot Password Modal (cross-platform replacement for Alert.prompt) */}
+      <Modal visible={resetModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setResetModalVisible(false)}>
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Reset Password</Text>
+            <Text style={styles.modalDesc}>Enter your email address and we'll send you a reset link.</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="email@example.com"
+              placeholderTextColor={`${colors.outline}80`}
+              value={resetEmail}
+              onChangeText={setResetEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoFocus
+            />
+            <View style={styles.modalActions}>
+              <Pressable onPress={() => setResetModalVisible(false)} style={styles.modalCancelBtn}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable onPress={handleSendReset} style={[styles.modalSendBtn, !resetEmail.trim() && { opacity: 0.4 }]}>
+                <Text style={styles.modalSendText}>Send Link</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -360,7 +432,7 @@ const styles = StyleSheet.create({
   // Social Auth
   socialRow: {
     flexDirection: 'row',
-    gap: 16, // gap-4
+    gap: 16,
   },
   socialBtn: {
     flex: 1,
@@ -368,10 +440,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 12, // py-3
-    paddingHorizontal: 16, // px-4
-    backgroundColor: `${colors.surfaceContainerHigh}66`, // /40 opacity
-    borderRadius: 12, // rounded-xl
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: `${colors.surfaceContainerHigh}66`,
+    borderRadius: 12,
   },
   socialIcon: {
     width: 16,
@@ -400,5 +472,70 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textDecorationLine: 'underline',
     textDecorationStyle: 'solid',
+  },
+
+  // Reset Password Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 24,
+    padding: 32,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 20,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  modalDesc: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  modalInput: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontFamily: fonts.sans,
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalCancelBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  modalCancelText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  modalSendBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  modalSendText: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 14,
+    color: colors.textOnPrimary,
   },
 });

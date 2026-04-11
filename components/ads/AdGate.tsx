@@ -1,6 +1,5 @@
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS, adsConfigured } from '@/lib/ads';
 import { useAuth } from '@/hooks/useAuth';
 import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
@@ -21,7 +20,7 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
   const { profile } = useAuth();
   const [adLoaded, setAdLoaded] = useState(false);
   const [showingMessage, setShowingMessage] = useState(false);
-  const [interstitial, setInterstitial] = useState<InterstitialAd | null>(null);
+  const [interstitial, setInterstitial] = useState<any>(null);
   const [message] = useState(() => TRANSPARENT_MESSAGES[Math.floor(Math.random() * TRANSPARENT_MESSAGES.length)]);
 
   const isPremium = profile?.subscription_tier === 'premium';
@@ -29,19 +28,25 @@ export function AdGate({ children, onAdComplete, actionLabel = 'Continue' }: AdG
   onAdCompleteRef.current = onAdComplete;
 
   useEffect(() => {
-    if (isPremium || !adsConfigured || !AD_UNIT_IDS.interstitial) return;
-    const ad = InterstitialAd.createForAdRequest(AD_UNIT_IDS.interstitial);
+    if (Platform.OS === 'web' || isPremium || !adsConfigured || !AD_UNIT_IDS.interstitial) return;
 
-    const loadListener = ad.addAdEventListener(AdEventType.LOADED, () => setAdLoaded(true));
-    const closeListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
-      onAdCompleteRef.current();
-      setShowingMessage(false);
+    let loadListener: (() => void) | undefined;
+    let closeListener: (() => void) | undefined;
+
+    import('react-native-google-mobile-ads').then(({ InterstitialAd, AdEventType }) => {
+      const ad = InterstitialAd.createForAdRequest(AD_UNIT_IDS.interstitial!);
+
+      loadListener = ad.addAdEventListener(AdEventType.LOADED, () => setAdLoaded(true));
+      closeListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
+        onAdCompleteRef.current();
+        setShowingMessage(false);
+      });
+
+      ad.load();
+      setInterstitial(ad);
     });
 
-    ad.load();
-    setInterstitial(ad);
-
-    return () => { loadListener(); closeListener(); };
+    return () => { loadListener?.(); closeListener?.(); };
   }, [isPremium]);
 
   const handlePress = useCallback(() => {

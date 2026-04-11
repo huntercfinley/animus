@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -136,9 +136,13 @@ export default function DreamMapScreen() {
           <View style={styles.densityCard}>
             <Text style={styles.densityTitle}>Archetypal Density</Text>
             <View style={styles.barsContainer}>
-              {(topArchetypes.length > 0 ? topArchetypes : archetypeLabels.map(n => ({ name: n, pct: Math.random() * 80 + 10 }))).map((a, i) => (
+              {topArchetypes.length > 0 ? topArchetypes.map((a, i) => (
                 <View key={i} style={styles.barCol}>
                   <View style={[styles.bar, { height: `${Math.min(a.pct, 100)}%`, opacity: 0.2 + (a.pct / 100) * 0.8 }]} />
+                </View>
+              )) : archetypeLabels.map((_, i) => (
+                <View key={i} style={styles.barCol}>
+                  <View style={[styles.bar, { height: '5%', opacity: 0.15 }]} />
                 </View>
               ))}
             </View>
@@ -157,7 +161,7 @@ export default function DreamMapScreen() {
               {dreams.length > 0 ? `${Math.min(Math.round((symbols.length / Math.max(dreams.length, 1)) * 20), 100)}%` : '—'}
             </Text>
             <Text style={styles.alignmentLabel}>Collective Unconscious Alignment</Text>
-            <Pressable style={styles.alignmentBtn}>
+            <Pressable style={styles.alignmentBtn} onPress={() => Alert.alert('Coming Soon', 'Global dream nodes will be available in a future update.')}>
               <Text style={styles.alignmentBtnText}>Explore Global Nodes</Text>
               <MaterialIcons name="arrow-forward" size={14} color="#ffffff" />
             </Pressable>

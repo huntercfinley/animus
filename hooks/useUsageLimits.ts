@@ -16,7 +16,7 @@ export function useUsageLimits() {
     if (!user) return { allowed: false, remaining: 0 };
 
     const maxCount = LIMITS[tier][limitType];
-    const isDailyLimit = limitType === 'shadow_exercise';
+    const isDailyLimit = limitType === 'shadow_exercise' || limitType === 'dream_insights' || limitType === 'dream_connection';
     const isMonthlyLimit = limitType === 'image_generation';
 
     let query = supabase.from('usage_limits').select('count').eq('user_id', user.id).eq('limit_type', limitType);
@@ -39,7 +39,7 @@ export function useUsageLimits() {
   const incrementLimit = useCallback(async (limitType: LimitType, dreamId?: string) => {
     if (!user) return;
 
-    const isDailyLimit = limitType === 'shadow_exercise';
+    const isDailyLimit = limitType === 'shadow_exercise' || limitType === 'dream_insights' || limitType === 'dream_connection';
     const isMonthlyLimit = limitType === 'image_generation';
     const today = new Date().toISOString().split('T')[0];
     const monthKey = today.substring(0, 7) + '-01';

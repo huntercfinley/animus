@@ -8,13 +8,13 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { parseDreams, guessMood, generateTitle, type ParsedDream } from '@/lib/import-dreams';
@@ -188,8 +188,10 @@ export default function ImportScreen() {
 
             {/* Decorative Quote — Stitch */}
             <View style={styles.quoteSection}>
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAIrwSFt9-11ZKx2yf6dr0-hyqpuhXsE5RC1-vu7jLETQrDicYdFRXABXef9ZP5a_bjMx8mKXA9DqhGOJ7lmHI1SppexImdzapKeb8zoFXXPNt9FE80odcweXjxM6Byd6TRmQ_xhjw8Y6cp9KjGqL33HJ17LelJZiLV2nsFPMcA0lOA0WTM-tMpscL54vIjhCNLjyfYKvzoJ9pqrNcQNZCKmcreKK-LkOHXak_7n3siVmMaualcP8TrfFHWVLa8EcdzAg9zaLgq3I4Y' }}
+              <LinearGradient
+                colors={[`${colors.primaryContainer}40`, `${colors.secondaryContainer}60`]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.quoteImage}
               />
               <View style={styles.quoteOverlay}>

@@ -9,7 +9,7 @@ export function useDreams() {
   const [loading, setLoading] = useState(true);
 
   const fetchDreams = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from('dreams')

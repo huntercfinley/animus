@@ -58,9 +58,9 @@ export default function OnboardingScreen() {
           <MaterialIcons name="cloud-queue" size={22} color={colors.primary} />
           <Text style={styles.headerTitle}>The Ethereal Archive</Text>
         </View>
-        <Pressable style={styles.helpBtn}>
+        <View style={styles.helpBtn}>
           <MaterialIcons name="help-outline" size={22} color={colors.textMuted} />
-        </Pressable>
+        </View>
       </View>
 
       <ScrollView

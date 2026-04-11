@@ -1,9 +1,12 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { callEdgeFunction } from '@/lib/ai';
@@ -67,9 +70,65 @@ export default function SettingsScreen() {
       'This will permanently delete your account and all dream data. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {} },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Are you absolutely sure?',
+              'Type your email to confirm: ' + (user?.email || ''),
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Permanently Delete',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      const uid = user!.id;
+                      // Delete all user data from tables (order matters for FK constraints)
+                      const { data: userDreams } = await supabase.from('dreams').select('id').eq('user_id', uid);
+                      const dreamIds = (userDreams || []).map((d: any) => d.id);
+                      if (dreamIds.length > 0) {
+                        await supabase.from('dream_conversations').delete().in('dream_id', dreamIds);
+                      }
+                      await supabase.from('dream_symbols').delete().eq('user_id', uid);
+                      await supabase.from('pattern_reports').delete().eq('user_id', uid);
+                      await supabase.from('archetype_snapshots').delete().eq('user_id', uid);
+                      await supabase.from('shadow_exercises').delete().eq('user_id', uid);
+                      await supabase.from('world_entries').delete().eq('user_id', uid);
+                      await supabase.from('usage_limits').delete().eq('user_id', uid);
+                      await supabase.from('dreams').delete().eq('user_id', uid);
+                      await supabase.from('profiles').delete().eq('id', uid);
+                      // Sign out and redirect
+                      await signOut();
+                      router.replace('/(auth)/sign-in');
+                    } catch (err) {
+                      Alert.alert('Error', 'Failed to delete account. Please try again.');
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
       ],
     );
+  };
+
+  const handleExportData = async () => {
+    try {
+      const uid = user!.id;
+      const { data: dreams } = await supabase.from('dreams').select('*').eq('user_id', uid).order('recorded_at', { ascending: false });
+      const { data: symbols } = await supabase.from('dream_symbols').select('*').eq('user_id', uid);
+      const { data: worldEntries } = await supabase.from('world_entries').select('*').eq('user_id', uid);
+      const exportData = { exported_at: new Date().toISOString(), dreams: dreams || [], symbols: symbols || [], world_entries: worldEntries || [] };
+      const json = JSON.stringify(exportData, null, 2);
+      const fileUri = FileSystem.documentDirectory + 'animus-export.json';
+      await FileSystem.writeAsStringAsync(fileUri, json);
+      await Sharing.shareAsync(fileUri, { mimeType: 'application/json', dialogTitle: 'Export Animus Data' });
+    } catch (err) {
+      Alert.alert('Error', 'Failed to export data.');
+    }
   };
 
   // Get user initial for avatar
@@ -94,7 +153,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Account Section */}
-        <Pressable style={styles.accountCard}>
+        <View style={styles.accountCard}>
           <View style={styles.avatarRing}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{initial}</Text>
@@ -105,7 +164,7 @@ export default function SettingsScreen() {
             <Text style={styles.accountEmail}>{user?.email}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={colors.outlineVariant} />
-        </Pressable>
+        </View>
 
         {/* Subscription Section */}
         <View style={styles.subscriptionCard}>
@@ -190,6 +249,7 @@ export default function SettingsScreen() {
                 { backgroundColor: `${colors.surfaceContainerHigh}80` },
                 pressed && { backgroundColor: colors.surfaceContainerHigh },
               ]}
+              onPress={handleExportData}
             >
               <View style={styles.dataRowLeft}>
                 <MaterialIcons name="file-download" size={22} color={colors.secondary} style={{ opacity: 0.7 }} />
@@ -212,11 +272,13 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Aesthetic Quote Image */}
+        {/* Aesthetic Quote */}
         <View style={styles.quoteCard}>
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBOGL1gR82nNUTHB7IU6Nd1wVLGl2Flmey7O5uswVNVwZvMiUKMw9tN5CtR7Mrt4LIHurWHAYhejCX7qyVCK1xRiZfo-Vfjg6PwlX0u-fZWryBs7dnEyypUJvnicaAHK01mqlrdR_5yAEmrdoL2Fzn-kkVyZMS5Wng8VIbiYNCSL8kUo9hLtceH6cnX1pUF5dtWb6cSEoAhKasKu5lowSEP1sHolsnhvqFhplzqSMXBbnnpCsedfe1-frZ0MQZ-je9yKJgPmddL6Rvp' }}
-            style={styles.quoteImage}
+          <LinearGradient
+            colors={[`${colors.primaryContainer}40`, `${colors.secondaryContainer}60`]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.quoteGradient}
           />
           <View style={styles.quoteOverlay}>
             <Text style={styles.quoteText}>
@@ -245,6 +307,9 @@ export default function SettingsScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>ANIMUS V1.0 · REALITY SUITES</Text>
+          <Pressable onPress={() => Linking.openURL('https://huntercfinley.github.io/animus/privacy-policy.html')}>
+            <Text style={styles.privacyLink}>Privacy Policy</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -490,10 +555,10 @@ const styles = StyleSheet.create({
     marginBottom: 48, // mb-12
     position: 'relative',
   },
-  quoteImage: {
+  quoteGradient: {
+    position: 'absolute',
     width: '100%',
     height: '100%',
-    opacity: 0.4,
   },
   quoteOverlay: {
     position: 'absolute',
@@ -554,5 +619,12 @@ const styles = StyleSheet.create({
     letterSpacing: 3, // tracking-widest
     color: `${colors.textSecondary}80`, // /50 opacity
     textTransform: 'uppercase',
+  },
+  privacyLink: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    color: colors.textMuted,
+    textDecorationLine: 'underline' as const,
+    marginTop: 8,
   },
 });

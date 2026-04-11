@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -32,6 +32,13 @@ export function useRecording() {
   const transcriptRef = useRef('');
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      try { ExpoSpeechRecognitionModule.stop(); } catch {}
+    };
+  }, []);
 
   useSpeechRecognitionEvent('result', (event) => {
     const text = event.results[0]?.transcript ?? '';

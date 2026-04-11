@@ -80,6 +80,8 @@ export const colors = {
   moodMysterious: '#7E8EDA',
   moodChaotic: '#DA7EBC',
   moodMelancholic: '#7EAADA',
+  moodIntense: '#DA4A4A',
+  moodTransformative: '#9B59B6',
 };
 
 export const moodTints: Record<string, string> = {
@@ -91,6 +93,8 @@ export const moodTints: Record<string, string> = {
   mysterious: '#F0F2FD',
   chaotic: '#FDF0F8',
   melancholic: '#F0F5FD',
+  intense: '#FDF0F0',
+  transformative: '#F6F0FD',
 };
 
 export const moodBorders: Record<string, string> = {
@@ -102,6 +106,8 @@ export const moodBorders: Record<string, string> = {
   mysterious: 'rgba(126, 142, 218, 0.15)',
   chaotic: 'rgba(218, 126, 188, 0.15)',
   melancholic: 'rgba(126, 170, 218, 0.15)',
+  intense: 'rgba(218, 74, 74, 0.15)',
+  transformative: 'rgba(155, 89, 182, 0.15)',
 };
 
 // --- Typography ---
@@ -176,4 +182,6 @@ export const moodColors: Record<string, string> = {
   mysterious: colors.moodMysterious,
   chaotic: colors.moodChaotic,
   melancholic: colors.moodMelancholic,
+  intense: colors.moodIntense,
+  transformative: colors.moodTransformative,
 };

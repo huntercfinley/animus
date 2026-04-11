@@ -18,7 +18,6 @@ export function useOfflineQueue() {
           await markSynced(dream.id);
         } catch (err) {
           console.warn(`Failed to sync dream ${dream.id}:`, err);
-          break;
         }
       }
       await deletesynced();

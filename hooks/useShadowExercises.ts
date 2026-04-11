@@ -21,7 +21,7 @@ export function useShadowExercises() {
 
   const generateExercise = useCallback(async (dreamId?: string, symbols?: any[]) => {
     const exercise = await callEdgeFunction<ShadowExercise>('shadow-exercise', { dream_id: dreamId, symbols });
-    setExercises(prev => [exercise, ...prev]);
+    if (exercise) setExercises(prev => [exercise, ...prev]);
     return exercise;
   }, []);
 
