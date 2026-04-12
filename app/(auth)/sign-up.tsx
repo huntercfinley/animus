@@ -23,6 +23,8 @@ export default function SignUp() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSignUp = async () => {
     if (!email.trim() || !password.trim()) return;
@@ -118,10 +120,17 @@ export default function SignUp() {
                   placeholderTextColor={`${colors.outline}80`}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   autoComplete="new-password"
                 />
-                <MaterialIcons name="lock-open" size={22} color={`${colors.outline}4D`} style={styles.inputIcon} />
+                <Pressable
+                  onPress={() => setShowPassword(v => !v)}
+                  style={styles.inputIcon}
+                  hitSlop={12}
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <MaterialIcons name={showPassword ? 'visibility' : 'visibility-off'} size={22} color={`${colors.outline}99`} />
+                </Pressable>
               </View>
             </View>
 
@@ -135,10 +144,17 @@ export default function SignUp() {
                   placeholderTextColor={`${colors.outline}80`}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showConfirm}
                   autoComplete="new-password"
                 />
-                <MaterialIcons name="lock" size={22} color={`${colors.outline}4D`} style={styles.inputIcon} />
+                <Pressable
+                  onPress={() => setShowConfirm(v => !v)}
+                  style={styles.inputIcon}
+                  hitSlop={12}
+                  accessibilityLabel={showConfirm ? 'Hide password' : 'Show password'}
+                >
+                  <MaterialIcons name={showConfirm ? 'visibility' : 'visibility-off'} size={22} color={`${colors.outline}99`} />
+                </Pressable>
               </View>
             </View>
 

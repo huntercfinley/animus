@@ -27,6 +27,7 @@ export default function SignIn() {
   const [socialLoading, setSocialLoading] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async () => {
     if (!identifier.trim() || !password.trim()) return;
@@ -134,15 +135,21 @@ export default function SignIn() {
                   placeholderTextColor={`${colors.outline}80`}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   autoComplete="password"
                 />
-                <MaterialIcons
-                  name="lock-open"
-                  size={22}
-                  color={`${colors.outline}4D`}
+                <Pressable
+                  onPress={() => setShowPassword(v => !v)}
                   style={styles.inputIcon}
-                />
+                  hitSlop={12}
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <MaterialIcons
+                    name={showPassword ? 'visibility' : 'visibility-off'}
+                    size={22}
+                    color={`${colors.outline}99`}
+                  />
+                </Pressable>
               </View>
             </View>
 
