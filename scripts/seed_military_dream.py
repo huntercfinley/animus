@@ -1,8 +1,10 @@
 """Seed interpretation, symbols, and go-deeper for Mandatory Military Service dream."""
-import urllib.request, json
+import os, urllib.request, json
 
-url = "https://xlumafywghpgallecsvh.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhsdW1hZnl3Z2hwZ2FsbGVjc3ZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDY2NjQ0NiwiZXhwIjoyMDkwMjQyNDQ2fQ.Ks-Qj7EPLAuhy-YJJwdT4JYsqkH0GGeBLcKYRw4VSz0"
+url = os.environ.get("SUPABASE_URL", "https://xlumafywghpgallecsvh.supabase.co")
+key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_SECRET_KEY")
+if not key:
+    raise SystemExit("Set SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY) in env before running.")
 uid = "a872fa8e-c789-4eb1-84b9-671981b5fd60"
 dream_id = "1449ee22-6acf-4f18-bbb0-4f9dfe0f79af"
 headers_json = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json", "Prefer": "return=minimal"}
