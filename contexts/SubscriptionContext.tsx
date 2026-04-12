@@ -61,7 +61,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           .update({ subscription_tier: premium ? 'premium' : 'free' })
           .eq('id', user.id);
       }
-    } catch {
+    } catch (err) {
+      if (__DEV__) console.warn('[SubscriptionContext] checkPremiumStatus failed', err);
       setIsPremium(false);
     }
   }
@@ -72,7 +73,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const { default: Purchases } = await import('react-native-purchases');
       const offerings = await Purchases.getOfferings();
       if (offerings.current) setPackages(offerings.current.availablePackages);
-    } catch {}
+    } catch (err) {
+      if (__DEV__) console.warn('[SubscriptionContext] loadPackages failed', err);
+    }
   }
 
   const purchase = async (pkg: any): Promise<boolean> => {
@@ -83,7 +86,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       await checkPremiumStatus();
       await refreshProfile();
       return true;
-    } catch { return false; }
+    } catch (err) {
+      if (__DEV__) console.warn('[SubscriptionContext] purchase failed', err);
+      return false;
+    }
   };
 
   const restore = async (): Promise<boolean> => {
@@ -100,7 +106,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       }
       await refreshProfile();
       return hasPremium;
-    } catch { return false; }
+    } catch (err) {
+      if (__DEV__) console.warn('[SubscriptionContext] restore failed', err);
+      return false;
+    }
   };
 
   return (
