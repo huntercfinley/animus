@@ -36,3 +36,13 @@ yarn-error.*
 
 # TypeScript
 *.tsbuildinfo
+
+# Native build outputs (EAS handles Android)
+android/
+
+# Local debug/scratch
+screenshots/
+tmp/
+scripts/debug/
+emulator-screen.png
+*.screen.png

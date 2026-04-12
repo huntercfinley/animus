@@ -65,3 +65,28 @@ Secondary: Lifestyle
 
 ## Age Rating
 12+ (Infrequent/Mild: Medical/Treatment Information)
+
+## Support URL (required by Apple)
+https://huntercfinley.github.io/animus/support.html
+
+## Marketing URL (optional)
+https://huntercfinley.github.io/animus/
+
+## Privacy Policy URL (required)
+https://huntercfinley.github.io/animus/privacy-policy.html
+
+## Copyright
+© 2026 Reality Suites
+
+## Trade Representative Contact (optional, required in some regions)
+Reality Suites — hunter@realitysuites.com
+
+## Screenshots Required
+- iPhone 6.9" (iPhone 17 Pro Max / 16 Pro Max) — 3 minimum, 6 ideal
+  1. Record screen (hero — red button, "Conscious Zone")
+  2. Dream detail surface (hero image + title + journal text)
+  3. Dream detail deep zone (interpretation on dark bg — **requires post-fix build**)
+  4. Dream Web constellation (map view)
+  5. My World (context management)
+  6. Settings / premium upsell
+- iPad Pro 13" — optional but recommended for discovery

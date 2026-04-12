@@ -13,9 +13,12 @@ interface SubscriptionState {
 
 const SubscriptionContext = createContext<SubscriptionState | null>(null);
 
+// RevenueCat requires distinct keys per platform. Fall back to the legacy
+// shared key only when a platform-specific one isn't set so iOS keeps working
+// during the launch window.
 const REVENUECAT_API_KEY = Platform.select({
-  ios: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY,
-  android: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY,
+  ios: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS || process.env.EXPO_PUBLIC_REVENUECAT_API_KEY,
+  android: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID,
 }) || '';
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
@@ -32,6 +35,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           const { data } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
           setIsPremium(data?.subscription_tier === 'premium');
         }
+        setLoading(false);
+        return;
+      }
+      if (!REVENUECAT_API_KEY) {
+        // No key set for this platform — skip RevenueCat entirely so the
+        // offerings fetch doesn't error-toast on every launch (common on
+        // Android dev builds while we ship iOS first).
+        if (__DEV__) {
+          console.warn(
+            `[SubscriptionContext] No RevenueCat API key for ${Platform.OS} — skipping init`
+          );
+        }
+        setIsPremium(false);
         setLoading(false);
         return;
       }

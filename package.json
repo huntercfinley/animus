@@ -7,7 +7,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "dev:android": "expo start --dev-client --android",
+    "dev:ios": "expo start --dev-client --ios",
     "test": "jest",
+    "deadcode": "npx knip",
     "eas-build-pre-install": "chmod -R u+w ."
   },
   "dependencies": {
