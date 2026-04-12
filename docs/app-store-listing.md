@@ -1,10 +1,10 @@
 # Animus — App Store Listing
 
 ## App Name (30 char max)
-Animus: Dream Journal
+Animus: Dream Interpreter
 
 ## Subtitle (30 char max)
-Jungian AI Dream Interpretation
+Decode Your Unconscious Mind
 
 ## Promotional Text (170 char max — can update anytime without new build)
 Your dreams are trying to tell you something. Animus uses Jungian depth psychology and AI to help you listen. Record, interpret, and understand your unconscious mind.
