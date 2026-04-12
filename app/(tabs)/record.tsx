@@ -3,14 +3,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Sentry from '@sentry/react-native';
 import { useRecording } from '@/hooks/useRecording';
 import { RecordButton } from '@/components/recording/RecordButton';
 import { TranscriptOverlay } from '@/components/recording/TranscriptOverlay';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
 import NetInfo from '@react-native-community/netinfo';
 import { processDream } from '@/lib/ai';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
+
+const DREAM_LOADING_MESSAGES = [
+  'Listening to your subconscious...',
+  'Weaving symbols from the deep...',
+  'Consulting the archetypes...',
+  'Painting your dreamscape...',
+  'Almost there — nearly surfaced...',
+];
 
 export default function RecordScreen() {
   const {
@@ -44,16 +54,31 @@ export default function RecordScreen() {
     try {
       const result = await stopRecording();
       const netState = await NetInfo.fetch();
-      if (netState.isConnected) {
+      if (!netState.isConnected) {
+        await saveDreamOffline(result.transcript, result.audioUri ?? null);
+        Alert.alert('Saved Offline', "Dream saved locally. It will be processed when you're back online.");
+        return;
+      }
+      try {
         const dream = await processDream(result.transcript, result.audioUri ?? null);
         router.push({ pathname: '/dream/[id]', params: { id: dream.id } });
-      } else {
+      } catch (processErr) {
+        Sentry.captureException(processErr, { tags: { feature: 'record.processDream' } });
         await saveDreamOffline(result.transcript, result.audioUri ?? null);
-        Alert.alert('Saved Offline', 'Dream saved locally. It will be processed when you\'re back online.');
+        Alert.alert(
+          'Could not interpret right now',
+          'We saved your dream locally and will retry automatically. You can revisit it from Journal once it\'s ready.'
+        );
       }
     } catch (err) {
-      await saveDreamOffline(transcript, null);
-      Alert.alert('Saved Offline', 'Dream saved locally. It will be processed shortly.');
+      Sentry.captureException(err, { tags: { feature: 'record.handleSave' } });
+      try {
+        await saveDreamOffline(transcript, null);
+        Alert.alert('Saved Offline', 'Dream saved locally. It will be processed shortly.');
+      } catch (offlineErr) {
+        Sentry.captureException(offlineErr, { tags: { feature: 'record.saveDreamOffline' } });
+        Alert.alert('Something went wrong', 'We couldn\'t save your dream. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
@@ -66,22 +91,34 @@ export default function RecordScreen() {
   const handleTextSave = async () => {
     if (!manualText.trim()) return;
     setSaving(true);
+    const text = manualText.trim();
     try {
       const netState = await NetInfo.fetch();
-      if (netState.isConnected) {
-        const dream = await processDream(manualText.trim(), null);
+      if (!netState.isConnected) {
+        await saveDreamOffline(text, null);
+        Alert.alert('Saved Offline', "Dream saved locally. It will be processed when you're back online.");
+        setManualText('');
+        setTextMode(false);
+        return;
+      }
+      try {
+        const dream = await processDream(text, null);
         setManualText('');
         setTextMode(false);
         router.push({ pathname: '/dream/[id]', params: { id: dream.id } });
-      } else {
-        await saveDreamOffline(manualText.trim(), null);
-        Alert.alert('Saved Offline', 'Dream saved locally. It will be processed when you\'re back online.');
+      } catch (processErr) {
+        Sentry.captureException(processErr, { tags: { feature: 'record.processDream' } });
+        await saveDreamOffline(text, null);
         setManualText('');
         setTextMode(false);
+        Alert.alert(
+          'Could not interpret right now',
+          'We saved your dream locally and will retry automatically. You can revisit it from Journal once it\'s ready.'
+        );
       }
     } catch (err) {
-      await saveDreamOffline(manualText.trim(), null);
-      Alert.alert('Saved Offline', 'Dream saved locally. It will be processed shortly.');
+      Sentry.captureException(err, { tags: { feature: 'record.handleTextSave' } });
+      Alert.alert('Something went wrong', 'We couldn\'t save your dream. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -90,6 +127,12 @@ export default function RecordScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader />
+
+      <LoadingOverlay
+        visible={saving}
+        title="Interpreting your dream..."
+        messages={DREAM_LOADING_MESSAGES}
+      />
 
       {/* Ambient glow circles */}
       <View style={styles.glowLeft} />

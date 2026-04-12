@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -10,6 +11,13 @@ import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { initializeAds } from '@/lib/ads';
 import { colors } from '@/constants/theme';
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || '',
+  enabled: !__DEV__,
+  tracesSampleRate: 1.0,
+  sendDefaultPii: true,
+});
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -53,7 +61,7 @@ function RootNavigator() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     NotoSerif_400Regular,
     NotoSerif_400Regular_Italic,
@@ -76,3 +84,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

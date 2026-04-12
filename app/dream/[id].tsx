@@ -1,11 +1,13 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import * as Sentry from '@sentry/react-native';
 import { useDreams } from '@/hooks/useDreams';
+import { OuroborosSpinner } from '@/components/ui/OuroborosSpinner';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, DreamSymbol } from '@/types/database';
 import { GoDeeper } from '@/components/interpretation/GoDeeper';
@@ -18,15 +20,35 @@ export default function DreamDetail() {
   const { getDream, getDreamSymbols } = useDreams();
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const shareRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [showShareCard, setShowShareCard] = useState(false);
 
-  useEffect(() => {
+  const loadDream = useCallback(async () => {
     if (!id) return;
-    getDream(id).then(setDream);
-    getDreamSymbols(id).then(setSymbols);
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [d, s] = await Promise.all([getDream(id), getDreamSymbols(id)]);
+      if (!d) {
+        setLoadError("We couldn't find this dream. It may have been deleted.");
+        return;
+      }
+      setDream(d);
+      setSymbols(s);
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: 'dream.load' }, extra: { dreamId: id } });
+      setLoadError('We couldn\'t load this dream. Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   }, [id, getDream, getDreamSymbols]);
+
+  useEffect(() => {
+    loadDream();
+  }, [loadDream]);
 
   const handleShare = async () => {
     setShowShareCard(true);
@@ -35,16 +57,40 @@ export default function DreamDetail() {
         const uri = await captureRef(shareRef, { format: 'png', quality: 1 });
         await Sharing.shareAsync(uri, { mimeType: 'image/png' });
       } catch (err) {
-        console.warn('Share failed:', err);
+        Sentry.captureException(err, { tags: { feature: 'dream.share' } });
       }
       setShowShareCard(false);
     }, 100);
   };
 
-  if (!dream) {
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.loading}>Surfacing from the depths...</Text>
+        <View style={styles.centerStack}>
+          <OuroborosSpinner size={56} />
+          <Text style={styles.loading}>Surfacing from the depths...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (loadError || !dream) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerStack}>
+          <MaterialIcons name="cloud-off" size={56} color={colors.textMuted} />
+          <Text style={styles.errorTitle}>Can't reach the dreamscape</Text>
+          <Text style={styles.errorMessage}>{loadError ?? 'Something went wrong.'}</Text>
+          <View style={styles.errorActions}>
+            <Pressable onPress={loadDream} style={styles.retryBtn}>
+              <MaterialIcons name="refresh" size={18} color={colors.textOnPrimary} />
+              <Text style={styles.retryText}>Try Again</Text>
+            </Pressable>
+            <Pressable onPress={() => router.back()} style={styles.backBtn}>
+              <Text style={styles.backBtnText}>Go Back</Text>
+            </Pressable>
+          </View>
+        </View>
       </SafeAreaView>
     );
   }
@@ -108,15 +154,17 @@ export default function DreamDetail() {
           )}
         </View>
 
-        {/* Deep Zone Transition — Stitch: gradient from surface to #1E1048 */}
+        {/* Deep Zone Transition — short gradient ribbon from surface to deepBg,
+            so the deep zone content sits fully on the solid dark background. */}
         <LinearGradient
           colors={[colors.surface, colors.deepBg]}
-          style={styles.deepZone}
-        >
+          style={styles.deepTransition}
+        />
+        <View style={styles.deepZone}>
           {/* Section header */}
           <View style={styles.deepHeader}>
             <MaterialIcons name="auto-awesome" size={36} color={colors.tertiaryFixedDim} />
-            <Text style={styles.deepTitle}>The AI Interpretation</Text>
+            <Text style={styles.deepTitle}>Dream Interpretation</Text>
             <View style={styles.deepDivider} />
           </View>
 
@@ -157,7 +205,7 @@ export default function DreamDetail() {
           <View style={styles.goDeeperWrap}>
             <GoDeeper dreamId={id!} />
           </View>
-        </LinearGradient>
+        </View>
 
         {showShareCard && (
           <View style={{ position: 'absolute', left: -9999 }}>
@@ -174,13 +222,63 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface,
   },
+  centerStack: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 16,
+  },
   loading: {
-    fontFamily: fonts.serif,
+    fontFamily: fonts.serifItalic,
     fontSize: 18,
     color: colors.textMuted,
     textAlign: 'center',
-    marginTop: 100,
-    fontStyle: 'italic',
+    marginTop: 16,
+  },
+  errorTitle: {
+    fontFamily: fonts.serifBold,
+    fontSize: 22,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  errorMessage: {
+    fontFamily: fonts.sans,
+    fontSize: 15,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 320,
+  },
+  errorActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  retryText: {
+    fontFamily: fonts.sansSemiBold,
+    color: colors.textOnPrimary,
+    fontSize: 14,
+  },
+  backBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  backBtnText: {
+    fontFamily: fonts.sansMedium,
+    color: colors.textSecondary,
+    fontSize: 14,
   },
 
   // Header
@@ -293,8 +391,12 @@ const styles = StyleSheet.create({
   },
 
   // Deep Zone
+  deepTransition: {
+    height: 64, // short ribbon: surface → deepBg, then solid deepBg below
+  },
   deepZone: {
-    paddingTop: 32, // quick transition — fast shift from light to dark
+    backgroundColor: colors.deepBg,
+    paddingTop: 32,
     paddingBottom: 48,
     paddingHorizontal: 24,
   },

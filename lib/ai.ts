@@ -1,29 +1,31 @@
+import * as Sentry from '@sentry/react-native';
 import { supabase } from './supabase';
 import { selectArtStyle } from '@/constants/art-styles';
 import type { InterpretDreamResponse, Dream, DreamSymbol } from '@/types/database';
 
 async function callEdgeFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authenticated');
-
-  const response = await fetch(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/${name}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `Edge function ${name} failed`);
+  const { data, error } = await supabase.functions.invoke<T>(name, { body });
+  if (error) {
+    let detail = '';
+    try {
+      const ctx: any = (error as any).context;
+      if (ctx?.json) {
+        const j = await ctx.json();
+        detail = j?.error || j?.message || JSON.stringify(j);
+      } else if (ctx?.text) {
+        detail = (await ctx.text()).slice(0, 500);
+      }
+    } catch {}
+    const msg = detail || error.message || `${name} failed`;
+    const err = new Error(msg);
+    Sentry.captureException(err, {
+      tags: { edgeFunction: name },
+      extra: { detail },
+    });
+    throw err;
   }
-
-  return response.json();
+  if (data == null) throw new Error(`${name} returned no data`);
+  return data;
 }
 
 export async function processDream(transcript: string, audioUri: string | null): Promise<Dream & { shouldNudgeWorld: boolean }> {

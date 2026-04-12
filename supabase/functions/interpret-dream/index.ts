@@ -2,6 +2,62 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('GOOGLE_AI_API_KEY') || '';
+
+// Try Claude first; fall back to Gemini free-tier on any failure.
+// Returns { text, model } where text is raw JSON from the model.
+async function callAI(systemPrompt: string, transcript: string): Promise<{ text: string; model: string }> {
+  // Primary: Claude Sonnet 4.6
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2048,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Here is my dream:\n\n${transcript}` }],
+      }),
+    });
+    if (r.ok) {
+      const j = await r.json();
+      return { text: j.content[0].text, model: 'claude-sonnet-4-6' };
+    }
+    console.warn('Claude failed, trying Gemini fallback:', r.status, (await r.text()).slice(0, 200));
+  } catch (err) {
+    console.warn('Claude threw, trying Gemini fallback:', (err as Error).message);
+  }
+
+  // Fallback: Gemini 2.0 Flash (free tier)
+  if (!GEMINI_API_KEY) throw new Error('Primary AI failed and no Gemini key configured');
+  const gr = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: `Here is my dream:\n\n${transcript}` }] }],
+        generationConfig: {
+          maxOutputTokens: 2048,
+          temperature: 0.8,
+          responseMimeType: 'application/json',
+        },
+      }),
+    }
+  );
+  if (!gr.ok) {
+    throw new Error(`Gemini request failed: ${gr.status} ${(await gr.text()).slice(0, 300)}`);
+  }
+  const gj = await gr.json();
+  const text = gj?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini returned no content');
+  return { text, model: 'gemini-2.0-flash' };
+}
 
 const BASE_SYSTEM_PROMPT = `You are a warm, wise dream analyst rooted in Carl Jung's depth psychology. You interpret dreams through the lens of archetypes, shadow, anima/animus, the collective unconscious, and individuation.
 
@@ -99,29 +155,19 @@ serve(async (req: Request) => {
     const systemPrompt = BASE_SYSTEM_PROMPT + personalContext + historyContext +
       `\n\nInterpretation length target: ${wordRange} words.`;
 
-    // Call Claude Sonnet 4.6
-    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: `Here is my dream:\n\n${transcript}` }],
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      return new Response(JSON.stringify({ error: 'AI request failed', details: errText }), { status: 502 });
+    // Claude primary, Gemini fallback
+    let rawContent: string;
+    let modelUsed: string;
+    try {
+      const ai = await callAI(systemPrompt, transcript);
+      rawContent = ai.text;
+      modelUsed = ai.model;
+    } catch (aiErr) {
+      return new Response(
+        JSON.stringify({ error: 'AI request failed', details: (aiErr as Error).message }),
+        { status: 502 }
+      );
     }
-
-    const aiResult = await aiResponse.json();
-    const rawContent = aiResult.content[0].text;
 
     // Parse JSON response (handle possible markdown wrapping)
     let parsed;
@@ -139,7 +185,7 @@ serve(async (req: Request) => {
       symbols: parsed.symbols || [],
       mood: parsed.mood,
       image_prompt: parsed.image_prompt,
-      model_used: 'claude-sonnet-4-6',
+      model_used: modelUsed,
     }), {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });

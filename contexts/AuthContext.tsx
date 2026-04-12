@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/react-native';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types/database';
 
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
     if (error) {
       console.error('Failed to fetch profile:', error.message);
+      Sentry.captureException(error, { tags: { feature: 'auth.fetchProfile' }, extra: { userId } });
       return;
     }
     setProfile(data);
@@ -44,14 +46,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(s);
         if (s?.user) await fetchProfile(s.user.id);
       })
-      .catch(() => {})
+      .catch((err) => {
+        Sentry.captureException(err, { tags: { feature: 'auth.getSession' } });
+      })
       .finally(() => setLoading(false));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === 'INITIAL_SESSION') return; // handled by getSession above
       setSession(s);
-      if (s?.user) fetchProfile(s.user.id).catch(() => {});
-      else setProfile(null);
+      if (s?.user) {
+        fetchProfile(s.user.id).catch((err) => {
+          Sentry.captureException(err, { tags: { feature: 'auth.onAuthStateChange.fetchProfile' } });
+        });
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -61,15 +70,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let email = identifier;
     // If it doesn't look like an email, treat it as a username and look up the email
     if (!identifier.includes('@')) {
-      const { data: profile, error: lookupError } = await supabase
+      const { data: profileData, error: lookupError } = await supabase
         .from('profiles')
         .select('email')
         .eq('username', identifier)
-        .single();
-      if (lookupError || !profile?.email) {
+        .maybeSingle();
+      if (lookupError) {
+        console.error('Username lookup failed:', lookupError.message, lookupError.code);
+        Sentry.captureException(lookupError, { tags: { feature: 'auth.usernameLookup' }, extra: { identifier } });
+        return { error: 'Something went wrong. Please try again.' };
+      }
+      if (!profileData?.email) {
         return { error: 'No account found with that username' };
       }
-      email = profile.email;
+      email = profileData.email;
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
