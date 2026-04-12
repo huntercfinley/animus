@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { Platform } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminUser } from '@/constants/admin';
 
 interface SubscriptionState {
   isPremium: boolean;
@@ -30,6 +31,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      if (user && isAdminUser(user.id)) {
+        setIsPremium(true);
+        setLoading(false);
+        return;
+      }
       if (Platform.OS === 'web') {
         if (user) {
           const { data } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
@@ -66,6 +72,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   async function checkPremiumStatus() {
     if (Platform.OS === 'web') return;
+    if (user && isAdminUser(user.id)) {
+      setIsPremium(true);
+      return;
+    }
     try {
       const { default: Purchases } = await import('react-native-purchases');
       const info = await Purchases.getCustomerInfo();
@@ -110,6 +120,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const restore = async (): Promise<boolean> => {
     if (Platform.OS === 'web') return false;
+    if (user && isAdminUser(user.id)) {
+      setIsPremium(true);
+      return true;
+    }
     try {
       const { default: Purchases } = await import('react-native-purchases');
       const customerInfo = await Purchases.restorePurchases();
