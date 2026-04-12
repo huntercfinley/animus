@@ -78,7 +78,7 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "organization": "reality-suites",
+          "organization": "reality-suites-llc",
           "project": "animus"
         }
       ]
