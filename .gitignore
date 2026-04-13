@@ -42,6 +42,7 @@ android/
 
 # Local debug/scratch
 screenshots/
+.emulator-screenshots/
 tmp/
 scripts/debug/
 emulator-screen.png

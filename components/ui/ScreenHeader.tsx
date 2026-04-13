@@ -18,7 +18,7 @@ export function ScreenHeader({ subtitle }: ScreenHeaderProps) {
       {/* Profile avatar */}
       <Pressable
         style={({ pressed }) => [styles.avatarWrap, pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }]}
-        onPress={() => router.push('/settings')}
+        onPress={() => router.push('/profile')}
       >
         {profile?.avatar_url ? (
           <Image source={{ uri: profile.avatar_url }} style={styles.avatar} contentFit="cover" />
