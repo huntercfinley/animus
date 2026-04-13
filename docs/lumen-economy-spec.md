@@ -41,7 +41,7 @@ Thematically: doing your psychological work is always free. Asking the app to pr
 
 | Action | Cost | Notes |
 |---|---|---|
-| Go Deeper (one exchange) | 10 Lumen | Cheapest; core drive to engage |
+| Go Deeper (one exchange pair — question + reply) | 10 Lumen | Cheapest; core drive to engage |
 | Dream connection | 15 Lumen | Connects 2 dreams via AI analysis |
 | Image generation | 20 Lumen | Imagen 4 Fast ($0.02 raw cost) |
 | Image refinement | 20 Lumen | Same as gen |
@@ -51,9 +51,14 @@ Thematically: doing your psychological work is always free. Asking the app to pr
 
 ## Premium tier interaction
 
-- Premium users bypass Lumen entirely. All Lumen-gated features are free.
-- Premium still displays the balance on profile (so they see it growing from shadow work) — preserves balance if they downgrade.
-- Premium pricing unchanged; Lumen is purely a free-tier bridge + a second revenue stream for engaged-but-unsubscribed users.
+Premium is part of the Lumen economy, not an escape hatch from it. The flagship benefit is a monthly Lumen grant, not "unlimited everything." This aligns the value proposition with the economy and removes the split between "metered free" and "unmetered premium" experiences.
+
+- **Monthly grant:** 1,500 Lumen auto-deposited on the subscription renewal date. At the $9.99/mo price anchor, premium buys ~2× the per-dollar value of the largest IAP pack — premium is always the best deal.
+- **Rollover cap:** Unused Lumen rolls over up to 2× the monthly grant (max stockpile 3,000 before the next grant is capped). Rewards consistent use without enabling infinite hoarding.
+- **Unmetered shadow work + dream recording:** These remain free for everyone; premium doesn't need to "unlock" them. Marketing copy: *"Unlimited shadow work. Unlimited dream recording. 1,500 Lumen every month for the deeper work."*
+- **Downgrade behavior:** Accumulated Lumen persists when a user cancels premium. The monthly grant simply stops. Cancel feels friendly, not punishing.
+- **Purchased Lumen** is always separate from the grant and never expires, regardless of subscription status.
+- **Premium day-one balance:** 100 Lumen signup grant + 1,500 first monthly grant = 1,600 Lumen.
 
 ## Rewarded ads
 
@@ -226,14 +231,17 @@ Calls Apple's `verifyReceipt` endpoint, checks transaction_id hasn't been proces
 - `lumen_transactions` is append-only; the edge functions are the only writers.
 - Admin grants (`admin_grant` type) reserved for customer-support credits — no UI, SQL-only.
 
-## Open questions for Matt
+## Finalized decisions (2026-04-13)
 
-1. **Go Deeper cost unit:** per user-turn (10 Lumen per "ask") or per exchange-pair (10 Lumen unlocks one question + one reply)? Per pair is cleaner UX and maps to the current conversation model.
-2. **Onboarding grace:** should new users get 3 free Go Deepers separate from their 100 Lumen starting balance, so they can experience the feature without feeling the spend?
-3. **Image gen transition:** do we move image gen fully to Lumen, or keep the existing 10 free/month and use Lumen only for overage? Fully moving is simpler; keeping the free tier is friendlier to casual users.
-4. **Lumen drip subscription:** optional $2.99/month for 50 Lumen/month, alongside premium? (Probably overcomplicated — defer.)
-5. **Pack naming:** keep "The Initiate's Pouch / Seeker's Purse / Alchemist's Coffer / Philosopher's Stone"? Or go functional for Apple compliance certainty?
-6. **Ad placement beyond Go Deeper:** allow ads to also unlock a free image gen (1/day)? Extra revenue + free-tier value, but more places to break ATT flow.
+All open questions from the scoping phase are resolved.
+
+1. **Go Deeper cost unit:** 10 Lumen per exchange pair (one user question + one AI reply). Maps to the current conversation UX; cleaner than per-turn.
+2. **Onboarding grace:** None beyond the 100 Lumen starting balance. 100 Lumen = 10 Go Deepers, enough to feel the feature without a separate grace pool.
+3. **Image gen transition:** Full conversion to Lumen. The 10/month free tier is retired at launch. Simpler, avoids dual accounting.
+4. **Pack naming:** Ship with the Jungian names. Keep functional fallback SKUs (`50 Lumen`, `150 Lumen`, etc.) pre-prepared in App Store Connect so we can hot-swap metadata if Apple rejects.
+5. **Ad placement:** Go Deeper only at launch. Revisit ad-unlocked image gen once we see AdMob fill rate + ATT decline rate in production.
+6. **Lumen drip subscription:** Deferred. Premium is the drip (see Premium tier interaction).
+7. **Premium tier model:** Premium is inside the Lumen economy via a 1,500 Lumen/month grant with 2× rollover cap. See Premium tier interaction for mechanics.
 
 ## Build sequence
 
