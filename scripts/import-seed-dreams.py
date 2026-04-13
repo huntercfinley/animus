@@ -22,7 +22,7 @@ from pathlib import Path
 from datetime import datetime
 
 def load_env():
-    """Load credentials from ~/.env"""
+    """Load credentials from ~/.env, .env.local, then os.environ (os.environ wins)."""
     env = {}
     env_path = Path.home() / ".env"
     if env_path.exists():
@@ -41,6 +41,10 @@ def load_env():
                 if "=" in line and not line.startswith("#"):
                     key, val = line.split("=", 1)
                     env[key] = val
+    # os.environ overrides file values
+    for k, v in os.environ.items():
+        if k.startswith("EXPO_PUBLIC_") or k.startswith("ANIMUS_") or k in ("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"):
+            env[k] = v
     return env
 
 def main():
