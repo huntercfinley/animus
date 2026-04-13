@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
@@ -65,6 +65,7 @@ export default function JournalScreen() {
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
+            onSubmitEditing={Keyboard.dismiss}
           />
         </View>
       </View>

@@ -20,6 +20,38 @@ export default function SettingsScreen() {
   const currentAppearance = (profile?.ai_context as any)?.appearance as string | undefined;
   const [appearance, setAppearance] = useState<string | undefined>(currentAppearance);
   const [appearanceLoading, setAppearanceLoading] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  const monthlyPkg = packages.find((p: any) => p.packageType === 'MONTHLY') || packages[0];
+  const yearlyPkg = packages.find((p: any) => p.packageType === 'ANNUAL');
+
+  const handleUpgrade = async (pkg: any) => {
+    if (!pkg) {
+      Alert.alert('Not available', 'Subscription options are still loading. Please try again in a moment.');
+      return;
+    }
+    setPurchasing(true);
+    const result = await purchase(pkg);
+    setPurchasing(false);
+    if (result.status === 'success') {
+      Alert.alert('Welcome to Premium', 'Thank you for supporting Animus. Your premium features are now unlocked.');
+    } else if (result.status === 'error') {
+      Alert.alert('Purchase failed', result.message);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    const hasPremium = await restore();
+    setRestoring(false);
+    Alert.alert(
+      hasPremium ? 'Purchases Restored' : 'No purchases found',
+      hasPremium
+        ? 'Your premium subscription has been restored.'
+        : 'We couldn\'t find an active subscription tied to this Apple ID.'
+    );
+  };
 
   const handleAnalyzeAppearance = async () => {
     if (!isPremium) {
@@ -160,10 +192,17 @@ export default function SettingsScreen() {
           </View>
           {!isPremium && (
             <Pressable
-              style={({ pressed }) => [styles.upgradeBtn, pressed && { transform: [{ scale: 0.95 }] }]}
-              onPress={() => packages[0] && purchase(packages[0])}
+              style={({ pressed }) => [
+                styles.upgradeBtn,
+                pressed && { transform: [{ scale: 0.95 }] },
+                (!monthlyPkg || purchasing) && { opacity: 0.5 },
+              ]}
+              onPress={() => handleUpgrade(yearlyPkg || monthlyPkg)}
+              disabled={!monthlyPkg || purchasing}
             >
-              <Text style={styles.upgradeBtnText}>Upgrade</Text>
+              <Text style={styles.upgradeBtnText}>
+                {purchasing ? 'Processing...' : 'Upgrade'}
+              </Text>
             </Pressable>
           )}
         </View>
@@ -285,8 +324,10 @@ export default function SettingsScreen() {
 
         {/* Restore Purchases (if not premium) */}
         {!isPremium && (
-          <Pressable style={styles.restoreBtn} onPress={restore}>
-            <Text style={styles.restoreText}>Restore purchases</Text>
+          <Pressable style={styles.restoreBtn} onPress={handleRestore} disabled={restoring}>
+            <Text style={styles.restoreText}>
+              {restoring ? 'Restoring...' : 'Restore purchases'}
+            </Text>
           </Pressable>
         )}
 

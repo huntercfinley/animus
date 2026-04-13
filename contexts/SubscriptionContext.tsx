@@ -1,14 +1,20 @@
 import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { Platform } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminUser } from '@/constants/admin';
+
+export type PurchaseResult =
+  | { status: 'success' }
+  | { status: 'cancelled' }
+  | { status: 'error'; message: string };
 
 interface SubscriptionState {
   isPremium: boolean;
   packages: any[];
   loading: boolean;
-  purchase: (pkg: any) => Promise<boolean>;
+  purchase: (pkg: any) => Promise<PurchaseResult>;
   restore: () => Promise<boolean>;
 }
 
@@ -104,17 +110,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const purchase = async (pkg: any): Promise<boolean> => {
-    if (Platform.OS === 'web') return false;
+  const purchase = async (pkg: any): Promise<PurchaseResult> => {
+    if (Platform.OS === 'web') {
+      return { status: 'error', message: 'Purchases are not available on web.' };
+    }
+    if (!pkg) {
+      return { status: 'error', message: 'This plan is not available right now. Please try again shortly.' };
+    }
     try {
       const { default: Purchases } = await import('react-native-purchases');
       await Purchases.purchasePackage(pkg);
       await checkPremiumStatus();
       await refreshProfile();
-      return true;
-    } catch (err) {
-      if (__DEV__) console.warn('[SubscriptionContext] purchase failed', err);
-      return false;
+      return { status: 'success' };
+    } catch (err: any) {
+      if (err?.userCancelled) return { status: 'cancelled' };
+      Sentry.captureException(err, { tags: { feature: 'subscription.purchase' } });
+      const message = err?.underlyingErrorMessage || err?.message || 'The purchase could not be completed.';
+      return { status: 'error', message };
     }
   };
 

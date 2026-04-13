@@ -52,15 +52,22 @@ export default function DreamDetail() {
 
   const handleShare = async () => {
     setShowShareCard(true);
-    setTimeout(async () => {
-      try {
-        const uri = await captureRef(shareRef, { format: 'png', quality: 1 });
-        await Sharing.shareAsync(uri, { mimeType: 'image/png' });
-      } catch (err) {
-        Sentry.captureException(err, { tags: { feature: 'dream.share' } });
-      }
-      setShowShareCard(false);
-    }, 100);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        if (!shareRef.current) {
+          setShowShareCard(false);
+          return;
+        }
+        try {
+          const uri = await captureRef(shareRef, { format: 'png', quality: 1 });
+          await Sharing.shareAsync(uri, { mimeType: 'image/png' });
+        } catch (err) {
+          Sentry.captureException(err, { tags: { feature: 'dream.share' } });
+        } finally {
+          setShowShareCard(false);
+        }
+      });
+    });
   };
 
   if (loading) {

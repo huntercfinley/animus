@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Pressable, Modal, Alert, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, Pressable, Modal, Alert, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -31,7 +31,9 @@ export default function ShadowWorkScreen() {
     try {
       await generateExercise();
       await incrementLimit('shadow_exercise');
-    } catch (err) { console.warn(err); }
+    } catch (err) {
+      Alert.alert('Couldn\'t generate exercise', 'Something went wrong reaching the depths. Please try again in a moment.');
+    }
     setGenerating(false);
   };
 
@@ -46,6 +48,11 @@ export default function ShadowWorkScreen() {
         <Text style={styles.headerTitle}>Animus</Text>
       </View>
 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
+      >
       <FlatList
         data={exercises}
         keyExtractor={e => e.id}
@@ -54,6 +61,8 @@ export default function ShadowWorkScreen() {
         refreshing={loading}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
         ListHeaderComponent={
           <>
             {/* Intro Header — Stitch */}
@@ -168,6 +177,7 @@ export default function ShadowWorkScreen() {
           </Text>
         }
       />
+      </KeyboardAvoidingView>
 
       <Modal visible={!!activeExercise} animationType="slide" transparent>
         <View style={styles.modalOverlay}>

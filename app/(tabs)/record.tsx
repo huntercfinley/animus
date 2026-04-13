@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, TextInput, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -138,110 +138,135 @@ export default function RecordScreen() {
       <View style={styles.glowLeft} />
       <View style={styles.glowRight} />
 
-      <View style={styles.inner}>
-        {/* Duration display */}
-        {isRecording && (
-          <Text style={styles.duration}>{formatDuration(duration)}</Text>
-        )}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={styles.inner}>
+            {textMode && !isRecording ? (
+              /* ───── TEXT MODE ───── */
+              <View style={styles.textModeWrap}>
+                <Text style={styles.textModeTitle}>Write Your Dream</Text>
+                <TextInput
+                  style={styles.textEntryInput}
+                  placeholder="Describe your dream..."
+                  placeholderTextColor={`${colors.textMuted}80`}
+                  value={manualText}
+                  onChangeText={setManualText}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus
+                />
+                <View style={styles.actions}>
+                  <Pressable
+                    style={styles.discardBtn}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      setTextMode(false);
+                      setManualText('');
+                    }}
+                  >
+                    <Text style={styles.discardText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.saveBtn, !manualText.trim() && { opacity: 0.3 }]}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      handleTextSave();
+                    }}
+                    disabled={!manualText.trim() || saving}
+                  >
+                    <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
+                  </Pressable>
+                </View>
+                <Pressable
+                  style={styles.switchBtn}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setTextMode(false);
+                  }}
+                >
+                  <MaterialIcons name="mic" size={16} color={colors.primary} />
+                  <Text style={styles.switchText}>Switch to Voice</Text>
+                </Pressable>
+              </View>
+            ) : (
+              /* ───── VOICE MODE ───── */
+              <>
+                {isRecording && (
+                  <Text style={styles.duration}>{formatDuration(duration)}</Text>
+                )}
 
-        {/* Transcription Card — Stitch: bg-surface-container-lowest rounded-xl p-8 min-h-[200px] */}
-        {!isRecording && !transcript ? (
-          <View style={styles.transcriptCard}>
-            <Text style={styles.placeholder}>
-              Your words will appear here as you speak...
-            </Text>
+                {!isRecording && !transcript ? (
+                  <View style={styles.transcriptCard}>
+                    <Text style={styles.placeholder}>
+                      Your words will appear here as you speak...
+                    </Text>
+                  </View>
+                ) : (
+                  <TranscriptOverlay
+                    transcript={transcript}
+                    isRecording={isRecording}
+                    onTranscriptEdit={updateTranscript}
+                  />
+                )}
+
+                {!isRecording && !transcript && (
+                  <View style={styles.visualizer}>
+                    <View style={[styles.vizBar, { height: 8, backgroundColor: `${colors.primary}33` }]} />
+                    <View style={[styles.vizBar, { height: 16, backgroundColor: `${colors.primary}4D` }]} />
+                    <View style={[styles.vizBar, { height: 24, backgroundColor: `${colors.primary}66` }]} />
+                    <View style={[styles.vizBar, { height: 12, backgroundColor: `${colors.primary}4D` }]} />
+                    <View style={[styles.vizBar, { height: 20, backgroundColor: `${colors.primary}33` }]} />
+                  </View>
+                )}
+
+                {error && <Text style={styles.error}>{error}</Text>}
+
+                <RecordButton
+                  isRecording={isRecording}
+                  isPaused={isPaused}
+                  onPress={handleRecordPress}
+                  size={128}
+                />
+
+                {!isRecording ? (
+                  <Text style={styles.label}>Tap to start recording</Text>
+                ) : isPaused ? (
+                  <Text style={styles.label}>Paused — tap to resume</Text>
+                ) : (
+                  <Text style={styles.label}>Recording...</Text>
+                )}
+                <Text style={styles.zoneLabel}>CONSCIOUS ZONE</Text>
+
+                {isRecording && (
+                  <View style={styles.actions}>
+                    <Pressable style={styles.discardBtn} onPress={handleDiscard}>
+                      <Text style={styles.discardText}>Discard</Text>
+                    </Pressable>
+                    <Pressable
+                      style={[styles.saveBtn, !transcript.trim() && { opacity: 0.3 }]}
+                      onPress={handleSave}
+                      disabled={!transcript.trim() || saving}
+                    >
+                      <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
+                    </Pressable>
+                  </View>
+                )}
+
+                {!isRecording && (
+                  <Pressable style={styles.switchBtn} onPress={() => setTextMode(true)}>
+                    <MaterialIcons name="edit" size={16} color={colors.primary} />
+                    <Text style={styles.switchText}>Switch to Text</Text>
+                  </Pressable>
+                )}
+              </>
+            )}
           </View>
-        ) : (
-          <TranscriptOverlay
-            transcript={transcript}
-            isRecording={isRecording}
-            onTranscriptEdit={updateTranscript}
-          />
-        )}
-
-        {/* Audio Visualizer — Stitch: 5 bars with varying heights */}
-        {!isRecording && !transcript && (
-          <View style={styles.visualizer}>
-            <View style={[styles.vizBar, { height: 8, backgroundColor: `${colors.primary}33` }]} />
-            <View style={[styles.vizBar, { height: 16, backgroundColor: `${colors.primary}4D` }]} />
-            <View style={[styles.vizBar, { height: 24, backgroundColor: `${colors.primary}66` }]} />
-            <View style={[styles.vizBar, { height: 12, backgroundColor: `${colors.primary}4D` }]} />
-            <View style={[styles.vizBar, { height: 20, backgroundColor: `${colors.primary}33` }]} />
-          </View>
-        )}
-
-        {error && <Text style={styles.error}>{error}</Text>}
-
-        {/* Record button — Stitch: w-32 h-32 (128px) */}
-        <RecordButton
-          isRecording={isRecording}
-          isPaused={isPaused}
-          onPress={handleRecordPress}
-          size={128}
-        />
-
-        {/* Labels */}
-        {!isRecording ? (
-          <Text style={styles.label}>Tap to start recording</Text>
-        ) : isPaused ? (
-          <Text style={styles.label}>Paused — tap to resume</Text>
-        ) : (
-          <Text style={styles.label}>Recording...</Text>
-        )}
-        <Text style={styles.zoneLabel}>CONSCIOUS ZONE</Text>
-
-        {/* Action buttons when recording */}
-        {isRecording && (
-          <View style={styles.actions}>
-            <Pressable style={styles.discardBtn} onPress={handleDiscard}>
-              <Text style={styles.discardText}>Discard</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.saveBtn, !transcript.trim() && { opacity: 0.3 }]}
-              onPress={handleSave}
-              disabled={!transcript.trim() || saving}
-            >
-              <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {/* Text entry mode */}
-        {textMode && !isRecording && (
-          <View style={styles.textEntrySection}>
-            <TextInput
-              style={styles.textEntryInput}
-              placeholder="Describe your dream..."
-              placeholderTextColor={`${colors.textMuted}80`}
-              value={manualText}
-              onChangeText={setManualText}
-              multiline
-              textAlignVertical="top"
-              autoFocus
-            />
-            <View style={styles.actions}>
-              <Pressable style={styles.discardBtn} onPress={() => { setTextMode(false); setManualText(''); }}>
-                <Text style={styles.discardText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.saveBtn, !manualText.trim() && { opacity: 0.3 }]}
-                onPress={handleTextSave}
-                disabled={!manualText.trim() || saving}
-              >
-                <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
-
-        {/* Switch to text / Switch to voice */}
-        {!isRecording && (
-          <Pressable style={styles.switchBtn} onPress={() => setTextMode(!textMode)}>
-            <MaterialIcons name={textMode ? 'mic' : 'edit'} size={16} color={colors.primary} />
-            <Text style={styles.switchText}>{textMode ? 'Switch to Voice' : 'Switch to Text'}</Text>
-          </Pressable>
-        )}
-      </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -392,10 +417,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primary,
   },
-  textEntrySection: {
+  textModeWrap: {
+    flex: 1,
     width: '100%',
     maxWidth: 512,
-    marginBottom: 24,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  textModeTitle: {
+    fontFamily: fonts.serifBold,
+    fontSize: 28,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   textEntryInput: {
     backgroundColor: colors.surfaceContainerLowest,
@@ -405,7 +440,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textPrimary,
     lineHeight: 24,
-    minHeight: 200,
+    minHeight: 220,
     borderWidth: 1,
     borderColor: `${colors.outlineVariant}26`,
   },
