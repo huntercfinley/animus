@@ -14,6 +14,45 @@ const MONTHLY_LIMITS = { free: 10, premium: 30 };
 // --- Image generation by tier ---
 // Free → Imagen 4 Fast ($0.02/image), Premium → Imagen 4 Standard ($0.04/image)
 
+// Word replacements that keep dream meaning while avoiding Imagen content filters.
+// Nudity + minors are the two hardest blocks; nudity alone is usually rewritten to
+// "robed/cloaked", and any reference to a minor is generalized to "a figure".
+const PROMPT_REPLACEMENTS: Array<[RegExp, string]> = [
+  // Nudity → symbolic covering
+  [/\b(completely |fully |totally )?(unclothed|naked|nude|bare|undressed|topless|stripped)\b/gi, 'cloaked in soft light'],
+  [/\bnakedness\b/gi, 'vulnerability'],
+  [/\bbare (body|skin|chest|flesh)\b/gi, 'luminous form'],
+  // Minors → generic figures (Imagen hard-blocks any minor in non-trivial scenes)
+  [/\b(teenagers?|teens?|adolescents?|children|kids?|child|kid|boys?|girls?|babies|baby|infants?|infant|minors?|youths?|schoolchildren)\b/gi, 'figures'],
+  [/\byoung (man|woman|person|people)\b/gi, 'figure'],
+  // Violence / gore → dream-softened
+  [/\b(blood|bloody|bleeding|gore|wound|wounded|stabbing|stabbed|corpse|corpses|dead body|dead bodies)\b/gi, 'shadow'],
+  [/\b(murder|murdered|killing|killed|slain)\b/gi, 'fading'],
+  // Sexual → intimate/symbolic
+  [/\b(sexual|erotic|intercourse|explicit)\b/gi, 'intimate'],
+];
+
+function sanitizePrompt(prompt: string): string {
+  let result = prompt;
+  for (const [pattern, replacement] of PROMPT_REPLACEMENTS) {
+    result = result.replace(pattern, replacement);
+  }
+  return result;
+}
+
+// Aggressive fallback: replace every person reference with abstract silhouettes
+// and drop physical descriptors. Used when the sanitized prompt still fails.
+function abstractifyPrompt(prompt: string): string {
+  let result = sanitizePrompt(prompt);
+  result = result.replace(
+    /\b(a |the |one |two |three |several |many |crowds? of |groups? of )?(man|woman|men|women|person|people|figure|figures|dreamer|audience|crowd|viewer|viewers|stranger|strangers|he|she|they)\b/gi,
+    'an ethereal silhouette',
+  );
+  // Strip explicit body / physical descriptors that can still trigger filters
+  result = result.replace(/\b(body|bodies|skin|flesh|chest|breast|breasts|torso|thigh|thighs|buttocks|genitals?)\b/gi, 'form');
+  return result;
+}
+
 async function generateWithImagen(prompt: string, model: string): Promise<string> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${GOOGLE_AI_API_KEY}`,
@@ -40,6 +79,20 @@ async function generateWithImagen(prompt: string, model: string): Promise<string
   const image = result.predictions?.[0]?.bytesBase64Encoded;
   if (!image) throw new Error(`No image in ${model} response`);
   return image;
+}
+
+// Try Imagen with sanitized prompt; on failure, rewrite abstractly and retry once.
+async function generateWithFallback(rawPrompt: string, model: string): Promise<{ image: string; promptUsed: string }> {
+  const sanitized = sanitizePrompt(rawPrompt);
+  try {
+    const image = await generateWithImagen(sanitized, model);
+    return { image, promptUsed: sanitized };
+  } catch (firstErr) {
+    const abstract = abstractifyPrompt(rawPrompt);
+    if (abstract === sanitized) throw firstErr; // nothing more we can do
+    const image = await generateWithImagen(abstract, model);
+    return { image, promptUsed: abstract };
+  }
 }
 
 // Check monthly image generation count
@@ -142,16 +195,10 @@ serve(async (req: Request) => {
     const fullPrompt = `${appearanceClause}${style_prefix || ''} ${image_prompt}. Dreamlike, evocative, no text or words in the image.`;
 
     // Free → Imagen 4 Fast ($0.02), Premium → Imagen 4 Standard ($0.04)
-    let imageBase64: string;
-    let modelUsed: string;
-
-    if (isPremium) {
-      imageBase64 = await generateWithImagen(fullPrompt, 'imagen-4.0-generate-001');
-      modelUsed = 'imagen-4.0-standard';
-    } else {
-      imageBase64 = await generateWithImagen(fullPrompt, 'imagen-4.0-fast-generate-001');
-      modelUsed = 'imagen-4.0-fast';
-    }
+    // generateWithFallback sanitizes the prompt, then abstracts and retries on failure.
+    const model = isPremium ? 'imagen-4.0-generate-001' : 'imagen-4.0-fast-generate-001';
+    const modelUsed = isPremium ? 'imagen-4.0-standard' : 'imagen-4.0-fast';
+    const { image: imageBase64 } = await generateWithFallback(fullPrompt, model);
 
     // Decode base64 and upload to Supabase Storage
     const imageBytes = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));

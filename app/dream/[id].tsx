@@ -11,6 +11,9 @@ import { OuroborosSpinner } from '@/components/ui/OuroborosSpinner';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, DreamSymbol } from '@/types/database';
 import { GoDeeper } from '@/components/interpretation/GoDeeper';
+import { callEdgeFunction } from '@/lib/ai';
+import { supabase } from '@/lib/supabase';
+import { ART_STYLES } from '@/constants/art-styles';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { ShareCardView } from '@/components/sharing/ShareCardView';
@@ -22,6 +25,8 @@ export default function DreamDetail() {
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const shareRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -73,6 +78,27 @@ export default function DreamDetail() {
       ]
     );
   };
+
+  const handleGenerateImage = useCallback(async () => {
+    if (!dream || !dream.image_prompt || generatingImage) return;
+    setGeneratingImage(true);
+    setImageError(null);
+    try {
+      const stylePrefix = ART_STYLES.find(s => s.id === dream.image_style)?.promptPrefix ?? '';
+      const result = await callEdgeFunction<{ image_url: string }>('generate-image', {
+        image_prompt: dream.image_prompt,
+        style_prefix: stylePrefix,
+        dream_id: dream.id,
+      });
+      await supabase.from('dreams').update({ image_url: result.image_url }).eq('id', dream.id);
+      setDream({ ...dream, image_url: result.image_url });
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: 'dream.retryImage' }, extra: { dreamId: dream.id } });
+      setImageError((err as Error).message || 'Image generation failed');
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [dream, generatingImage]);
 
   const handleShare = async () => {
     setShowShareCard(true);
@@ -157,7 +183,7 @@ export default function DreamDetail() {
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Image — Stitch: aspect-[4/5] rounded-xl shadow-2xl */}
-        {dream.image_url && (
+        {dream.image_url ? (
           <View style={styles.heroWrap}>
             <View style={styles.heroContainer}>
               <Image source={{ uri: dream.image_url }} style={styles.heroImage} contentFit="cover" />
@@ -174,7 +200,35 @@ export default function DreamDetail() {
               )}
             </View>
           </View>
-        )}
+        ) : dream.image_prompt ? (
+          <View style={styles.heroWrap}>
+            <View style={[styles.heroContainer, styles.heroPlaceholder]}>
+              {generatingImage ? (
+                <>
+                  <OuroborosSpinner size={56} />
+                  <Text style={styles.heroPlaceholderText}>Summoning imagery from the unconscious...</Text>
+                </>
+              ) : (
+                <>
+                  <MaterialIcons name="image-not-supported" size={44} color={colors.textMuted} />
+                  <Text style={styles.heroPlaceholderTitle}>Image unavailable</Text>
+                  <Text style={styles.heroPlaceholderText}>
+                    {imageError
+                      ? 'The dream resisted imagery. Try once more.'
+                      : 'This dream has no image yet.'}
+                  </Text>
+                  <Pressable
+                    onPress={handleGenerateImage}
+                    style={({ pressed }) => [styles.heroRetryBtn, pressed && { opacity: 0.8 }]}
+                  >
+                    <MaterialIcons name="auto-awesome" size={18} color={colors.textOnPrimary} />
+                    <Text style={styles.heroRetryText}>Conjure Image</Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          </View>
+        ) : null}
 
         {/* Dream Content — Stitch: px-8 */}
         <View style={styles.contentSection}>
@@ -369,6 +423,42 @@ const styles = StyleSheet.create({
   heroImage: {
     width: '100%',
     height: '100%',
+  },
+  heroPlaceholder: {
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 12,
+  },
+  heroPlaceholderTitle: {
+    fontFamily: fonts.serifBold,
+    fontSize: 20,
+    color: colors.textPrimary,
+    marginTop: 8,
+  },
+  heroPlaceholderText: {
+    fontFamily: fonts.serifItalic,
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    maxWidth: 260,
+  },
+  heroRetryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginTop: 12,
+  },
+  heroRetryText: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 14,
+    color: colors.textOnPrimary,
   },
   heroGradient: {
     position: 'absolute',
