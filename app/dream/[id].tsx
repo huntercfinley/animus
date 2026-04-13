@@ -7,6 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Sentry from '@sentry/react-native';
 import { useDreams } from '@/hooks/useDreams';
+import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { OuroborosSpinner } from '@/components/ui/OuroborosSpinner';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, DreamSymbol } from '@/types/database';
@@ -21,12 +22,14 @@ import { ShareCardView } from '@/components/sharing/ShareCardView';
 export default function DreamDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getDream, getDreamSymbols, softDeleteDream } = useDreams();
+  const { checkLimit, incrementLimit } = useUsageLimits();
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [descending, setDescending] = useState(false);
   const shareRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -78,6 +81,29 @@ export default function DreamDetail() {
       ]
     );
   };
+
+  const handleDescend = useCallback(async () => {
+    if (!dream || descending) return;
+    const { allowed } = await checkLimit('shadow_exercise');
+    if (!allowed) {
+      Alert.alert('Daily limit reached', "You've completed your shadow exercises for today. Return tomorrow to continue your inner work.");
+      return;
+    }
+    setDescending(true);
+    try {
+      const exercise = await callEdgeFunction<{ id: string }>('shadow-exercise', {
+        dream_id: dream.id,
+        symbols: symbols.map(s => ({ symbol: s.symbol })),
+      });
+      await incrementLimit('shadow_exercise');
+      router.push({ pathname: '/(tabs)/shadow-work', params: { open: exercise.id } });
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: 'dream.descend' }, extra: { dreamId: dream.id } });
+      Alert.alert("Couldn't descend", 'The depths resisted. Please try again in a moment.');
+    } finally {
+      setDescending(false);
+    }
+  }, [dream, symbols, descending, checkLimit, incrementLimit]);
 
   const handleGenerateImage = useCallback(async () => {
     if (!dream || !dream.image_prompt || generatingImage) return;
@@ -281,6 +307,18 @@ export default function DreamDetail() {
                   <MaterialIcons name="psychology" size={22} color="#ffffff" />
                   <Text style={styles.goBtnText}>Go Deeper</Text>
                 </LinearGradient>
+              </Pressable>
+
+              {/* Descend into this dream — generate shadow exercise tied to this dream */}
+              <Pressable
+                onPress={handleDescend}
+                disabled={descending}
+                style={({ pressed }) => [styles.descendBtn, pressed && { opacity: 0.7 }, descending && { opacity: 0.5 }]}
+              >
+                <MaterialIcons name="nights-stay" size={20} color={colors.tertiaryFixedDim} />
+                <Text style={styles.descendBtnText}>
+                  {descending ? 'Descending...' : 'Descend Into This Dream'}
+                </Text>
               </Pressable>
 
               {/* Share button */}
@@ -608,6 +646,24 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansMedium,
     fontSize: 16,
     color: colors.deepTextPrimary,
+  },
+  descendBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: `${colors.tertiaryFixedDim}4D`,
+    backgroundColor: 'rgba(30, 16, 72, 0.3)',
+  },
+  descendBtnText: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 15,
+    color: colors.tertiaryFixedDim,
+    letterSpacing: 0.3,
   },
 
   goDeeperWrap: {

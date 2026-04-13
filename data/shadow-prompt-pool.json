@@ -1,0 +1,182 @@
+[
+  {
+    "id": "mirror-aspect",
+    "title": "The Mirror Aspect",
+    "depth_level": "II",
+    "prompt": "Identify a trait in another person that triggers a strong emotional reaction in you. The charge you feel is not about them — it is the place where your own disowned quality lives. What does this reveal about the part of yourself you have not yet been willing to meet?"
+  },
+  {
+    "id": "forbidden-feeling",
+    "title": "The Forbidden Feeling",
+    "depth_level": "I",
+    "prompt": "Every family and every childhood had emotions that were quietly treated as unacceptable — anger, grief, desire, pride, or joy. There is one feeling you still apologize for, even to yourself. What is it, and what did it cost you to learn that it was not safe to feel?"
+  },
+  {
+    "id": "secret-envy",
+    "title": "The Secret Envy",
+    "depth_level": "I",
+    "prompt": "Envy is the shadow pointing directly at what your soul wants but has not yet dared to claim. Think of someone whose life you quietly envy — not in detail, but in essence. What are they living that you have been told you cannot have?"
+  },
+  {
+    "id": "compliment-you-cannot-keep",
+    "title": "The Compliment You Cannot Keep",
+    "depth_level": "I",
+    "prompt": "There is a specific kind of praise that slides off you no matter how many times you hear it. The compliment your system refuses to absorb is often naming a truth about you that your conscious identity cannot yet hold. What is the compliment, and why does letting it in feel dangerous?"
+  },
+  {
+    "id": "unspoken-judgment",
+    "title": "The Judgment You Pretend Not to Make",
+    "depth_level": "I",
+    "prompt": "You hold quiet judgments about certain types of people — the needy, the arrogant, the passive, the indulgent — and you would never say them aloud. Jung would say those disowned figures live inside you, unacknowledged. Which type of person do you secretly look down on, and where does that same quality hide in your own life?"
+  },
+  {
+    "id": "approval-that-binds",
+    "title": "The Approval That Still Binds You",
+    "depth_level": "I",
+    "prompt": "Somewhere in your life there is still a voice — a parent, a teacher, a former partner, a culture — whose approval you are silently performing for. Most of the time you do not even notice you are doing it. Whose gaze are you still arranging your life beneath, and what would you do differently if that gaze dissolved tomorrow?"
+  },
+  {
+    "id": "unfinished-sentence",
+    "title": "The Unfinished Sentence",
+    "depth_level": "I",
+    "prompt": "There is something you never said to someone who mattered — a truth, an apology, a goodbye, a confession of love. The words are still sitting inside you, shaping your behavior in ways you can only half-see. What is the sentence, and what would it take to finally speak it, even into empty air?"
+  },
+  {
+    "id": "stranger-who-is-you",
+    "title": "The Stranger Who Is You",
+    "depth_level": "I",
+    "prompt": "Think of a person you actively dislike but barely know — someone whose whole being seems to offend you. Projection is most reliable when the charge is disproportionate to the encounter. What quality in them mirrors something you have refused to own in yourself?"
+  },
+  {
+    "id": "resentment-you-deny",
+    "title": "The Resentment You Deny",
+    "depth_level": "I",
+    "prompt": "There is someone you love toward whom you quietly hold a grievance you have told yourself you are over. Unfelt resentment does not dissolve — it organizes itself into chronic tension, withdrawal, or sudden coldness. Who are you still secretly angry at, and what would honoring that anger ask of you?"
+  },
+  {
+    "id": "memory-you-do-not-revisit",
+    "title": "The Memory You Do Not Revisit",
+    "depth_level": "I",
+    "prompt": "Certain memories sit behind a locked door in your psyche. You know they are there, you walk past them daily, but you do not open them. Which memory is behind that door right now, and what is it still trying to tell you?"
+  },
+  {
+    "id": "self-you-abandoned",
+    "title": "The Self You Abandoned",
+    "depth_level": "II",
+    "prompt": "Somewhere along the way you left a version of yourself behind — a child who loved something strange, a young adult who believed something fiercely, a dreamer who wanted something uncool. That self is not dead; it is exiled. Who was that version of you, and what did you have to become in order to survive without them?"
+  },
+  {
+    "id": "gift-you-refuse",
+    "title": "The Gift You Refuse to Claim",
+    "depth_level": "II",
+    "prompt": "There is a talent or sensitivity in you that others have named repeatedly, that you still do not let yourself fully believe. Claiming it would mean accepting a responsibility you have been dodging. What is the gift, and what would your life demand of you if you finally said yes to it?"
+  },
+  {
+    "id": "mother-you-carry",
+    "title": "The Mother You Still Carry",
+    "depth_level": "II",
+    "prompt": "Every mother transmits an unlived life — the self she could not become — and every child inherits some of that unfinished business. Setting judgment aside, what did your mother long for that she never allowed herself, and how is that longing still shaping your choices today?"
+  },
+  {
+    "id": "father-silent-rules",
+    "title": "The Father's Silent Rules",
+    "depth_level": "II",
+    "prompt": "Your father taught you unspoken laws about what a person is allowed to be, feel, want, or refuse. Most of those rules you absorbed without ever hearing them stated aloud. What is one law you have been living under, and what would it mean to break it cleanly?"
+  },
+  {
+    "id": "mask-has-cracked",
+    "title": "Where the Mask Has Cracked",
+    "depth_level": "II",
+    "prompt": "The persona is the face we show the world, and it works until it doesn't. Lately some situation in your life has been asking you to drop a version of yourself you have carefully maintained. Where is the mask slipping, and what is trying to come through the crack?"
+  },
+  {
+    "id": "body-refusal",
+    "title": "The Body's Refusal",
+    "depth_level": "II",
+    "prompt": "Your body knows things your mind has not given itself permission to know. It tightens in certain rooms, goes quiet around certain people, flares awake at certain ideas. What has your body been telling you that your conscious plans have been overriding?"
+  },
+  {
+    "id": "soul-figure",
+    "title": "The Soul-Figure",
+    "depth_level": "II",
+    "prompt": "Jung believed every psyche carries a contra-sexual soul-image — the Anima for a man, the Animus for a woman — that mediates between the ego and the deep unconscious. When that figure appears in dreams or in the world, it often arrives asking to be recognized. Has such a figure appeared to you recently, and what did you feel when you met them?"
+  },
+  {
+    "id": "golden-shadow",
+    "title": "The Golden Shadow",
+    "depth_level": "II",
+    "prompt": "Not all shadow material is dark. Some of it is luminous — qualities of beauty, power, or tenderness that you admire in others but refuse to own in yourself because claiming them feels arrogant or unsafe. Which radiant trait do you project onto people you admire, and what would it cost you to admit that it lives in you too?"
+  },
+  {
+    "id": "role-wearing-out",
+    "title": "The Role That Is Wearing You Out",
+    "depth_level": "II",
+    "prompt": "There is a role in your life — caretaker, achiever, peacemaker, rebel, the strong one — that you once chose and have since been consumed by. It is no longer serving you, but stepping out of it feels like betraying everyone who depends on you playing it. Which role is it, and who are you underneath it when no one is watching?"
+  },
+  {
+    "id": "dream-that-returns",
+    "title": "The Dream That Returns",
+    "depth_level": "II",
+    "prompt": "When a dream image or theme repeats, the psyche is underlining it — calling attention to something the waking mind has not yet understood. What image, place, or figure has been returning to your dreams lately, and what would you say to it if you could meet it consciously?"
+  },
+  {
+    "id": "wound-became-medicine",
+    "title": "The Wound That Became Medicine",
+    "depth_level": "III",
+    "prompt": "Every wound we carry contains, hidden inside it, the specific medicine we are meant to offer the world. The injury that nearly unmade you is often the same place you are most able to help another person. What is your wound, and what medicine has it quietly become?"
+  },
+  {
+    "id": "self-that-needs-mourning",
+    "title": "The Self That Needs Mourning",
+    "depth_level": "III",
+    "prompt": "Before any new self can fully arrive, an older self has to be allowed to die — and most of us skip the grieving. There is a version of you, with its own dreams and certainties, that no longer exists but has never been properly laid to rest. Who were they, what did they want, and what would it mean to grieve them now?"
+  },
+  {
+    "id": "life-you-chose-against",
+    "title": "The Life You Chose Against",
+    "depth_level": "III",
+    "prompt": "Every decisive yes in your life required a silent no to some other possibility, and the ghosts of those unchosen lives still haunt the edges of your thoughts. One of them in particular keeps returning — a path you did not take, a person you did not become. Which life is it, and what does it still want from you?"
+  },
+  {
+    "id": "the-inheritance",
+    "title": "The Inheritance",
+    "depth_level": "III",
+    "prompt": "Some of what you carry was never yours — it was handed to you wordlessly, by ancestors and family systems that never resolved it themselves. Before you can release it, you have to see it clearly enough to name it. What inherited shadow have you been carrying on behalf of people who came before you?"
+  },
+  {
+    "id": "teacher-who-came-as-chaos",
+    "title": "The Teacher Who Came as Chaos",
+    "depth_level": "III",
+    "prompt": "The Trickster arrives in our lives as disorder, disruption, and uncomfortable irony — and underneath the chaos is always an initiation the ego did not agree to. Look back at the last time your plans were thoroughly upended. What did the disruption make possible that your careful life never would have?"
+  },
+  {
+    "id": "broken-open",
+    "title": "The Time You Were Broken Open",
+    "depth_level": "III",
+    "prompt": "There was a period in your life when the structures you had built no longer held you, and something essential cracked. From the other side, that descent usually turns out to have been the beginning of something the old self could never have contained. What did you lose in that breaking, and what arrived in its place?"
+  },
+  {
+    "id": "love-you-should-not-need",
+    "title": "The Love You Should Not Need",
+    "depth_level": "III",
+    "prompt": "There is a person — present or past, real or imagined — you love in a way that does not fit your stated values or your chosen life. That love is not a mistake; it is information about an unmet need in the deep psyche. Who is the figure, and what do they represent that your conscious life has refused to make room for?"
+  },
+  {
+    "id": "inner-marriage",
+    "title": "The Inner Marriage",
+    "depth_level": "III",
+    "prompt": "Jung called the final stage of individuation the coniunctio — the inner marriage of opposites the psyche has been keeping apart. Within you, two parts are still refusing to sit at the same table: perhaps the ambitious one and the resting one, the logical one and the intuitive one, the adult and the child. Which two parts of you most need to meet, and what would their first conversation sound like?"
+  },
+  {
+    "id": "summons-you-defer",
+    "title": "The Summons You Keep Deferring",
+    "depth_level": "III",
+    "prompt": "There is a call you have been hearing for some time — a creative project, a relationship, a geography, a practice, a confession — that keeps arriving and that you keep moving to next month. The Self does not stop summoning; it only grows louder and stranger until it is heard. What has been calling you, and what are you afraid will happen if you finally answer?"
+  },
+  {
+    "id": "part-that-needs-forgiveness",
+    "title": "The Part That Needs Forgiveness",
+    "depth_level": "III",
+    "prompt": "Somewhere inside you, a younger or earlier version of yourself is still holding something against you — a choice you made, a person you became, a moment of weakness, a moment of cruelty. Full integration is not possible until that inner figure is met and forgiven, not from above but from beside. Who is the part of you that still needs forgiveness, and what do they need to hear from you today?"
+  }
+]

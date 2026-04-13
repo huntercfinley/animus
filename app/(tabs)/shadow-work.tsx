@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Pressable, Modal, Alert, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
-import { router } from 'expo-router';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShadowExercises } from '@/hooks/useShadowExercises';
@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { ExerciseCard } from '@/components/shadow/ExerciseCard';
 import { ExerciseSheet } from '@/components/shadow/ExerciseSheet';
+import { getTodaysPrompt } from '@/lib/shadow-pool';
 import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
 import type { ShadowExercise } from '@/types/database';
 
@@ -20,6 +21,20 @@ export default function ShadowWorkScreen() {
   const [activeExercise, setActiveExercise] = useState<ShadowExercise | null>(null);
   const [generating, setGenerating] = useState(false);
   const [featuredJournal, setFeaturedJournal] = useState('');
+  const featured = useMemo(() => getTodaysPrompt(), []);
+  const { open: openExerciseId } = useLocalSearchParams<{ open?: string }>();
+  const handledOpenParam = useRef<string | null>(null);
+
+  // When arriving from a dream with ?open=<exerciseId>, open that exercise's sheet.
+  useEffect(() => {
+    if (!openExerciseId || handledOpenParam.current === openExerciseId) return;
+    const match = exercises.find(e => e.id === openExerciseId);
+    if (match) {
+      handledOpenParam.current = openExerciseId;
+      setActiveExercise(match);
+      router.setParams({ open: undefined });
+    }
+  }, [openExerciseId, exercises]);
 
   const handleGenerate = async () => {
     const { allowed } = await checkLimit('shadow_exercise');
@@ -29,8 +44,9 @@ export default function ShadowWorkScreen() {
     }
     setGenerating(true);
     try {
-      await generateExercise();
+      const exercise = await generateExercise();
       await incrementLimit('shadow_exercise');
+      if (exercise) setActiveExercise(exercise);
     } catch (err) {
       Alert.alert('Couldn\'t generate exercise', 'Something went wrong reaching the depths. Please try again in a moment.');
     }
@@ -79,14 +95,12 @@ export default function ShadowWorkScreen() {
               <View style={styles.featuredHeader}>
                 <MaterialIcons name="nights-stay" size={36} color={colors.tertiaryFixedDim} />
                 <View style={styles.depthBadge}>
-                  <Text style={styles.depthBadgeText}>DEPTH LEVEL II</Text>
+                  <Text style={styles.depthBadgeText}>DEPTH LEVEL {featured.depth_level}</Text>
                 </View>
               </View>
 
-              <Text style={styles.featuredTitle}>The Mirror Aspect</Text>
-              <Text style={styles.featuredDesc}>
-                Identify a trait in another person that triggers a strong emotional reaction. What does this reveal about your own unacknowledged qualities?
-              </Text>
+              <Text style={styles.featuredTitle}>{featured.title}</Text>
+              <Text style={styles.featuredDesc}>{featured.prompt}</Text>
 
               <View style={styles.journalArea}>
                 <Text style={styles.journalLabel}>JOURNAL ENTRY</Text>
@@ -113,9 +127,9 @@ export default function ShadowWorkScreen() {
                       return;
                     }
                     try {
-                      const { data, error } = await supabase.from('shadow_exercises').insert({
+                      const { error } = await supabase.from('shadow_exercises').insert({
                         user_id: user.id,
-                        prompt: 'The Mirror Aspect: Identify a trait in another person that triggers a strong emotional reaction. What does this reveal about your own unacknowledged qualities?',
+                        prompt: `${featured.title}: ${featured.prompt}`,
                         response: featuredJournal,
                       }).select().single();
                       if (error) throw error;
