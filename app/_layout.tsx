@@ -56,6 +56,7 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="dream/[id]" options={{ presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="trash" options={{ presentation: 'modal' }} />
       <Stack.Screen name="import" options={{ presentation: 'modal' }} />
     </Stack>
   );

@@ -20,9 +20,10 @@ const accentColors: Record<string, string> = {
 
 interface DreamCardProps {
   dream: Dream;
+  onLongPress?: () => void;
 }
 
-export function DreamCard({ dream }: DreamCardProps) {
+export function DreamCard({ dream, onLongPress }: DreamCardProps) {
   const mood = dream.mood || 'mysterious';
   const accentColor = accentColors[mood] || `${colors.primary}4D`;
   const dateStr = new Date(dream.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -32,6 +33,8 @@ export function DreamCard({ dream }: DreamCardProps) {
     <Pressable
       style={styles.card}
       onPress={() => router.push({ pathname: '/dream/[id]', params: { id: dream.id } })}
+      onLongPress={onLongPress}
+      delayLongPress={400}
     >
       {/* Dream image */}
       {hasImage && (

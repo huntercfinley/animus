@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,7 +17,7 @@ import { ShareCardView } from '@/components/sharing/ShareCardView';
 
 export default function DreamDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getDream, getDreamSymbols } = useDreams();
+  const { getDream, getDreamSymbols, softDeleteDream } = useDreams();
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +49,30 @@ export default function DreamDetail() {
   useEffect(() => {
     loadDream();
   }, [loadDream]);
+
+  const handleDelete = () => {
+    if (!dream) return;
+    Alert.alert(
+      'Move to Trash',
+      'This dream will be moved to the trash. You can restore it from Settings → Trash.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Move to Trash',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await softDeleteDream(dream.id);
+              router.back();
+            } catch (err) {
+              Sentry.captureException(err, { tags: { feature: 'dream.softDelete' } });
+              Alert.alert('Error', 'Could not move dream to trash.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleShare = async () => {
     setShowShareCard(true);
@@ -115,12 +139,20 @@ export default function DreamDetail() {
           <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Animus</Text>
-        <Pressable
-          onPress={handleShare}
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-        >
-          <MaterialIcons name="ios-share" size={22} color={colors.primary} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={handleDelete}
+            style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
+          >
+            <MaterialIcons name="delete-outline" size={22} color={colors.textSecondary} />
+          </Pressable>
+          <Pressable
+            onPress={handleShare}
+            style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
+          >
+            <MaterialIcons name="ios-share" size={22} color={colors.primary} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -300,6 +332,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   headerTitle: {

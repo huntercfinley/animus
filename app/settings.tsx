@@ -283,6 +283,18 @@ export default function SettingsScreen() {
               <MaterialIcons name="arrow-forward" size={16} color={colors.outlineVariant} />
             </Pressable>
 
+            {/* Trash */}
+            <Pressable
+              style={({ pressed }) => [styles.dataRow, pressed && { backgroundColor: colors.surfaceContainerHigh }]}
+              onPress={() => router.push('/trash')}
+            >
+              <View style={styles.dataRowLeft}>
+                <MaterialIcons name="delete-outline" size={22} color={colors.secondary} style={{ opacity: 0.7 }} />
+                <Text style={styles.dataRowText}>Trash</Text>
+              </View>
+              <MaterialIcons name="arrow-forward" size={16} color={colors.outlineVariant} />
+            </Pressable>
+
             {/* Delete Account */}
             <Pressable
               style={({ pressed }) => [styles.dataRow, pressed && { backgroundColor: `${colors.error}0D` }]}

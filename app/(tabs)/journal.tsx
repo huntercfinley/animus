@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Keyboard } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Keyboard, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
@@ -38,8 +38,29 @@ function groupDreamsByMonth(dreams: Dream[]): ListItem[] {
 }
 
 export default function JournalScreen() {
-  const { dreams, loading, fetchDreams } = useDreams();
+  const { dreams, loading, fetchDreams, softDeleteDream } = useDreams();
   const [search, setSearch] = useState('');
+
+  const handleLongPress = (dream: Dream) => {
+    Alert.alert(
+      dream.title || 'Untitled Dream',
+      'Move this dream to the trash? You can restore it later from Settings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Move to Trash',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await softDeleteDream(dream.id);
+            } catch {
+              Alert.alert('Error', 'Could not move dream to trash.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const filtered = search.trim()
     ? dreams.filter(d =>
@@ -85,7 +106,7 @@ export default function JournalScreen() {
           renderItem={({ item }) =>
             item.type === 'header'
               ? <MonthHeader month={item.month} year={item.year} count={item.count} />
-              : <DreamCard dream={item.dream} />
+              : <DreamCard dream={item.dream} onLongPress={() => handleLongPress(item.dream)} />
           }
           onRefresh={fetchDreams}
           refreshing={loading}

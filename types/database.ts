@@ -38,6 +38,7 @@ export interface Dream {
   audio_url: string | null;
   model_used: string | null;
   created_at: string;
+  deleted_at: string | null;
   // Computed/joined fields (not always present)
   themes?: string[];
 }

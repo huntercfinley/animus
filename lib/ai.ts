@@ -38,6 +38,7 @@ export async function processDream(transcript: string, audioUri: string | null):
     .from('dreams')
     .select('image_style')
     .eq('user_id', user.id)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(5);
 
