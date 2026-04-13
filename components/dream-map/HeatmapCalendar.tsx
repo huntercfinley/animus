@@ -6,11 +6,9 @@ import type { Dream } from '@/types/database';
 
 interface HeatmapCalendarProps {
   dreams: Dream[];
-  streakCurrent: number;
-  streakLongest: number;
 }
 
-export function HeatmapCalendar({ dreams, streakCurrent, streakLongest }: HeatmapCalendarProps) {
+export function HeatmapCalendar({ dreams }: HeatmapCalendarProps) {
   const { grid, monthLabels } = useMemo(() => {
     const today = new Date();
     const startDate = new Date(today);
@@ -65,19 +63,9 @@ export function HeatmapCalendar({ dreams, streakCurrent, streakLongest }: Heatma
 
   return (
     <View>
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{streakCurrent}</Text>
-          <Text style={styles.statLabel}>Current streak</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{streakLongest}</Text>
-          <Text style={styles.statLabel}>Longest streak</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{dreams.length}</Text>
-          <Text style={styles.statLabel}>Total dreams</Text>
-        </View>
+      <View style={styles.totalRow}>
+        <Text style={styles.totalValue}>{dreams.length}</Text>
+        <Text style={styles.totalLabel}>{dreams.length === 1 ? 'Dream mapped' : 'Dreams mapped'}</Text>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -114,10 +102,9 @@ export function HeatmapCalendar({ dreams, streakCurrent, streakLongest }: Heatma
 }
 
 const styles = StyleSheet.create({
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: spacing.lg, paddingHorizontal: spacing.md },
-  stat: { alignItems: 'center' },
-  statValue: { fontSize: 28, color: colors.textPrimary, fontWeight: '600' },
-  statLabel: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
+  totalRow: { alignItems: 'center', paddingVertical: spacing.lg, paddingHorizontal: spacing.md },
+  totalValue: { fontFamily: fonts.serifBold, fontSize: 36, color: colors.textPrimary, letterSpacing: -0.5 },
+  totalLabel: { fontFamily: fonts.sans, fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 },
   monthRow: { height: 20, position: 'relative', marginLeft: 4 },
   monthLabel: { position: 'absolute', fontSize: 10, color: colors.textMuted },
   gridRow: { flexDirection: 'row', gap: 2 },

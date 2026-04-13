@@ -149,8 +149,6 @@ export default function ProfileScreen() {
     ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : '';
   const dreamCount = profile?.dream_count ?? 0;
-  const streakCurrent = profile?.streak_current ?? 0;
-  const streakLongest = profile?.streak_longest ?? 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -220,22 +218,10 @@ export default function ProfileScreen() {
 
         {memberSince ? <Text style={styles.memberSince}>Member since {memberSince}</Text> : null}
 
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.statTile}>
-            <Text style={styles.statValue}>{dreamCount}</Text>
-            <Text style={styles.statLabel}>Dreams</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statTile}>
-            <Text style={styles.statValue}>{streakCurrent}</Text>
-            <Text style={styles.statLabel}>Day streak</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statTile}>
-            <Text style={styles.statValue}>{streakLongest}</Text>
-            <Text style={styles.statLabel}>Longest</Text>
-          </View>
+        {/* Dream count */}
+        <View style={styles.dreamCountPill}>
+          <Text style={styles.dreamCountValue}>{dreamCount}</Text>
+          <Text style={styles.dreamCountLabel}>{dreamCount === 1 ? 'Dream recorded' : 'Dreams recorded'}</Text>
         </View>
 
         {/* Dominant Archetype */}
@@ -454,41 +440,25 @@ const styles = StyleSheet.create({
   },
 
   // Stats
-  statsRow: {
-    flexDirection: 'row',
+  dreamCountPill: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 16,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
-    width: '100%',
-    ...shadows.cardLifted,
-    shadowColor: 'rgba(81, 79, 129, 0.06)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 32,
   },
-  statTile: { flex: 1, alignItems: 'center' },
-  statValue: {
+  dreamCountValue: {
     fontFamily: fonts.serifBold,
-    fontSize: 24,
+    fontSize: 44,
     color: colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: -1,
+    lineHeight: 48,
   },
-  statLabel: {
+  dreamCountLabel: {
     fontFamily: fonts.sans,
     fontSize: 11,
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: `${colors.outlineVariant}40`,
+    marginTop: 4,
   },
 
   // Section card

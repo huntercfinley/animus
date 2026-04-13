@@ -120,11 +120,7 @@ export default function DreamMapScreen() {
         {/* Visualization — Stitch: aspect-[4/5] rounded-xxl bg-surface-container-low */}
         <View style={styles.vizContainer}>
           {view === 'heatmap' ? (
-            <HeatmapCalendar
-              dreams={dreams}
-              streakCurrent={profile?.streak_current || 0}
-              streakLongest={profile?.streak_longest || 0}
-            />
+            <HeatmapCalendar dreams={dreams} />
           ) : (
             <DreamWeb dreams={dreams} symbols={symbols} />
           )}
