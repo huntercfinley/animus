@@ -209,7 +209,7 @@ export default function SettingsScreen() {
 
         {/* Appearance Section — analyze-appearance edge function (premium) */}
         <View style={styles.appearanceSection}>
-          <Text style={styles.sectionLabel}>YOUR APPEARANCE</Text>
+          <Text style={styles.sectionLabel}>APPEARING IN DREAMS</Text>
           <View style={styles.appearanceCard}>
             {appearance ? (
               <>
@@ -294,18 +294,6 @@ export default function SettingsScreen() {
               </View>
               <MaterialIcons name="arrow-forward" size={16} color={colors.outlineVariant} />
             </Pressable>
-
-            {/* Delete Account */}
-            <Pressable
-              style={({ pressed }) => [styles.dataRow, pressed && { backgroundColor: `${colors.error}0D` }]}
-              onPress={handleDeleteAccount}
-            >
-              <View style={styles.dataRowLeft}>
-                <MaterialIcons name="delete-forever" size={22} color={colors.error} style={{ opacity: 0.7 }} />
-                <Text style={styles.deleteText}>Delete Account</Text>
-              </View>
-              <MaterialIcons name="warning" size={16} color={`${colors.error}4D`} />
-            </Pressable>
           </View>
         </View>
 
@@ -350,6 +338,14 @@ export default function SettingsScreen() {
             <Text style={styles.privacyLink}>Privacy Policy</Text>
           </Pressable>
         </View>
+
+        {/* Delete Account — isolated at the very bottom to prevent mis-taps */}
+        <Pressable
+          style={({ pressed }) => [styles.deleteAccountLink, pressed && { opacity: 0.5 }]}
+          onPress={handleDeleteAccount}
+        >
+          <Text style={styles.deleteAccountLinkText}>Delete Account</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -579,12 +575,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textPrimary,
   },
-  deleteText: {
-    fontFamily: fonts.sansMedium,
-    fontSize: 16,
-    color: colors.error,
-  },
-
   // Quote Image
   quoteCard: {
     width: '100%',
@@ -665,5 +655,19 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textDecorationLine: 'underline' as const,
     marginTop: 8,
+  },
+
+  // Delete Account — visually isolated, small and understated
+  deleteAccountLink: {
+    alignSelf: 'center',
+    marginTop: 64,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  deleteAccountLinkText: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    color: `${colors.error}99`,
+    textDecorationLine: 'underline' as const,
   },
 });
