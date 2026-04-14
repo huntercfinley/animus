@@ -8,6 +8,9 @@ import { Image } from 'expo-image';
 import * as Sentry from '@sentry/react-native';
 import { useDreams } from '@/hooks/useDreams';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { InsufficientLumenError } from '@/hooks/useLumen';
+import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenSheet';
+import { LumenShop } from '@/components/lumen/LumenShop';
 import { OuroborosSpinner } from '@/components/ui/OuroborosSpinner';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, DreamSymbol } from '@/types/database';
@@ -23,6 +26,8 @@ export default function DreamDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getDream, getDreamSymbols, softDeleteDream } = useDreams();
   const { checkLimit, incrementLimit } = useUsageLimits();
+  const [insufficientLumen, setInsufficientLumen] = useState<{ current: number; required: number } | null>(null);
+  const [shopOpen, setShopOpen] = useState(false);
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,6 +115,7 @@ export default function DreamDetail() {
     setGeneratingImage(true);
     setImageError(null);
     try {
+      // generate-image deducts Lumen server-side (migration 20 lockdown).
       const stylePrefix = ART_STYLES.find(s => s.id === dream.image_style)?.promptPrefix ?? '';
       const result = await callEdgeFunction<{ image_url: string }>('generate-image', {
         image_prompt: dream.image_prompt,
@@ -119,8 +125,12 @@ export default function DreamDetail() {
       await supabase.from('dreams').update({ image_url: result.image_url }).eq('id', dream.id);
       setDream({ ...dream, image_url: result.image_url });
     } catch (err) {
-      Sentry.captureException(err, { tags: { feature: 'dream.retryImage' }, extra: { dreamId: dream.id } });
-      setImageError((err as Error).message || 'Image generation failed');
+      if (err instanceof InsufficientLumenError) {
+        setInsufficientLumen({ current: err.current, required: err.required });
+      } else {
+        Sentry.captureException(err, { tags: { feature: 'dream.retryImage' }, extra: { dreamId: dream.id } });
+        setImageError((err as Error).message || 'Image generation failed');
+      }
     } finally {
       setGeneratingImage(false);
     }
@@ -344,6 +354,15 @@ export default function DreamDetail() {
           </View>
         )}
       </ScrollView>
+      <InsufficientLumenSheet
+        visible={!!insufficientLumen}
+        current={insufficientLumen?.current ?? 0}
+        required={insufficientLumen?.required ?? 0}
+        action="image_gen"
+        onClose={() => setInsufficientLumen(null)}
+        onBuyLumen={() => setShopOpen(true)}
+      />
+      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
     </SafeAreaView>
   );
 }

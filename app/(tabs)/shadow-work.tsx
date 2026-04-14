@@ -6,6 +6,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShadowExercises } from '@/hooks/useShadowExercises';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { useLumen } from '@/hooks/useLumen';
+import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { ExerciseCard } from '@/components/shadow/ExerciseCard';
@@ -18,6 +20,8 @@ export default function ShadowWorkScreen() {
   const { user } = useAuth();
   const { exercises, loading, fetchExercises, generateExercise, saveResponse } = useShadowExercises();
   const { checkLimit, incrementLimit } = useUsageLimits();
+  const { earnShadow } = useLumen();
+  const toast = useToast();
   const [activeExercise, setActiveExercise] = useState<ShadowExercise | null>(null);
   const [generating, setGenerating] = useState(false);
   const [featuredJournal, setFeaturedJournal] = useState('');
@@ -127,14 +131,23 @@ export default function ShadowWorkScreen() {
                       return;
                     }
                     try {
-                      const { error } = await supabase.from('shadow_exercises').insert({
+                      const { data: inserted, error } = await supabase.from('shadow_exercises').insert({
                         user_id: user.id,
                         prompt: `${featured.title}: ${featured.prompt}`,
                         response: featuredJournal,
                       }).select().single();
                       if (error) throw error;
                       await incrementLimit('shadow_exercise');
-                      Alert.alert('Session Archived', 'Your reflection has been saved.');
+                      if (inserted && featuredJournal.trim().length >= 100) {
+                        try {
+                          const result = await earnShadow(inserted.id);
+                          toast.showLumen(result.earned);
+                        } catch {
+                          toast.show('Session archived', { tone: 'lumen', icon: 'nightlight-round' });
+                        }
+                      } else {
+                        toast.show('Session archived', { tone: 'lumen', icon: 'nightlight-round' });
+                      }
                       setFeaturedJournal('');
                       fetchExercises();
                     } catch (err) {
@@ -199,7 +212,17 @@ export default function ShadowWorkScreen() {
             <ExerciseSheet
               prompt={activeExercise.prompt}
               existingResponse={activeExercise.response}
-              onSave={(text) => saveResponse(activeExercise.id, text)}
+              onSave={async (text) => {
+                await saveResponse(activeExercise.id, text);
+                if (text.trim().length >= 100) {
+                  try {
+                    const result = await earnShadow(activeExercise.id);
+                    toast.showLumen(result.earned);
+                  } catch {
+                    // earn failures are non-fatal
+                  }
+                }
+              }}
               onClose={() => setActiveExercise(null)}
             />
           )}

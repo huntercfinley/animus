@@ -12,6 +12,7 @@ export interface Profile {
   username: string | null;
   avatar_url: string | null;
   subscription_tier: SubscriptionTier;
+  lumen_balance: number;
   onboarding_completed: boolean;
   ai_context: Record<string, unknown>;
   dream_count: number;

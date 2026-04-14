@@ -6,8 +6,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { NotoSerif_400Regular, NotoSerif_400Regular_Italic, NotoSerif_700Bold } from '@expo-google-fonts/noto-serif';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { initializeAds } from '@/lib/ads';
 import { colors } from '@/constants/theme';
@@ -78,11 +80,15 @@ function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <RootNavigator />
-        </SubscriptionProvider>
-      </AuthProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <ToastProvider>
+              <RootNavigator />
+            </ToastProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

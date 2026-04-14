@@ -1,27 +1,38 @@
 import * as Sentry from '@sentry/react-native';
 import { supabase } from './supabase';
+import { InsufficientLumenError } from './lumen-errors';
 import { selectArtStyle } from '@/constants/art-styles';
 import type { InterpretDreamResponse, Dream, DreamSymbol } from '@/types/database';
 
-async function callEdgeFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
+async function callEdgeFunction<T>(name: string, body: Record<string, unknown>, opts?: { silent?: boolean }): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
   if (error) {
     let detail = '';
+    let parsed: any = null;
     try {
       const ctx: any = (error as any).context;
       if (ctx?.json) {
-        const j = await ctx.json();
-        detail = j?.error || j?.message || JSON.stringify(j);
+        parsed = await ctx.json();
+        detail = parsed?.error || parsed?.message || JSON.stringify(parsed);
       } else if (ctx?.text) {
         detail = (await ctx.text()).slice(0, 500);
       }
     } catch {}
+    // Special-case insufficient_lumen so UIs can pattern-match with
+    // `instanceof InsufficientLumenError` and read current/required. Edge
+    // functions (generate-image, go-deeper, dream-insights, dream-connection,
+    // lumen-spend) all return this shape on a failed spend.
+    if (parsed?.error === 'insufficient_lumen') {
+      throw new InsufficientLumenError(parsed.current_balance ?? 0, parsed.required ?? 0);
+    }
     const msg = detail || error.message || `${name} failed`;
     const err = new Error(msg);
-    Sentry.captureException(err, {
-      tags: { edgeFunction: name },
-      extra: { detail },
-    });
+    if (!opts?.silent) {
+      Sentry.captureException(err, {
+        tags: { edgeFunction: name },
+        extra: { detail },
+      });
+    }
     throw err;
   }
   if (data == null) throw new Error(`${name} returned no data`);
@@ -85,11 +96,8 @@ export async function processDream(transcript: string, audioUri: string | null):
     });
   }
 
-  // Update archetype profile for premium users
-  const { data: userProfile } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
-  if (userProfile?.subscription_tier === 'premium') {
-    callEdgeFunction('archetype-snapshot', {}).catch(err => console.warn('Archetype update failed:', err));
-  }
+  // Refresh archetype snapshot for everyone — archetype is universal, not premium-gated.
+  callEdgeFunction('archetype-snapshot', {}).catch(err => console.warn('Archetype update failed:', err));
 
   const shouldNudgeWorld = await checkWorldNudge(user.id);
 
@@ -105,16 +113,27 @@ async function checkWorldNudge(userId: string): Promise<boolean> {
 }
 
 async function generateAndAttachImage(dreamId: string, imagePrompt: string, stylePrefix: string) {
-  const result = await callEdgeFunction<{ image_url: string }>('generate-image', {
-    image_prompt: imagePrompt,
-    style_prefix: stylePrefix,
-    dream_id: dreamId,
-  });
+  // generate-image deducts Lumen server-side before calling Imagen (and
+  // refunds on failure). insufficient_lumen is expected for free users
+  // with a low balance — silent so it doesn't trip Sentry.
+  try {
+    const result = await callEdgeFunction<{ image_url: string }>('generate-image', {
+      image_prompt: imagePrompt,
+      style_prefix: stylePrefix,
+      dream_id: dreamId,
+    }, { silent: true });
 
-  await supabase
-    .from('dreams')
-    .update({ image_url: result.image_url })
-    .eq('id', dreamId);
+    await supabase
+      .from('dreams')
+      .update({ image_url: result.image_url })
+      .eq('id', dreamId);
+  } catch (err) {
+    if ((err as Error).message?.includes('insufficient_lumen')) {
+      console.warn('Skipping auto image: insufficient Lumen');
+      return;
+    }
+    throw err;
+  }
 }
 
 async function uploadAudio(dreamId: string, userId: string, audioUri: string) {

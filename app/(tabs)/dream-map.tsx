@@ -4,10 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
 import { useAuth } from '@/hooks/useAuth';
+import { InsufficientLumenError } from '@/hooks/useLumen';
 import { supabase } from '@/lib/supabase';
 import { callEdgeFunction } from '@/lib/ai';
 import { HeatmapCalendar } from '@/components/dream-map/HeatmapCalendar';
 import { DreamWeb } from '@/components/dream-map/DreamWeb';
+import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenSheet';
+import { LumenShop } from '@/components/lumen/LumenShop';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { DreamSymbol, PatternReport, DreamConnection } from '@/types/database';
@@ -22,6 +25,8 @@ export default function DreamMapScreen() {
 
   const [latestReport, setLatestReport] = useState<PatternReport | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insufficientLumen, setInsufficientLumen] = useState<{ current: number; required: number } | null>(null);
+  const [shopOpen, setShopOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -35,10 +40,14 @@ export default function DreamMapScreen() {
   const generateInsights = useCallback(async (periodType: 'weekly' | 'monthly') => {
     setInsightsLoading(true);
     try {
+      // dream-insights deducts Lumen server-side (was client-side until the
+      // migration 20 lockdown — a tampered client could bypass the charge).
       const report = await callEdgeFunction<PatternReport>('dream-insights', { period_type: periodType });
       setLatestReport(report);
     } catch (err) {
-      // silently fail — user may not be premium or have enough dreams
+      if (err instanceof InsufficientLumenError) {
+        setInsufficientLumen({ current: err.current, required: err.required });
+      }
     } finally {
       setInsightsLoading(false);
     }
@@ -60,14 +69,17 @@ export default function DreamMapScreen() {
     if (selectedDreams.length !== 2) return;
     setConnectionLoading(true);
     try {
+      // dream-connection deducts Lumen server-side.
       const result = await callEdgeFunction<DreamConnection>('dream-connection', {
         dream_a_id: selectedDreams[0],
         dream_b_id: selectedDreams[1],
       });
       setConnectionResult(result);
       setSelectedDreams([]);
-    } catch {
-      // silently fail
+    } catch (err) {
+      if (err instanceof InsufficientLumenError) {
+        setInsufficientLumen({ current: err.current, required: err.required });
+      }
     } finally {
       setConnectionLoading(false);
     }
@@ -268,6 +280,16 @@ export default function DreamMapScreen() {
           </View>
         )}
       </ScrollView>
+
+      <InsufficientLumenSheet
+        visible={!!insufficientLumen}
+        current={insufficientLumen?.current ?? 0}
+        required={insufficientLumen?.required ?? 0}
+        action="connection"
+        onClose={() => setInsufficientLumen(null)}
+        onBuyLumen={() => setShopOpen(true)}
+      />
+      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
     </SafeAreaView>
   );
 }

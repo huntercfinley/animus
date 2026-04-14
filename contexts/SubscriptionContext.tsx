@@ -89,9 +89,28 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setIsPremium(premium);
 
       if (user) {
-        await supabase.from('profiles')
-          .update({ subscription_tier: premium ? 'premium' : 'free' })
-          .eq('id', user.id);
+        // profiles.subscription_tier is server-managed (column-level revoke
+        // since migration 19). subscription-sync re-checks the entitlement
+        // against RevenueCat's REST API and updates the row via service_role,
+        // so a tampered client can't promote itself to premium.
+        try {
+          await supabase.functions.invoke('subscription-sync', { body: {} });
+          await refreshProfile();
+        } catch (syncErr) {
+          if (__DEV__) console.warn('[SubscriptionContext] subscription-sync failed', syncErr);
+        }
+
+        // Premium subscribers get 1500 Lumen/month, capped at a 3000 stockpile.
+        // The RPC is idempotent per calendar month, so calling it on every app
+        // launch is safe — it no-ops after the first claim of the period.
+        if (premium) {
+          try {
+            await supabase.functions.invoke('lumen-monthly-grant', { body: {} });
+            await refreshProfile();
+          } catch (grantErr) {
+            if (__DEV__) console.warn('[SubscriptionContext] monthly grant skipped', grantErr);
+          }
+        }
       }
     } catch (err) {
       if (__DEV__) console.warn('[SubscriptionContext] checkPremiumStatus failed', err);
@@ -143,9 +162,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const hasPremium = customerInfo.entitlements.active['premium'] !== undefined;
       setIsPremium(hasPremium);
       if (user) {
-        await supabase.from('profiles')
-          .update({ subscription_tier: hasPremium ? 'premium' : 'free' })
-          .eq('id', user.id);
+        // Server-side mirror via subscription-sync (the column is locked from
+        // direct client writes — see migration 19).
+        try {
+          await supabase.functions.invoke('subscription-sync', { body: {} });
+        } catch (syncErr) {
+          if (__DEV__) console.warn('[SubscriptionContext] sync after restore failed', syncErr);
+        }
       }
       await refreshProfile();
       return hasPremium;

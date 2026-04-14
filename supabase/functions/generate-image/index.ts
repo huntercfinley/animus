@@ -8,9 +8,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, content-type',
 };
 
-// Monthly image limits
-const MONTHLY_LIMITS = { free: 10, premium: 30 };
-
 // --- Image generation by tier ---
 // Free → Imagen 4 Fast ($0.02/image), Premium → Imagen 4 Standard ($0.04/image)
 
@@ -95,59 +92,26 @@ async function generateWithFallback(rawPrompt: string, model: string): Promise<{
   }
 }
 
-// Check monthly image generation count
-async function getMonthlyImageCount(supabase: any, userId: string): Promise<number> {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-  const { data } = await supabase
-    .from('usage_limits')
-    .select('count')
-    .eq('user_id', userId)
-    .eq('limit_type', 'image_generation')
-    .gte('period_date', monthStart.split('T')[0])
-    .maybeSingle();
-
-  return data?.count || 0;
-}
-
-// Increment monthly image generation count
-async function incrementMonthlyImageCount(supabase: any, userId: string) {
-  const today = new Date().toISOString().split('T')[0];
-  const monthKey = today.substring(0, 7) + '-01'; // YYYY-MM-01
-
-  const { data: existing } = await supabase
-    .from('usage_limits')
-    .select('id, count')
-    .eq('user_id', userId)
-    .eq('limit_type', 'image_generation')
-    .eq('period_date', monthKey)
-    .maybeSingle();
-
-  if (existing) {
-    await supabase.from('usage_limits')
-      .update({ count: existing.count + 1, updated_at: new Date().toISOString() })
-      .eq('id', existing.id);
-  } else {
-    await supabase.from('usage_limits').insert({
-      user_id: userId,
-      dream_id: null,
-      limit_type: 'image_generation',
-      count: 1,
-      period_date: monthKey,
-    });
-  }
-}
+// Image generation cost in Lumen. Mirrors lumen-spend COSTS['image_gen'].
+const IMAGE_GEN_COST = 20;
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS });
   }
 
+  // Track whether we already deducted so the catch block knows to refund.
+  let deductedForUser: string | null = null;
+  let deductedDreamId: string | null = null;
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'Missing authorization' }), { status: 401, headers: CORS_HEADERS });
     }
 
     const supabase = createClient(
@@ -158,34 +122,84 @@ serve(async (req: Request) => {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: CORS_HEADERS });
     }
 
     const { image_prompt, style_prefix, dream_id } = await req.json();
-    if (!image_prompt) {
-      return new Response(JSON.stringify({ error: 'No image_prompt provided' }), { status: 400 });
+    if (!image_prompt || typeof image_prompt !== 'string') {
+      return new Response(JSON.stringify({ error: 'No image_prompt provided' }), { status: 400, headers: CORS_HEADERS });
+    }
+    // Caps on user-controlled prompt fields. Our own interpret-dream output is
+    // typically ~1-2KB; 4KB is comfortable headroom. style_prefix is a short
+    // art-style tag from the client picker ("impressionist oil painting,") so
+    // 200 chars is plenty.
+    if (image_prompt.length > 4000) {
+      return new Response(
+        JSON.stringify({ error: 'image_prompt_too_long', max: 4000, got: image_prompt.length }),
+        { status: 413, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+      );
+    }
+    if (style_prefix && (typeof style_prefix !== 'string' || style_prefix.length > 200)) {
+      return new Response(
+        JSON.stringify({ error: 'style_prefix_too_long', max: 200 }),
+        { status: 413, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+      );
     }
 
-    // Check subscription tier and appearance data
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('subscription_tier, ai_context')
-      .eq('id', user.id)
-      .single();
+    // Check subscription tier and appearance data; simultaneously verify
+    // dream_id ownership (if provided) so the ledger + storage path cannot be
+    // scoped to another user's dream.
+    const [profileRes, dreamRes] = await Promise.all([
+      supabase.from('profiles').select('subscription_tier, ai_context').eq('id', user.id).single(),
+      dream_id
+        ? supabase.from('dreams').select('id').eq('id', dream_id).eq('user_id', user.id).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
 
+    if (dream_id && !dreamRes.data) {
+      return new Response(
+        JSON.stringify({ error: 'dream_not_found_or_not_owned' }),
+        { status: 404, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+      );
+    }
+
+    const profile = profileRes.data;
     const isPremium = profile?.subscription_tier === 'premium';
-    const monthlyLimit = isPremium ? MONTHLY_LIMITS.premium : MONTHLY_LIMITS.free;
     const appearance = isPremium ? profile?.ai_context?.appearance : null;
 
-    // Check monthly limit
-    const currentCount = await getMonthlyImageCount(supabase, user.id);
-    if (currentCount >= monthlyLimit) {
-      return new Response(JSON.stringify({
-        error: 'Monthly image limit reached',
-        limit: monthlyLimit,
-        used: currentCount,
-        upgrade: !isPremium,
-      }), { status: 429, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } });
+    // Deduct Lumen BEFORE calling Imagen. Premium is unmetered per spec.
+    // The client cannot be trusted to charge itself — a tampered build could
+    // call this function directly and burn our Imagen budget for free. See
+    // docs/lumen-economy-spec.md for the cost table.
+    if (!isPremium) {
+      const { error: spendErr } = await admin.rpc('lumen_spend_atomic', {
+        p_user_id: user.id,
+        p_amount: IMAGE_GEN_COST,
+        p_type: 'spend_image_gen',
+        p_dream_id: dream_id ?? null,
+        p_exercise_id: null,
+      });
+      if (spendErr) {
+        const msg = spendErr.message || '';
+        if (msg.includes('insufficient_lumen')) {
+          const { data: p } = await admin
+            .from('profiles')
+            .select('lumen_balance')
+            .eq('id', user.id)
+            .single();
+          return new Response(
+            JSON.stringify({
+              error: 'insufficient_lumen',
+              current_balance: p?.lumen_balance ?? 0,
+              required: IMAGE_GEN_COST,
+            }),
+            { status: 402, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+          );
+        }
+        throw spendErr;
+      }
+      deductedForUser = user.id;
+      deductedDreamId = dream_id ?? null;
     }
 
     // Inject user appearance for premium users who have set it up
@@ -212,25 +226,38 @@ serve(async (req: Request) => {
       });
 
     if (uploadError) {
-      return new Response(JSON.stringify({ error: 'Upload failed', details: uploadError.message }), { status: 500 });
+      throw new Error(`upload_failed: ${uploadError.message}`);
     }
 
     const { data: { publicUrl } } = supabase.storage
       .from('dream-images')
       .getPublicUrl(fileName);
 
-    // Increment monthly usage
-    await incrementMonthlyImageCount(supabase, user.id);
-
+    // Success — Lumen stays spent.
     return new Response(JSON.stringify({
       image_url: publicUrl,
       model_used: modelUsed,
       show_ad: !isPremium,
-      images_remaining: monthlyLimit - currentCount - 1,
     }), {
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
+    // Refund the spend if Imagen or upload failed after we already deducted.
+    if (deductedForUser) {
+      const { error: refundErr } = await admin.rpc('lumen_refund_atomic', {
+        p_user_id: deductedForUser,
+        p_amount: IMAGE_GEN_COST,
+        p_type: 'refund_image_gen',
+        p_dream_id: deductedDreamId,
+        p_exercise_id: null,
+      });
+      if (refundErr) {
+        console.error('[generate-image] refund failed — user is down 20 Lumen', refundErr);
+      }
+    }
+    return new Response(
+      JSON.stringify({ error: (err as Error).message }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+    );
   }
 });

@@ -44,7 +44,7 @@ export default function MyWorldScreen() {
   const sections = groupByCategory(entries);
 
   useEffect(() => {
-    callEdgeFunction<{ suggestions: { symbol: string; count: number }[] }>('suggest-world-entry', {})
+    callEdgeFunction<{ suggestions: { symbol: string; count: number }[] }>('suggest-world-entry', {}, { silent: true })
       .then(res => setSuggestions(res.suggestions))
       .catch(() => {});
   }, [entries.length]);

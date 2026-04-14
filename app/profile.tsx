@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Sentry from '@sentry/react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { LumenShop } from '@/components/lumen/LumenShop';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, ArchetypeSnapshot } from '@/types/database';
 
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const [usernameDraft, setUsernameDraft] = useState('');
   const [savingUsername, setSavingUsername] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
 
   const fetchProfileData = useCallback(async () => {
     if (!user) return;
@@ -149,6 +151,7 @@ export default function ProfileScreen() {
     ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : '';
   const dreamCount = profile?.dream_count ?? 0;
+  const lumenBalance = profile?.lumen_balance ?? 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -218,10 +221,25 @@ export default function ProfileScreen() {
 
         {memberSince ? <Text style={styles.memberSince}>Member since {memberSince}</Text> : null}
 
-        {/* Dream count */}
-        <View style={styles.dreamCountPill}>
-          <Text style={styles.dreamCountValue}>{dreamCount}</Text>
-          <Text style={styles.dreamCountLabel}>{dreamCount === 1 ? 'Dream recorded' : 'Dreams recorded'}</Text>
+        {/* Dream count + Lumen balance */}
+        <View style={styles.statsRow}>
+          <View style={styles.statPill}>
+            <Text style={styles.statValue}>{dreamCount}</Text>
+            <Text style={styles.statLabel}>{dreamCount === 1 ? 'Dream' : 'Dreams'}</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <Pressable
+            style={({ pressed }) => [styles.statPill, pressed && { opacity: 0.7 }]}
+            onPress={() => setShopOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Open Lumen shop"
+          >
+            <View style={styles.lumenValueRow}>
+              <MaterialIcons name="auto-awesome" size={22} color={colors.primary} />
+              <Text style={styles.statValue}>{lumenBalance}</Text>
+            </View>
+            <Text style={styles.statLabel}>Lumen · Tap to buy</Text>
+          </Pressable>
         </View>
 
         {/* Dominant Archetype */}
@@ -316,6 +334,7 @@ export default function ProfileScreen() {
           <Text style={styles.privateText}>Private — only you can see this</Text>
         </View>
       </ScrollView>
+      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -440,25 +459,43 @@ const styles = StyleSheet.create({
   },
 
   // Stats
-  dreamCountPill: {
+  statsRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.lg,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
   },
-  dreamCountValue: {
+  statPill: {
+    alignItems: 'center',
+    minWidth: 96,
+  },
+  statValue: {
     fontFamily: fonts.serifBold,
-    fontSize: 44,
+    fontSize: 38,
     color: colors.textPrimary,
     letterSpacing: -1,
-    lineHeight: 48,
+    lineHeight: 44,
   },
-  dreamCountLabel: {
+  lumenValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statLabel: {
     fontFamily: fonts.sans,
     fontSize: 11,
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginTop: 4,
+  },
+  statDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: colors.textMuted,
+    opacity: 0.25,
   },
 
   // Section card

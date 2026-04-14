@@ -22,8 +22,26 @@ serve(async (req: Request) => {
     if (!authHeader) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+
+    // Daily rate limit — shadow-exercise hits Claude on every call.
+    // 20/day is generous given the spec's 3/day earn cap on lumen-earn-shadow.
+    const { error: rateErr } = await admin.rpc('check_and_increment_rate_limit', {
+      p_user_id: user.id,
+      p_limit_key: 'shadow_exercise_gen',
+      p_max: 20,
+    });
+    if (rateErr) {
+      if (rateErr.message?.includes('rate_limit_exceeded')) {
+        return new Response(
+          JSON.stringify({ error: 'rate_limit_exceeded', limit: 20, reset: 'midnight UTC' }),
+          { status: 429, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        );
+      }
+      console.error('rate limit rpc failed:', rateErr);
+    }
 
     const { dream_id, symbols } = await req.json();
 

@@ -61,11 +61,55 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'No photo_urls provided' }), { status: 400 });
     }
 
-    // Download photos and convert to base64 for Gemini Vision
+    // SSRF guard: photo_urls must point to OUR supabase storage bucket. An
+    // attacker could otherwise pass http://169.254.169.254/ (cloud metadata),
+    // internal services, or arbitrary hosts and have the edge function fetch
+    // them server-side.
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const ALLOWED_PREFIX = `${SUPABASE_URL}/storage/v1/object/`;
+    for (const url of photo_urls.slice(0, 3)) {
+      if (typeof url !== 'string' || !url.startsWith(ALLOWED_PREFIX)) {
+        return new Response(
+          JSON.stringify({ error: 'invalid_photo_url', must_start_with: ALLOWED_PREFIX }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+        );
+      }
+    }
+
+    // Rate limit: 5/day — users don't need to re-analyze their appearance
+    // frequently. Premium only, but still worth bounding.
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+    const { error: rateErr } = await admin.rpc('check_and_increment_rate_limit', {
+      p_user_id: user.id,
+      p_limit_key: 'analyze_appearance',
+      p_max: 5,
+    });
+    if (rateErr) {
+      if ((rateErr.message || '').includes('rate_limit_exceeded')) {
+        return new Response(
+          JSON.stringify({ error: 'rate_limit_exceeded', daily_max: 5 }),
+          { status: 429, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+        );
+      }
+      throw rateErr;
+    }
+
+    // Download photos and convert to base64 for Gemini Vision. Cap each
+    // response body at 10MB so a malicious URL can't blow memory.
+    const MAX_BYTES = 10 * 1024 * 1024;
     const imageParts = [];
     for (const url of photo_urls.slice(0, 3)) {
       const imgResponse = await fetch(url);
       const imgBuffer = await imgResponse.arrayBuffer();
+      if (imgBuffer.byteLength > MAX_BYTES) {
+        return new Response(
+          JSON.stringify({ error: 'photo_too_large', max_bytes: MAX_BYTES }),
+          { status: 413, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
+        );
+      }
       const base64 = btoa(String.fromCharCode(...new Uint8Array(imgBuffer)));
       imageParts.push({
         inlineData: {

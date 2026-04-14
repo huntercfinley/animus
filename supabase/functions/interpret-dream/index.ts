@@ -102,6 +102,12 @@ serve(async (req: Request) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
+    // Admin client for the rate-limit RPC (service_role bypasses RLS).
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
@@ -110,6 +116,15 @@ serve(async (req: Request) => {
     const { transcript } = await req.json();
     if (!transcript?.trim()) {
       return new Response(JSON.stringify({ error: 'No transcript provided' }), { status: 400 });
+    }
+    // Hard cap on transcript size to bound Claude input-token cost per call.
+    // ~10KB is ~2000 words — longer than any spoken dream, tight enough to block
+    // tampered-client balloon attacks within the 20/day rate limit.
+    if (transcript.length > 10000) {
+      return new Response(
+        JSON.stringify({ error: 'transcript_too_long', max: 10000, got: transcript.length }),
+        { status: 413, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      );
     }
 
     // Fetch user context in parallel
@@ -121,6 +136,26 @@ serve(async (req: Request) => {
     ]);
 
     const profile = profileRes.data;
+
+    // Daily rate limit — protects Claude credit from tampered-client spam.
+    // Dream interpretation is free per the Lumen spec (core funnel), so the gate
+    // is a per-user daily cap, not a Lumen cost.
+    const isPremiumTier = profile?.subscription_tier === 'premium';
+    const dailyCap = isPremiumTier ? 200 : 20;
+    const { error: rateErr } = await admin.rpc('check_and_increment_rate_limit', {
+      p_user_id: user.id,
+      p_limit_key: 'dream_interpret',
+      p_max: dailyCap,
+    });
+    if (rateErr) {
+      if (rateErr.message?.includes('rate_limit_exceeded')) {
+        return new Response(
+          JSON.stringify({ error: 'rate_limit_exceeded', limit: dailyCap, reset: 'midnight UTC' }),
+          { status: 429, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        );
+      }
+      console.error('rate limit rpc failed:', rateErr);
+    }
     const worldEntries = worldRes.data || [];
     const recentSymbols = symbolsRes.data || [];
 
@@ -149,8 +184,7 @@ serve(async (req: Request) => {
           .join('\n');
     }
 
-    const isPremium = profile?.subscription_tier === 'premium';
-    const wordRange = isPremium ? '300-400' : '150-200';
+    const wordRange = isPremiumTier ? '300-400' : '150-200';
 
     const systemPrompt = BASE_SYSTEM_PROMPT + personalContext + historyContext +
       `\n\nInterpretation length target: ${wordRange} words.`;
