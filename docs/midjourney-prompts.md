@@ -4,7 +4,7 @@ Exported 2026-04-15 — 55 dreams.
 
 Paste each block into Midjourney (`/imagine prompt: ...`). Each ends with `--ar 3:4` to match the in-app dream card hero frame. `--style raw` and `--v 6.1` keep Midjourney from over-stylizing the art-style prefix — tweak to taste.
 
-Each prompt prepends a physical description of Hunter so Midjourney renders him as the dreamer wherever the dream has a human figure: **a 30-year-old biracial man with warm light-brown skin, short dark curly hair, freckles across his nose and cheeks, dark brown eyes, slim athletic build, clean-shaven**.
+Dreams with a human figure in the frame prepend a physical description of the dreamer so Midjourney renders Hunter as that figure: **a 30-year-old biracial man with warm light-brown skin, short dark curly hair, freckles across his nose and cheeks, dark brown eyes, slim athletic build, clean-shaven**. Pure landscape/object/abstract scenes are left as-is.
 
 ---
 
@@ -60,7 +60,7 @@ featuring a 30-year-old biracial man with warm light-brown skin, short dark curl
 - **Dream id:** `2138aed1-db26-4884-9d23-6020c9b87c55`
 
 ```
-featuring a 30-year-old biracial man with warm light-brown skin, short dark curly hair, freckles across his nose and cheeks, dark brown eyes, slim athletic build, clean-shaven as the dreamer, Two brothers face each other in a narrow California street at dusk, one holding a knife that catches the dying light, the other backing away with hands raised. Their shadows on the ground are entangled, merging into a single dark shape between them. Behind them, a small group of friends and family stand at a respectful distance, faces illuminated by warm window light, watching silently. A tall building looms overhead where the knife might be thrown out of reach. Chiaroscuro realist painting with warm ochres and deep charcoal shadows, emotionally charged and cinematic.. Dreamlike, evocative, no text or words in the image. --ar 3:4 --style raw --v 6.1
+Two brothers face each other in a narrow California street at dusk, one holding a knife that catches the dying light, the other backing away with hands raised. Their shadows on the ground are entangled, merging into a single dark shape between them. Behind them, a small group of friends and family stand at a respectful distance, faces illuminated by warm window light, watching silently. A tall building looms overhead where the knife might be thrown out of reach. Chiaroscuro realist painting with warm ochres and deep charcoal shadows, emotionally charged and cinematic.. Dreamlike, evocative, no text or words in the image. --ar 3:4 --style raw --v 6.1
 ```
 
 ## 6. Blade Runner Baseball
@@ -467,7 +467,7 @@ featuring a 30-year-old biracial man with warm light-brown skin, short dark curl
 - **Dream id:** `d3762220-4c4b-4421-a0a8-8d2be6043d1f`
 
 ```
-featuring a 30-year-old biracial man with warm light-brown skin, short dark curly hair, freckles across his nose and cheeks, dark brown eyes, slim athletic build, clean-shaven as the dreamer, A suburban house on a quiet cul-de-sac under siege: an enormous tidal wave curls over the rooftop, translucent blue-green water revealing fish and debris within its wall. Neighboring houses are shattered and floating. But the central home glows with warm golden light from within, and through its windows a family sits untouched and dry at a dinner table. The street sign reads 'Suncountry Circle.' Hyperreal surrealism, palette of deep ocean blues against warm amber interior light, dramatic storm clouds overhead with a single shaft of sunlight. Inspired by Magritte's domestic surrealism.. Dreamlike, evocative, no text or words in the image. --ar 3:4 --style raw --v 6.1
+A suburban house on a quiet cul-de-sac under siege: an enormous tidal wave curls over the rooftop, translucent blue-green water revealing fish and debris within its wall. Neighboring houses are shattered and floating. But the central home glows with warm golden light from within, and through its windows a family sits untouched and dry at a dinner table. The street sign reads 'Suncountry Circle.' Hyperreal surrealism, palette of deep ocean blues against warm amber interior light, dramatic storm clouds overhead with a single shaft of sunlight. Inspired by Magritte's domestic surrealism.. Dreamlike, evocative, no text or words in the image. --ar 3:4 --style raw --v 6.1
 ```
 
 ## 43. The War Within the Ruined House

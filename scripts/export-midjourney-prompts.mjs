@@ -49,9 +49,17 @@ const STYLE_PREFIX = {
 const APPEARANCE =
   'a 30-year-old biracial man with warm light-brown skin, short dark curly hair, freckles across his nose and cheeks, dark brown eyes, slim athletic build, clean-shaven';
 
-// Dreams that already have correct 3:4 images — skip them.
+// Dreams that already have correct 3:4 images — skip them entirely.
 const SKIP_IDS = new Set([
   '32187786-3da5-46e5-83e4-d2cc68ddde72', // Two Houses, One Road (generated via current 3:4 edge fn)
+]);
+
+// Dreams whose image_prompt has no human figure to render (landscape/object/abstract).
+// These get exported without the appearance clause so Midjourney doesn't force
+// Hunter into a scene where he doesn't belong.
+const NO_FIGURE_IDS = new Set([
+  '2138aed1-db26-4884-9d23-6020c9b87c55', // The Knife Between Brothers
+  'd3762220-4c4b-4421-a0a8-8d2be6043d1f',
 ]);
 
 const sb = createClient(URL, KEY);
@@ -75,7 +83,7 @@ lines.push(`Exported ${new Date().toISOString().split('T')[0]} — ${dreams.leng
 lines.push('');
 lines.push(`Paste each block into Midjourney (\`/imagine prompt: ...\`). Each ends with \`--ar 3:4\` to match the in-app dream card hero frame. \`--style raw\` and \`--v 6.1\` keep Midjourney from over-stylizing the art-style prefix — tweak to taste.`);
 lines.push('');
-lines.push(`Each prompt prepends a physical description of Hunter so Midjourney renders him as the dreamer wherever the dream has a human figure: **${APPEARANCE}**.`);
+lines.push(`Dreams with a human figure in the frame prepend a physical description of the dreamer so Midjourney renders Hunter as that figure: **${APPEARANCE}**. Pure landscape/object/abstract scenes are left as-is.`);
 lines.push('');
 lines.push('---');
 lines.push('');
@@ -86,7 +94,8 @@ for (let i = 0; i < dreams.length; i++) {
   // Match the in-app composition in generate-image/index.ts, which prepends an
   // appearance clause before the style prefix:
   //   `${appearanceClause}${style_prefix || ''} ${image_prompt}. Dreamlike, evocative, no text or words in the image.`
-  const appearanceClause = `featuring ${APPEARANCE} as the dreamer, `;
+  const hasFigure = !NO_FIGURE_IDS.has(d.id);
+  const appearanceClause = hasFigure ? `featuring ${APPEARANCE} as the dreamer, ` : '';
   const core = `${appearanceClause}${prefix ? prefix + ' ' : ''}${d.image_prompt}. Dreamlike, evocative, no text or words in the image.`;
   const prompt = `${core} --ar 3:4 --style raw --v 6.1`;
 
