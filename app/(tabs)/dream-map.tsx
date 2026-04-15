@@ -86,11 +86,24 @@ export default function DreamMapScreen() {
     }
   }, [selectedDreams]);
 
-  // Compute archetype percentages — map symbol.archetype (stored as archetype id)
-  // against the canonical ARCHETYPES list so names/symbols render consistently.
+  // Compute archetype percentages — normalize symbol.archetype (which can be
+  // either a canonical id like "shadow" OR a display name like "Shadow" or
+  // "Wise Old Man/Woman") to the canonical id so counts aggregate correctly.
   const archetypeCounts: Record<string, number> = {};
   symbols.forEach(s => {
-    if (s.archetype) archetypeCounts[s.archetype] = (archetypeCounts[s.archetype] || 0) + 1;
+    if (!s.archetype) return;
+    const raw = s.archetype.trim();
+    const lower = raw.toLowerCase();
+    const noPrefix = lower.replace(/^the\s+/, '');
+    const match = ARCHETYPES.find(a =>
+      a.id === lower ||
+      a.id === noPrefix ||
+      a.name.toLowerCase() === lower ||
+      a.name.toLowerCase().replace(/^the\s+/, '') === noPrefix ||
+      // "Wise Old Man" → "wise_old" (match prefix of "Wise Old Man/Woman")
+      a.name.toLowerCase().replace(/^the\s+/, '').startsWith(noPrefix.split('/')[0])
+    );
+    if (match) archetypeCounts[match.id] = (archetypeCounts[match.id] || 0) + 1;
   });
   const totalArchetypeHits = Object.values(archetypeCounts).reduce((a, b) => a + b, 0);
   const archetypeRows = ARCHETYPES
