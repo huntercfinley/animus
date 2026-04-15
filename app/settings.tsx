@@ -6,6 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -70,10 +71,10 @@ export default function SettingsScreen() {
     try {
       const photoUrls: string[] = [];
       for (const asset of result.assets.slice(0, 3)) {
-        const response = await fetch(asset.uri);
-        const blob = await response.blob();
+        const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' });
+        const arrayBuffer = decodeBase64(base64);
         const fileName = `${user!.id}/appearance-${Date.now()}-${photoUrls.length}.jpg`;
-        const { error } = await supabase.storage.from('user-photos').upload(fileName, blob, { contentType: 'image/jpeg' });
+        const { error } = await supabase.storage.from('user-photos').upload(fileName, arrayBuffer, { contentType: 'image/jpeg' });
         if (!error) {
           const { data: { publicUrl } } = supabase.storage.from('user-photos').getPublicUrl(fileName);
           photoUrls.push(publicUrl);

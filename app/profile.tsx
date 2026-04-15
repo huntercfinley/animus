@@ -5,6 +5,8 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Sentry from '@sentry/react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
@@ -78,12 +80,12 @@ export default function ProfileScreen() {
     setUploadingAvatar(true);
     try {
       const asset = result.assets[0];
-      const response = await fetch(asset.uri);
-      const blob = await response.blob();
+      const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' });
+      const arrayBuffer = decodeBase64(base64);
       const fileName = `${user.id}/avatar.jpg`;
       const { error } = await supabase.storage
         .from('user-photos')
-        .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true });
+        .upload(fileName, arrayBuffer, { contentType: 'image/jpeg', upsert: true });
       if (error) throw error;
 
       const { data: { publicUrl } } = supabase.storage.from('user-photos').getPublicUrl(fileName);
