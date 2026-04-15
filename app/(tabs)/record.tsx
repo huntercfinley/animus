@@ -141,61 +141,54 @@ export default function RecordScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={82}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={styles.inner}>
-            {textMode && !isRecording ? (
-              /* ───── TEXT MODE ───── */
-              <View style={styles.textModeWrap}>
-                <Text style={styles.textModeTitle}>Write Your Dream</Text>
-                <TextInput
-                  style={styles.textEntryInput}
-                  placeholder="Describe your dream..."
-                  placeholderTextColor={`${colors.textMuted}80`}
-                  value={manualText}
-                  onChangeText={setManualText}
-                  multiline
-                  textAlignVertical="top"
-                  autoFocus
-                />
-                <View style={styles.actions}>
-                  <Pressable
-                    style={styles.discardBtn}
-                    onPress={() => {
-                      Keyboard.dismiss();
-                      setTextMode(false);
-                      setManualText('');
-                    }}
-                  >
-                    <Text style={styles.discardText}>Cancel</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.saveBtn, !manualText.trim() && { opacity: 0.3 }]}
-                    onPress={() => {
-                      Keyboard.dismiss();
-                      handleTextSave();
-                    }}
-                    disabled={!manualText.trim() || saving}
-                  >
-                    <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
-                  </Pressable>
-                </View>
-                <Pressable
-                  style={styles.switchBtn}
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    setTextMode(false);
-                  }}
-                >
-                  <MaterialIcons name="mic" size={16} color={colors.primary} />
-                  <Text style={styles.switchText}>Switch to Voice</Text>
-                </Pressable>
-              </View>
-            ) : (
-              /* ───── VOICE MODE ───── */
-              <>
-                {isRecording && (
+        {textMode && !isRecording ? (
+          /* ───── TEXT MODE ─────
+             Top-aligned layout so the TextInput is anchored at the top of the
+             screen (where the transcript overlay sits in voice mode). Actions
+             row hugs the bottom and rides above the keyboard via the
+             KeyboardAvoidingView + tab-bar offset above. */
+          <View style={styles.textInner}>
+            <Text style={styles.textModeTitle}>Write Your Dream</Text>
+            <TextInput
+              style={styles.textEntryInput}
+              placeholder="Describe your dream..."
+              placeholderTextColor={`${colors.textMuted}80`}
+              value={manualText}
+              onChangeText={setManualText}
+              multiline
+              textAlignVertical="top"
+              autoFocus
+            />
+            <View style={styles.textActions}>
+              <Pressable
+                style={styles.discardBtn}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setTextMode(false);
+                  setManualText('');
+                }}
+              >
+                <Text style={styles.discardText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.saveBtn, !manualText.trim() && { opacity: 0.3 }]}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  handleTextSave();
+                }}
+                disabled={!manualText.trim() || saving}
+              >
+                <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Dream'}</Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={styles.inner}>
+              {/* ───── VOICE MODE ───── */}
+              {isRecording && (
                   <Text style={styles.duration}>{formatDuration(duration)}</Text>
                 )}
 
@@ -256,16 +249,15 @@ export default function RecordScreen() {
                   </View>
                 )}
 
-                {!isRecording && (
-                  <Pressable style={styles.switchBtn} onPress={() => setTextMode(true)}>
-                    <MaterialIcons name="edit" size={16} color={colors.primary} />
-                    <Text style={styles.switchText}>Switch to Text</Text>
-                  </Pressable>
-                )}
-              </>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+              {!isRecording && (
+                <Pressable style={styles.switchBtn} onPress={() => setTextMode(true)}>
+                  <MaterialIcons name="edit" size={16} color={colors.primary} />
+                  <Text style={styles.switchText}>Switch to Text</Text>
+                </Pressable>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -417,31 +409,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primary,
   },
-  textModeWrap: {
+  textInner: {
     flex: 1,
     width: '100%',
     maxWidth: 512,
     alignSelf: 'center',
-    justifyContent: 'center',
-    gap: 20,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
+    gap: 16,
   },
   textModeTitle: {
     fontFamily: fonts.serifBold,
-    fontSize: 28,
+    fontSize: 24,
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
   },
   textEntryInput: {
+    flex: 1,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 12,
-    padding: 24,
+    padding: 20,
     fontFamily: fonts.sans,
     fontSize: 16,
     color: colors.textPrimary,
     lineHeight: 24,
-    minHeight: 220,
+    minHeight: 140,
     borderWidth: 1,
     borderColor: `${colors.outlineVariant}26`,
+  },
+  textActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });

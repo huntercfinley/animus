@@ -10,12 +10,12 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const SUPABASE_URL = 'https://xlumafywghpgallecsvh.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_URL = process.env.ANIMUS_SUPABASE_URL || 'https://xlumafywghpgallecsvh.supabase.co';
+const SUPABASE_SERVICE_KEY =
+  process.env.ANIMUS_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_SERVICE_KEY) {
-  console.error('ERROR: Set SUPABASE_SERVICE_KEY environment variable');
-  console.error('Get it from: Supabase Dashboard → Settings → API → service_role key');
+  console.error('ERROR: Set ANIMUS_SUPABASE_SERVICE_ROLE_KEY (sb_secret_*) environment variable');
   process.exit(1);
 }
 
