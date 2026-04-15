@@ -3,6 +3,7 @@ node_modules
 .git
 .expo
 data
+!data/shadow-prompt-pool.json
 .superpowers
 
 # Build artifacts
