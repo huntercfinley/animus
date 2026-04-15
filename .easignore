@@ -2,7 +2,7 @@
 node_modules
 .git
 .expo
-data
+data/*
 !data/shadow-prompt-pool.json
 .superpowers
 
