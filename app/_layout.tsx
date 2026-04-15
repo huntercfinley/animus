@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { NotoSerif_400Regular, NotoSerif_400Regular_Italic, NotoSerif_700Bold } from '@expo-google-fonts/noto-serif';
@@ -25,6 +25,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function RootNavigator() {
   const { session, loading, profile } = useAuth();
+  const welcomedRef = useRef(false);
 
   useEffect(() => { initializeAds(); }, []);
 
@@ -43,7 +44,12 @@ function RootNavigator() {
     } else if (profile && !profile.onboarding_completed) {
       router.replace('/(onboarding)');
     } else if (session) {
-      router.replace('/(tabs)/record');
+      if (!welcomedRef.current) {
+        welcomedRef.current = true;
+        router.replace('/welcome');
+      } else {
+        router.replace('/(tabs)/record');
+      }
     }
   }, [session, loading, profile]);
 
@@ -55,6 +61,7 @@ function RootNavigator() {
     }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="welcome" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="dream/[id]" options={{ presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
