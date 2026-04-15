@@ -13,6 +13,7 @@ import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenShee
 import { LumenShop } from '@/components/lumen/LumenShop';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
+import { ARCHETYPES } from '@/constants/archetypes';
 import type { DreamSymbol, PatternReport, DreamConnection } from '@/types/database';
 
 type ViewMode = 'web' | 'heatmap';
@@ -85,17 +86,22 @@ export default function DreamMapScreen() {
     }
   }, [selectedDreams]);
 
-  // Compute archetype percentages
+  // Compute archetype percentages — map symbol.archetype (stored as archetype id)
+  // against the canonical ARCHETYPES list so names/symbols render consistently.
   const archetypeCounts: Record<string, number> = {};
   symbols.forEach(s => {
     if (s.archetype) archetypeCounts[s.archetype] = (archetypeCounts[s.archetype] || 0) + 1;
   });
-  const totalSymbols = symbols.length || 1;
-  const archetypeLabels = ['Shadow', 'Anima', 'Self', 'Wise Old Man', 'Hero', 'Mother', 'Trickster'];
-  const topArchetypes = Object.entries(archetypeCounts)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 7)
-    .map(([name, count]) => ({ name, pct: Math.round((count / totalSymbols) * 100) }));
+  const totalArchetypeHits = Object.values(archetypeCounts).reduce((a, b) => a + b, 0);
+  const archetypeRows = ARCHETYPES
+    .map(a => ({
+      id: a.id,
+      name: a.name,
+      symbol: a.symbol,
+      count: archetypeCounts[a.id] || 0,
+      pct: totalArchetypeHits > 0 ? Math.round(((archetypeCounts[a.id] || 0) / totalArchetypeHits) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -140,23 +146,32 @@ export default function DreamMapScreen() {
 
         {/* Metrics Section — Stitch bento grid */}
         <View style={styles.metricsRow}>
-          {/* Archetypal Density Chart */}
+          {/* Archetypal Density — vertical list of horizontal bars */}
           <View style={styles.densityCard}>
             <Text style={styles.densityTitle}>Archetypal Density</Text>
-            <View style={styles.barsContainer}>
-              {topArchetypes.length > 0 ? topArchetypes.map((a, i) => (
-                <View key={i} style={styles.barCol}>
-                  <View style={[styles.bar, { height: `${Math.min(a.pct, 100)}%`, opacity: 0.2 + (a.pct / 100) * 0.8 }]} />
+            {totalArchetypeHits === 0 && (
+              <Text style={styles.densityEmpty}>
+                Record dreams to see your archetypal pattern emerge.
+              </Text>
+            )}
+            <View style={styles.densityRows}>
+              {archetypeRows.map(row => (
+                <View key={row.id} style={styles.densityRow}>
+                  <View style={styles.densityRowHeader}>
+                    <Text style={styles.densityRowLabel} numberOfLines={1}>
+                      {row.symbol} {row.name}
+                    </Text>
+                    <Text style={styles.densityRowPct}>{row.pct}%</Text>
+                  </View>
+                  <View style={styles.densityBarTrack}>
+                    <View
+                      style={[
+                        styles.densityBarFill,
+                        { width: `${row.pct}%`, opacity: row.count > 0 ? 0.2 + Math.min(row.pct / 100, 1) * 0.8 : 0.12 },
+                      ]}
+                    />
+                  </View>
                 </View>
-              )) : archetypeLabels.map((_, i) => (
-                <View key={i} style={styles.barCol}>
-                  <View style={[styles.bar, { height: '5%', opacity: 0.15 }]} />
-                </View>
-              ))}
-            </View>
-            <View style={styles.barLabels}>
-              {archetypeLabels.map((label, i) => (
-                <Text key={i} style={styles.barLabel}>{label}</Text>
               ))}
             </View>
           </View>
@@ -381,36 +396,48 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: 16,
   },
-  barsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-    height: 128,
+  densityEmpty: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    marginBottom: spacing.md,
   },
-  barCol: {
-    flex: 1,
-    height: '100%',
-    justifyContent: 'flex-end',
+  densityRows: {
+    gap: spacing.md,
   },
-  bar: {
-    backgroundColor: colors.primary,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    width: '100%',
+  densityRow: {
+    gap: 6,
   },
-  barLabels: {
+  densityRowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    alignItems: 'center',
   },
-  barLabel: {
+  densityRowLabel: {
     fontFamily: fonts.sansMedium,
-    fontSize: 10,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
+    fontSize: 13,
+    color: colors.textPrimary,
     flex: 1,
-    textAlign: 'center',
+    marginRight: spacing.sm,
+  },
+  densityRowPct: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    color: colors.textSecondary,
+    minWidth: 32,
+    textAlign: 'right',
+  },
+  densityBarTrack: {
+    height: 8,
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  densityBarFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 4,
   },
 
   // Alignment card

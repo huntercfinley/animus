@@ -20,7 +20,12 @@ export function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
       <View style={styles.bars}>
         {sorted.slice(0, 5).map(([key, value]) => (
           <View key={key} style={styles.barRow}>
-            <Text style={styles.barLabel}>{ARCHETYPE_MAP[key]?.symbol} {ARCHETYPE_MAP[key]?.name || key}</Text>
+            <View style={styles.barRowHeader}>
+              <Text style={styles.barLabel} numberOfLines={1}>
+                {ARCHETYPE_MAP[key]?.symbol} {ARCHETYPE_MAP[key]?.name || key}
+              </Text>
+              <Text style={styles.barPct}>{Math.round((value as number) * 100)}%</Text>
+            </View>
             <View style={styles.barTrack}>
               <View style={[styles.barFill, { width: `${(value as number) * 100}%` }]} />
             </View>
@@ -56,23 +61,34 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: spacing.md,
   },
-  bars: { gap: spacing.xs },
+  bars: { gap: spacing.sm },
   barRow: {
+    gap: 4,
+  },
+  barRowHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     gap: spacing.sm,
   },
   barLabel: {
     fontFamily: fonts.sansMedium,
-    width: 120,
+    fontSize: 13,
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  barPct: {
+    fontFamily: fonts.sansMedium,
     fontSize: 12,
     color: colors.textSecondary,
+    minWidth: 32,
+    textAlign: 'right',
   },
   barTrack: {
-    flex: 1,
     height: 6,
     backgroundColor: colors.surfaceContainerHigh,
     borderRadius: 3,
+    overflow: 'hidden',
   },
   barFill: {
     height: 6,

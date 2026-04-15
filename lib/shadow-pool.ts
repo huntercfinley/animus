@@ -1,4 +1,4 @@
-import pool from '@/data/shadow-prompt-pool.json';
+import pool from '../data/shadow-prompt-pool.json';
 
 export interface ShadowPrompt {
   id: string;
