@@ -94,8 +94,12 @@ for (let i = 0; i < dreams.length; i++) {
   // Match the in-app composition in generate-image/index.ts, which prepends an
   // appearance clause before the style prefix:
   //   `${appearanceClause}${style_prefix || ''} ${image_prompt}. Dreamlike, evocative, no text or words in the image.`
+  // Place Hunter *into* the scene, not at the center of it — the dream's own
+  // subject should remain the focal point. "with X present in the scene"
+  // reads as additive to Midjourney; "featuring X as the dreamer" would
+  // promote him to subject and distort compositions where he's incidental.
   const hasFigure = !NO_FIGURE_IDS.has(d.id);
-  const appearanceClause = hasFigure ? `featuring ${APPEARANCE} as the dreamer, ` : '';
+  const appearanceClause = hasFigure ? `with ${APPEARANCE} present in the scene, ` : '';
   const core = `${appearanceClause}${prefix ? prefix + ' ' : ''}${d.image_prompt}. Dreamlike, evocative, no text or words in the image.`;
   const prompt = `${core} --ar 3:4 --style raw --v 6.1`;
 
