@@ -3,7 +3,6 @@ import { Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { isAdminUser } from '@/constants/admin';
 
 export type PurchaseResult =
   | { status: 'success' }
@@ -29,7 +28,7 @@ const REVENUECAT_API_KEY = Platform.select({
 }) || '';
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const { user, refreshProfile } = useAuth();
+  const { user, profile: authProfile, refreshProfile } = useAuth();
   const [isPremium, setIsPremium] = useState(false);
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      if (user && isAdminUser(user.id)) {
+      if (user && authProfile?.is_admin === true) {
         setIsPremium(true);
         setLoading(false);
         return;
@@ -74,11 +73,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
     init();
-  }, [user]);
+  }, [user, authProfile]);
 
   async function checkPremiumStatus() {
     if (Platform.OS === 'web') return;
-    if (user && isAdminUser(user.id)) {
+    if (user && authProfile?.is_admin === true) {
       setIsPremium(true);
       return;
     }
@@ -152,7 +151,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const restore = async (): Promise<boolean> => {
     if (Platform.OS === 'web') return false;
-    if (user && isAdminUser(user.id)) {
+    if (user && authProfile?.is_admin === true) {
       setIsPremium(true);
       return true;
     }

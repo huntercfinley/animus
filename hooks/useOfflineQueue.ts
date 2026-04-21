@@ -17,7 +17,7 @@ export function useOfflineQueue() {
           await processDream(dream.transcript, dream.audio_uri);
           await markSynced(dream.id);
         } catch (err) {
-          console.warn(`Failed to sync dream ${dream.id}:`, err);
+          if (__DEV__) console.warn(`Failed to sync dream ${dream.id}:`, err);
         }
       }
       await deletesynced();

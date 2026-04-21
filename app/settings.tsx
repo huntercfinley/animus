@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Alert, Linking, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 
 export default function SettingsScreen() {
-  const { user, profile, signOut } = useAuth();
+  const { user, session, profile, signOut } = useAuth();
   const { isPremium, packages, purchase, restore } = useSubscription();
 
   const currentAppearance = (profile?.ai_context as any)?.appearance as string | undefined;
@@ -23,6 +23,10 @@ export default function SettingsScreen() {
   const [appearanceLoading, setAppearanceLoading] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const monthlyPkg = packages.find((p: any) => p.packageType === 'MONTHLY') || packages[0];
   const yearlyPkg = packages.find((p: any) => p.packageType === 'ANNUAL');
@@ -107,30 +111,42 @@ export default function SettingsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            Alert.alert(
-              'Are you absolutely sure?',
-              'Type your email to confirm: ' + (user?.email || ''),
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Permanently Delete',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await callEdgeFunction('delete-account', {});
-                      await signOut();
-                      router.replace('/(auth)/sign-in');
-                    } catch (err) {
-                      Alert.alert('Error', 'Failed to delete account. Please try again.');
-                    }
-                  },
-                },
-              ],
-            );
+            setDeletePassword('');
+            setDeleteError(null);
+            setDeleteModalVisible(true);
           },
         },
       ],
     );
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      setDeleteError('Please enter your password.');
+      return;
+    }
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      // Re-authenticate before deletion
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: session?.user?.email ?? '',
+        password: deletePassword,
+      });
+      if (reauthError) {
+        setDeleteError('Incorrect password. Please try again.');
+        setDeleteLoading(false);
+        return;
+      }
+      await callEdgeFunction('delete-account', {});
+      setDeleteModalVisible(false);
+      await signOut();
+      router.replace('/(auth)/sign-in');
+    } catch (err) {
+      setDeleteError('Failed to delete account. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleExportData = async () => {
@@ -348,6 +364,52 @@ export default function SettingsScreen() {
           <Text style={styles.deleteAccountLinkText}>Delete Account</Text>
         </Pressable>
       </ScrollView>
+
+      {/* Re-authentication modal for account deletion */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Confirm Deletion</Text>
+            <Text style={styles.modalDesc}>
+              Enter your password to permanently delete your account and all data.
+            </Text>
+            {deleteError && <Text style={styles.modalError}>{deleteError}</Text>}
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Password"
+              placeholderTextColor={`${colors.outline}80`}
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              autoCapitalize="none"
+              editable={!deleteLoading}
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={styles.modalCancelBtn}
+                onPress={() => setDeleteModalVisible(false)}
+                disabled={deleteLoading}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalDeleteBtn, deleteLoading && { opacity: 0.5 }]}
+                onPress={confirmDeleteAccount}
+                disabled={deleteLoading}
+              >
+                <Text style={styles.modalDeleteText}>
+                  {deleteLoading ? 'Deleting...' : 'Permanently Delete'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -670,5 +732,76 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: `${colors.error}99`,
     textDecorationLine: 'underline' as const,
+  },
+
+  // Delete account re-auth modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 20,
+    padding: 28,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontFamily: fonts.serifBold,
+    fontSize: 20,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  modalDesc: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  modalError: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    color: colors.error,
+    marginBottom: 12,
+  },
+  modalInput: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontFamily: fonts.sans,
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row' as const,
+    justifyContent: 'flex-end' as const,
+    gap: 12,
+  },
+  modalCancelBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  modalCancelText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  modalDeleteBtn: {
+    backgroundColor: colors.error,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  modalDeleteText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    color: '#ffffff',
   },
 });

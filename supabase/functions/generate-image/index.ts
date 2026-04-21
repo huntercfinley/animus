@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const GOOGLE_AI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('GOOGLE_AI_API_KEY') || '';
 
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
@@ -255,8 +256,9 @@ serve(async (req: Request) => {
         console.error('[generate-image] refund failed — user is down 20 Lumen', refundErr);
       }
     }
+    console.error('generate-image error:', (err as Error).message);
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ error: 'internal_error' }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } },
     );
   }

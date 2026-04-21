@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
@@ -48,8 +49,9 @@ serve(async (req: Request) => {
     });
     if (!rcRes.ok) {
       const text = await rcRes.text();
+      console.error('RevenueCat fetch failed:', rcRes.status, text.slice(0, 200));
       return new Response(
-        JSON.stringify({ error: 'revenuecat_fetch_failed', status: rcRes.status, body: text.slice(0, 200) }),
+        JSON.stringify({ error: 'subscription_check_failed', status: rcRes.status }),
         { status: 502, headers: CORS },
       );
     }
@@ -84,8 +86,9 @@ serve(async (req: Request) => {
       { headers: CORS },
     );
   } catch (err) {
+    console.error('subscription-sync error:', (err as Error).message);
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ error: 'internal_error' }),
       { status: 500, headers: CORS },
     );
   }

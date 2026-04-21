@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
 
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type', 'Content-Type': 'application/json' };
 const GO_DEEPER_COST = 10;
 
@@ -152,6 +153,7 @@ serve(async (req: Request) => {
       });
       if (refundErr) console.error('[go-deeper] refund failed', refundErr);
     }
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: CORS });
+    console.error('go-deeper error:', (err as Error).message);
+    return new Response(JSON.stringify({ error: 'internal_error' }), { status: 500, headers: CORS });
   }
 });

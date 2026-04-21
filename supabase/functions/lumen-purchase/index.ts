@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
@@ -65,6 +66,31 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    // Verify the transaction with RevenueCat before crediting Lumen
+    const RC_API_KEY = Deno.env.get('REVENUECAT_API_KEY');
+    if (!RC_API_KEY) {
+      console.error('REVENUECAT_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'purchase_verification_unavailable' }), { status: 503, headers: CORS });
+    }
+
+    const rcRes = await fetch(
+      `https://api.revenuecat.com/v1/subscribers/${user.id}`,
+      { headers: { 'Authorization': `Bearer ${RC_API_KEY}`, 'Content-Type': 'application/json' } }
+    );
+
+    if (!rcRes.ok) {
+      console.error('RevenueCat verification failed:', rcRes.status);
+      return new Response(JSON.stringify({ error: 'purchase_verification_failed' }), { status: 502, headers: CORS });
+    }
+
+    const rcData = await rcRes.json();
+    // Check if the transaction exists in the subscriber's non-subscription purchases
+    const allTransactions = rcData?.subscriber?.non_subscriptions || {};
+    const allTxIds = Object.values(allTransactions).flat().map((t: any) => t.store_transaction_id);
+    if (!allTxIds.includes(transactionId)) {
+      return new Response(JSON.stringify({ error: 'transaction_not_found' }), { status: 403, headers: CORS });
+    }
+
     const { data, error } = await admin.rpc('lumen_purchase_atomic', {
       p_user_id: user.id,
       p_amount: pack.amount,
@@ -85,8 +111,9 @@ serve(async (req: Request) => {
       { headers: CORS },
     );
   } catch (err) {
+    console.error('lumen-purchase error:', (err as Error).message);
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ error: 'internal_error' }),
       { status: 500, headers: CORS },
     );
   }

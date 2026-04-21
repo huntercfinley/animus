@@ -47,7 +47,7 @@ export function useRecording() {
   });
 
   useSpeechRecognitionEvent('error', (event) => {
-    console.warn('Speech recognition error:', event.error);
+    if (__DEV__) console.warn('Speech recognition error:', event.error);
   });
 
   const startRecording = useCallback(async () => {
@@ -74,7 +74,7 @@ export function useRecording() {
           ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: true });
         }
       } catch {
-        console.warn('Voice recognition unavailable — recording audio only');
+        if (__DEV__) console.warn('Voice recognition unavailable — recording audio only');
       }
 
       if (intervalRef.current) clearInterval(intervalRef.current);

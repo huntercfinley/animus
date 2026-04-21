@@ -87,17 +87,17 @@ export async function processDream(transcript: string, audioUri: string | null):
   }
 
   generateAndAttachImage(dream.id, interpretation.image_prompt, artStyle.promptPrefix).catch(err => {
-    console.warn('Image generation failed:', err);
+    if (__DEV__) console.warn('Image generation failed:', err);
   });
 
   if (audioUri) {
     uploadAudio(dream.id, user.id, audioUri).catch(err => {
-      console.warn('Audio upload failed:', err);
+      if (__DEV__) console.warn('Audio upload failed:', err);
     });
   }
 
   // Refresh archetype snapshot for everyone — archetype is universal, not premium-gated.
-  callEdgeFunction('archetype-snapshot', {}).catch(err => console.warn('Archetype update failed:', err));
+  callEdgeFunction('archetype-snapshot', {}).catch(err => { if (__DEV__) console.warn('Archetype update failed:', err); });
 
   const shouldNudgeWorld = await checkWorldNudge(user.id);
 
@@ -129,7 +129,7 @@ async function generateAndAttachImage(dreamId: string, imagePrompt: string, styl
       .eq('id', dreamId);
   } catch (err) {
     if ((err as Error).message?.includes('insufficient_lumen')) {
-      console.warn('Skipping auto image: insufficient Lumen');
+      if (__DEV__) console.warn('Skipping auto image: insufficient Lumen');
       return;
     }
     throw err;

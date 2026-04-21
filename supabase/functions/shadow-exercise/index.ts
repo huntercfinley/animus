@@ -36,18 +36,42 @@ serve(async (req: Request) => {
     if (rateErr) {
       if (rateErr.message?.includes('rate_limit_exceeded')) {
         return new Response(
-          JSON.stringify({ error: 'rate_limit_exceeded', limit: 20, reset: 'midnight UTC' }),
+          JSON.stringify({ error: 'rate_limit_exceeded' }),
           { status: 429, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
         );
       }
-      console.error('rate limit rpc failed:', rateErr);
+      console.error('rate limit check failed:', rateErr);
+      return new Response(
+        JSON.stringify({ error: 'service_unavailable' }),
+        { status: 503, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      );
     }
 
     const { dream_id, symbols } = await req.json();
 
+    // Validate symbols array
+    if (!Array.isArray(symbols) || symbols.length === 0 || symbols.length > 20) {
+      return new Response(JSON.stringify({ error: 'invalid_symbols' }), { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    }
+    const sanitizedSymbols = symbols.map((s: any) => {
+      const sym = String(s.symbol || s).slice(0, 50).replace(/[^\w\s'-]/g, '');
+      return sym;
+    }).filter(Boolean);
+    if (sanitizedSymbols.length === 0) {
+      return new Response(JSON.stringify({ error: 'invalid_symbols' }), { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    }
+
+    // Verify dream ownership if dream_id provided
+    if (dream_id) {
+      const { data: dream } = await supabase.from('dreams').select('id').eq('id', dream_id).eq('user_id', user.id).single();
+      if (!dream) {
+        return new Response(JSON.stringify({ error: 'dream_not_found' }), { status: 404, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+
     let context = '';
-    if (symbols?.length) {
-      context = `\n\nDream symbols to weave into the exercise: ${symbols.map((s: any) => s.symbol).join(', ')}`;
+    if (sanitizedSymbols.length) {
+      context = `\n\nDream symbols to weave into the exercise: ${sanitizedSymbols.join(', ')}`;
     }
 
     const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
@@ -58,7 +82,8 @@ serve(async (req: Request) => {
 
     if (!aiResponse.ok) {
       const errBody = await aiResponse.text();
-      return new Response(JSON.stringify({ error: 'AI service unavailable', detail: errBody }), { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+      console.error('Claude API failed:', aiResponse.status, errBody.slice(0, 200));
+      return new Response(JSON.stringify({ error: 'ai_service_unavailable' }), { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     }
     const aiResult = await aiResponse.json();
     const prompt = aiResult.content[0].text;
@@ -72,6 +97,7 @@ serve(async (req: Request) => {
 
     return new Response(JSON.stringify(exercise), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
+    console.error('shadow-exercise error:', (err as Error).message);
+    return new Response(JSON.stringify({ error: 'internal_error' }), { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   }
 });

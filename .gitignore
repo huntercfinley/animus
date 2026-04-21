@@ -40,6 +40,10 @@ yarn-error.*
 # Native build outputs (EAS handles Android)
 android/
 
+# Personal data (never track)
+data/chatgpt-export/
+data/db_dreams.json
+
 # Local debug/scratch
 screenshots/
 .emulator-screenshots/

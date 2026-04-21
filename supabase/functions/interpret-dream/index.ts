@@ -51,13 +51,17 @@ async function callAI(systemPrompt: string, transcript: string): Promise<{ text:
     }
   );
   if (!gr.ok) {
-    throw new Error(`Gemini request failed: ${gr.status} ${(await gr.text()).slice(0, 300)}`);
+    const geminiErr = await gr.text();
+    console.error('Gemini request failed:', gr.status, geminiErr.slice(0, 300));
+    throw new Error('ai_service_unavailable');
   }
   const gj = await gr.json();
   const text = gj?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error('Gemini returned no content');
   return { text, model: 'gemini-2.0-flash' };
 }
+
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 
 const BASE_SYSTEM_PROMPT = `You are a warm, wise dream analyst rooted in Carl Jung's depth psychology. You interpret dreams through the lens of archetypes, shadow, anima/animus, the collective unconscious, and individuation.
 
@@ -155,6 +159,10 @@ serve(async (req: Request) => {
         );
       }
       console.error('rate limit rpc failed:', rateErr);
+      return new Response(
+        JSON.stringify({ error: 'service_unavailable' }),
+        { status: 503, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      );
     }
     const worldEntries = worldRes.data || [];
     const recentSymbols = symbolsRes.data || [];
@@ -197,9 +205,10 @@ serve(async (req: Request) => {
       rawContent = ai.text;
       modelUsed = ai.model;
     } catch (aiErr) {
+      console.error('AI request failed:', (aiErr as Error).message);
       return new Response(
-        JSON.stringify({ error: 'AI request failed', details: (aiErr as Error).message }),
-        { status: 502 }
+        JSON.stringify({ error: 'ai_service_unavailable' }),
+        { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -209,7 +218,8 @@ serve(async (req: Request) => {
       const jsonStr = rawContent.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
       parsed = JSON.parse(jsonStr);
     } catch {
-      return new Response(JSON.stringify({ error: 'Failed to parse AI response', raw: rawContent }), { status: 502 });
+      console.error('Failed to parse AI response:', rawContent?.slice(0, 500));
+      return new Response(JSON.stringify({ error: 'ai_parse_error' }), { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     }
 
     return new Response(JSON.stringify({
@@ -224,6 +234,7 @@ serve(async (req: Request) => {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
+    console.error('interpret-dream error:', (err as Error).message);
+    return new Response(JSON.stringify({ error: 'internal_error' }), { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   }
 });

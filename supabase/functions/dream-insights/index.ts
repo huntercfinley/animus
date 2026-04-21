@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+// CORS: '*' is acceptable for a mobile-only app — native clients don't send Origin headers.
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type', 'Content-Type': 'application/json' };
 const INSIGHTS_COST = 25;
 
@@ -85,7 +86,8 @@ serve(async (req: Request) => {
 
   if (!aiResponse.ok) {
     const errBody = await aiResponse.text();
-    throw new Error(`ai_service_unavailable: ${errBody.slice(0, 200)}`);
+    console.error('Claude API failed:', aiResponse.status, errBody.slice(0, 200));
+    throw new Error('ai_service_unavailable');
   }
   const aiResult = await aiResponse.json();
   const report = aiResult.content[0].text;
@@ -106,6 +108,7 @@ serve(async (req: Request) => {
       });
       if (refundErr) console.error('[dream-insights] refund failed', refundErr);
     }
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: CORS });
+    console.error('dream-insights error:', (err as Error).message);
+    return new Response(JSON.stringify({ error: 'internal_error' }), { status: 500, headers: CORS });
   }
 });

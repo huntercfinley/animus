@@ -11,8 +11,8 @@
     "dev:ios": "expo start --dev-client --ios",
     "test": "jest",
     "deadcode": "npx knip",
-    "deploy:fn": "npx supabase functions deploy --project-ref xlumafywghpgallecsvh --no-verify-jwt",
-    "deploy:fn:all": "for fn in analyze-appearance archetype-snapshot delete-account dream-connection dream-insights generate-image go-deeper interpret-dream lumen-ad-credit lumen-earn-shadow lumen-monthly-grant lumen-purchase lumen-spend shadow-exercise subscription-sync suggest-world-entry; do npx supabase functions deploy $fn --project-ref xlumafywghpgallecsvh --no-verify-jwt; done",
+    "deploy:fn": "npx supabase functions deploy --project-ref xlumafywghpgallecsvh",
+    "deploy:fn:all": "for fn in analyze-appearance archetype-snapshot delete-account dream-connection dream-insights generate-image go-deeper interpret-dream lumen-ad-credit lumen-earn-shadow lumen-monthly-grant lumen-purchase lumen-spend shadow-exercise subscription-sync suggest-world-entry; do npx supabase functions deploy $fn --project-ref xlumafywghpgallecsvh; done",
     "eas-build-pre-install": "chmod -R u+w ."
   },
   "dependencies": {

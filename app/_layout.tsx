@@ -17,8 +17,8 @@ import { colors } from '@/constants/theme';
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || '',
   enabled: !__DEV__,
-  tracesSampleRate: 1.0,
-  sendDefaultPii: true,
+  tracesSampleRate: 0.2,
+  sendDefaultPii: false,
 });
 
 SplashScreen.preventAutoHideAsync().catch(() => {});

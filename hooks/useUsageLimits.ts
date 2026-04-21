@@ -45,31 +45,21 @@ export function useUsageLimits() {
     const monthKey = today.substring(0, 7) + '-01';
 
     if (!isDailyLimit && !isMonthlyLimit && !dreamId) {
-      console.error('incrementLimit called without dreamId for per-dream limit:', limitType);
+      if (__DEV__) console.error('incrementLimit called without dreamId for per-dream limit:', limitType);
       return;
     }
 
-    const periodKey = isMonthlyLimit ? monthKey : isDailyLimit ? today : null;
-    const lookupField = (isDailyLimit || isMonthlyLimit) ? 'period_date' : 'dream_id';
-    const lookupValue = (isDailyLimit || isMonthlyLimit) ? periodKey! : dreamId!;
+    const periodDate = isMonthlyLimit ? monthKey : isDailyLimit ? today : null;
 
-    const { data: existing } = await supabase.from('usage_limits')
-      .select('id, count')
-      .eq('user_id', user.id)
-      .eq('limit_type', limitType)
-      .eq(lookupField, lookupValue)
-      .maybeSingle();
+    const { error } = await supabase.rpc('increment_usage_limit', {
+      p_user_id: user.id,
+      p_limit_type: limitType,
+      p_dream_id: (isDailyLimit || isMonthlyLimit) ? null : (dreamId ?? null),
+      p_period_date: periodDate,
+    });
 
-    if (existing) {
-      await supabase.from('usage_limits').update({ count: existing.count + 1, updated_at: new Date().toISOString() }).eq('id', existing.id);
-    } else {
-      await supabase.from('usage_limits').insert({
-        user_id: user.id,
-        dream_id: (isDailyLimit || isMonthlyLimit) ? null : dreamId,
-        limit_type: limitType,
-        count: 1,
-        period_date: periodKey,
-      });
+    if (error) {
+      if (__DEV__) console.error('increment_usage_limit RPC failed:', error.message);
     }
   }, [user]);
 

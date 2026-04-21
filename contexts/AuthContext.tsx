@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', userId)
       .single();
     if (error) {
-      console.error('Failed to fetch profile:', error.message);
+      if (__DEV__) console.error('Failed to fetch profile:', error.message);
       Sentry.captureException(error, { tags: { feature: 'auth.fetchProfile' }, extra: { userId } });
       return;
     }
@@ -76,17 +76,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('username', identifier)
         .maybeSingle();
       if (lookupError) {
-        console.error('Username lookup failed:', lookupError.message, lookupError.code);
+        if (__DEV__) console.error('Username lookup failed:', lookupError.message, lookupError.code);
         Sentry.captureException(lookupError, { tags: { feature: 'auth.usernameLookup' }, extra: { identifier } });
         return { error: 'Something went wrong. Please try again.' };
       }
       if (!profileData?.email) {
-        return { error: 'No account found with that username' };
+        return { error: 'Invalid credentials' };
       }
       email = profileData.email;
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    if (error) return { error: 'Invalid credentials' };
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string) => {
