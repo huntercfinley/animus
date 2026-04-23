@@ -48,7 +48,7 @@ export default function ShadowWorkScreen() {
     }
     setGenerating(true);
     try {
-      const exercise = await generateExercise();
+      const exercise = await generateExercise(undefined, [{ symbol: 'shadow' }]);
       await incrementLimit('shadow_exercise');
       if (exercise) setActiveExercise(exercise);
     } catch (err) {
