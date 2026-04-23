@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react-native';
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (identifier: string, password: string) => {
+  const signIn = useCallback(async (identifier: string, password: string) => {
     let email = identifier;
     // If it doesn't look like an email, treat it as a username and look up the email
     if (!identifier.includes('@')) {
@@ -88,23 +88,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: 'Invalid credentials' };
     return { error: null };
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
     return { error: error?.message ?? null };
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
-  };
+  }, []);
 
-  const refreshProfile = async () => {
-    if (session?.user) await fetchProfile(session.user.id);
-  };
+  const refreshProfile = useCallback(async () => {
+    const userId = session?.user?.id;
+    if (userId) await fetchProfile(userId);
+  }, [session?.user?.id]);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       const { openAuthSessionAsync } = await import('expo-web-browser');
       const { makeRedirectUri } = await import('expo-auth-session');
@@ -135,9 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       return { error: (err as Error).message };
     }
-  };
+  }, []);
 
-  const signInWithApple = async () => {
+  const signInWithApple = useCallback(async () => {
     try {
       if (Platform.OS !== 'ios') return { error: 'Apple Sign In is only available on iOS' };
       const AppleAuth = await import('expo-apple-authentication');
@@ -157,30 +158,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (err?.code === 'ERR_REQUEST_CANCELED') return { error: null };
       return { error: (err as Error).message };
     }
-  };
+  }, []);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     return { error: error?.message ?? null };
-  };
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{
-      session,
-      user: session?.user ?? null,
-      profile,
-      loading,
-      signIn,
-      signUp,
-      signOut,
-      refreshProfile,
-      signInWithGoogle,
-      signInWithApple,
-      resetPassword,
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = useMemo<AuthState>(() => ({
+    session,
+    user: session?.user ?? null,
+    profile,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    refreshProfile,
+    signInWithGoogle,
+    signInWithApple,
+    resetPassword,
+  }), [session, profile, loading, signIn, signUp, signOut, refreshProfile, signInWithGoogle, signInWithApple, resetPassword]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

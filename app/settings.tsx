@@ -6,12 +6,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
-import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { callEdgeFunction } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
+import { uploadImageToSupabase } from '@/lib/storage';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 
 export default function SettingsScreen() {
@@ -73,17 +73,20 @@ export default function SettingsScreen() {
 
     setAppearanceLoading(true);
     try {
-      const photoUrls: string[] = [];
-      for (const asset of result.assets.slice(0, 3)) {
-        const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' });
-        const arrayBuffer = decodeBase64(base64);
-        const fileName = `${user!.id}/appearance-${Date.now()}-${photoUrls.length}.jpg`;
-        const { error } = await supabase.storage.from('user-photos').upload(fileName, arrayBuffer, { contentType: 'image/jpeg' });
-        if (!error) {
-          const { data: { publicUrl } } = supabase.storage.from('user-photos').getPublicUrl(fileName);
-          photoUrls.push(publicUrl);
-        }
-      }
+      const uploads = await Promise.all(
+        result.assets.slice(0, 3).map(async (asset, i) => {
+          try {
+            return await uploadImageToSupabase(
+              'user-photos',
+              `${user!.id}/appearance-${Date.now()}-${i}.jpg`,
+              asset.uri
+            );
+          } catch {
+            return null;
+          }
+        })
+      );
+      const photoUrls = uploads.filter((u): u is string => u !== null);
       if (photoUrls.length === 0) throw new Error('Failed to upload photos');
       const res = await callEdgeFunction<{ appearance: string }>('analyze-appearance', { photo_urls: photoUrls });
       setAppearance(res.appearance);

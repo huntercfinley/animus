@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { colors, fonts, spacing, borderRadius, moodColors, moodTints } from '@/constants/theme';
+import { formatDreamDate } from '@/lib/formatters';
 import type { Dream } from '@/types/database';
 
 // Accent stripe colors per mood — mapped from Stitch palette
@@ -26,7 +27,7 @@ interface DreamCardProps {
 export function DreamCard({ dream, onLongPress }: DreamCardProps) {
   const mood = dream.mood || 'mysterious';
   const accentColor = accentColors[mood] || `${colors.primary}4D`;
-  const dateStr = new Date(dream.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const dateStr = formatDreamDate(dream.created_at, 'short');
   const hasImage = !!dream.image_url;
 
   return (

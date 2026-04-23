@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { callEdgeFunction } from '@/lib/ai';
 import { useAuth } from '@/hooks/useAuth';
-import type { ShadowExercise } from '@/types/database';
+import type { DreamSymbol, ShadowExercise } from '@/types/database';
 
 export function useShadowExercises() {
   const { user } = useAuth();
@@ -19,7 +19,7 @@ export function useShadowExercises() {
 
   useEffect(() => { fetchExercises(); }, [fetchExercises]);
 
-  const generateExercise = useCallback(async (dreamId?: string, symbols?: any[]) => {
+  const generateExercise = useCallback(async (dreamId?: string, symbols?: Pick<DreamSymbol, 'symbol'>[]) => {
     const exercise = await callEdgeFunction<ShadowExercise>('shadow-exercise', { dream_id: dreamId, symbols });
     if (exercise) setExercises(prev => [exercise, ...prev]);
     return exercise;

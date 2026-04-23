@@ -5,11 +5,12 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Sentry from '@sentry/react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { uploadImageToSupabase } from '@/lib/storage';
+import { formatDreamDate } from '@/lib/formatters';
+import { BackHeader } from '@/components/ui/BackHeader';
 import { LumenShop } from '@/components/lumen/LumenShop';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, ArchetypeSnapshot } from '@/types/database';
@@ -79,16 +80,7 @@ export default function ProfileScreen() {
 
     setUploadingAvatar(true);
     try {
-      const asset = result.assets[0];
-      const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' });
-      const arrayBuffer = decodeBase64(base64);
-      const fileName = `${user.id}/avatar.jpg`;
-      const { error } = await supabase.storage
-        .from('user-photos')
-        .upload(fileName, arrayBuffer, { contentType: 'image/jpeg', upsert: true });
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage.from('user-photos').getPublicUrl(fileName);
+      const publicUrl = await uploadImageToSupabase('user-photos', `${user.id}/avatar.jpg`, result.assets[0].uri, { upsert: true });
       const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
       const { error: updateError } = await supabase
         .from('profiles')
@@ -149,24 +141,13 @@ export default function ProfileScreen() {
 
   const displayName = profile?.display_name || 'Dreamer';
   const initial = (profile?.display_name?.[0] || user?.email?.[0] || 'a').toUpperCase();
-  const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : '';
+  const memberSince = formatDreamDate(profile?.created_at, 'month-year');
   const dreamCount = profile?.dream_count ?? 0;
   const lumenBalance = profile?.lumen_balance ?? 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.headerBar}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-        >
-          <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.headerBtn} />
-      </View>
+      <BackHeader title="Profile" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Avatar */}
@@ -343,20 +324,6 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  headerBtn: { minWidth: 56, height: 40, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: {
-    fontFamily: fonts.serifItalic,
-    fontSize: 24,
-    color: colors.textPrimary,
-    letterSpacing: -0.5,
-  },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, alignItems: 'center' },
 
   // Avatar

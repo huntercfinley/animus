@@ -44,7 +44,7 @@ export function useWorldEntries() {
       .single();
     if (data) setEntries(prev => prev.map(e => e.id === id ? data : e));
     return { data, error };
-  }, []);
+  }, [user]);
 
   const deleteEntry = useCallback(async (id: string) => {
     if (!user) return;
@@ -52,7 +52,5 @@ export function useWorldEntries() {
     setEntries(prev => prev.filter(e => e.id !== id));
   }, [user]);
 
-  const byCategory = (cat: WorldEntryCategory) => entries.filter(e => e.category === cat);
-
-  return { entries, loading, fetchEntries, addEntry, updateEntry, deleteEntry, byCategory };
+  return { entries, loading, fetchEntries, addEntry, updateEntry, deleteEntry };
 }

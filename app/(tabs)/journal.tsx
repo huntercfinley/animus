@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Keyboard, Alert } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, Keyboard, Alert, type ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
@@ -7,33 +7,37 @@ import { DreamCard } from '@/components/journal/DreamCard';
 import { MonthHeader } from '@/components/journal/MonthHeader';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { colors, fonts, spacing } from '@/constants/theme';
+import { formatDreamDate } from '@/lib/formatters';
 import type { Dream } from '@/types/database';
 
 type ListItem = { type: 'header'; month: string; year: number; count: number } | { type: 'dream'; dream: Dream };
 
-function groupDreamsByMonth(dreams: Dream[]): ListItem[] {
+function buildListItems(dreams: Dream[]): ListItem[] {
+  // Single O(n) pass: count per-month and emit headers inline. The earlier
+  // version re-filtered the full array at each month boundary (O(n^2)).
+  const counts = new Map<string, number>();
+  const meta = new Map<string, { month: string; year: number }>();
+  for (const d of dreams) {
+    const date = new Date(d.created_at);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    if (!meta.has(key)) {
+      meta.set(key, { month: formatDreamDate(d.created_at, 'month-only'), year: date.getFullYear() });
+    }
+  }
+
   const items: ListItem[] = [];
   let currentKey = '';
-
   for (const dream of dreams) {
     const date = new Date(dream.created_at);
     const key = `${date.getFullYear()}-${date.getMonth()}`;
     if (key !== currentKey) {
       currentKey = key;
-      const monthDreams = dreams.filter(d => {
-        const dd = new Date(d.created_at);
-        return dd.getFullYear() === date.getFullYear() && dd.getMonth() === date.getMonth();
-      });
-      items.push({
-        type: 'header',
-        month: date.toLocaleDateString('en-US', { month: 'long' }),
-        year: date.getFullYear(),
-        count: monthDreams.length,
-      });
+      const m = meta.get(key)!;
+      items.push({ type: 'header', month: m.month, year: m.year, count: counts.get(key) ?? 0 });
     }
     items.push({ type: 'dream', dream });
   }
-
   return items;
 }
 
@@ -41,7 +45,7 @@ export default function JournalScreen() {
   const { dreams, loading, fetchDreams, softDeleteDream } = useDreams();
   const [search, setSearch] = useState('');
 
-  const handleLongPress = (dream: Dream) => {
+  const handleLongPress = useCallback((dream: Dream) => {
     Alert.alert(
       dream.title || 'Untitled Dream',
       'Move this dream to the trash? You can restore it later from Settings.',
@@ -60,16 +64,33 @@ export default function JournalScreen() {
         },
       ]
     );
-  };
+  }, [softDeleteDream]);
 
-  const filtered = search.trim()
-    ? dreams.filter(d =>
-        (d.title || '').toLowerCase().includes(search.toLowerCase()) ||
-        (d.journal_text || '').toLowerCase().includes(search.toLowerCase())
-      )
-    : dreams;
+  const trimmedSearch = search.trim();
+  const items = useMemo(() => {
+    const filtered = trimmedSearch
+      ? dreams.filter(d => {
+          const q = trimmedSearch.toLowerCase();
+          return (d.title || '').toLowerCase().includes(q) || (d.journal_text || '').toLowerCase().includes(q);
+        })
+      : dreams;
+    return buildListItems(filtered);
+  }, [dreams, trimmedSearch]);
 
-  const items = groupDreamsByMonth(filtered);
+  const renderItem = useCallback<ListRenderItem<ListItem>>(({ item }) =>
+    item.type === 'header'
+      ? <MonthHeader month={item.month} year={item.year} count={item.count} />
+      : <DreamCard dream={item.dream} onLongPress={() => handleLongPress(item.dream)} />,
+    [handleLongPress]
+  );
+
+  const keyExtractor = useCallback((item: ListItem, index: number) =>
+    item.type === 'header' ? `h-${index}` : `d-${item.dream.id}`,
+    []
+  );
+
+  const showEmptyJournal = !loading && dreams.length === 0;
+  const showNoResults = !loading && dreams.length > 0 && items.length === 0 && trimmedSearch.length > 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -91,23 +112,23 @@ export default function JournalScreen() {
         </View>
       </View>
 
-      {!loading && dreams.length === 0 ? (
+      {showEmptyJournal ? (
         <View style={styles.emptyWrap}>
           <Text style={styles.empty}>
             Your dream journal is empty.{'\n'}Record your first dream to begin.
           </Text>
         </View>
+      ) : showNoResults ? (
+        <View style={styles.emptyWrap}>
+          <Text style={styles.empty}>
+            No dreams match &ldquo;{trimmedSearch}&rdquo;.
+          </Text>
+        </View>
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item, index) =>
-            item.type === 'header' ? `h-${index}` : `d-${(item as any).dream.id}`
-          }
-          renderItem={({ item }) =>
-            item.type === 'header'
-              ? <MonthHeader month={item.month} year={item.year} count={item.count} />
-              : <DreamCard dream={item.dream} onLongPress={() => handleLongPress(item.dream)} />
-          }
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
           onRefresh={fetchDreams}
           refreshing={loading}
           contentContainerStyle={styles.list}

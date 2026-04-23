@@ -128,7 +128,7 @@ async function generateAndAttachImage(dreamId: string, imagePrompt: string, styl
       .update({ image_url: result.image_url })
       .eq('id', dreamId);
   } catch (err) {
-    if ((err as Error).message?.includes('insufficient_lumen')) {
+    if (err instanceof InsufficientLumenError) {
       if (__DEV__) console.warn('Skipping auto image: insufficient Lumen');
       return;
     }

@@ -9,12 +9,13 @@ import * as Sentry from '@sentry/react-native';
 import { useDreams } from '@/hooks/useDreams';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { InsufficientLumenError } from '@/hooks/useLumen';
-import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenSheet';
-import { LumenShop } from '@/components/lumen/LumenShop';
+import { useLumenGate } from '@/hooks/useLumenGate';
+import { LumenGateSheets } from '@/components/lumen/LumenGateSheets';
 import { OuroborosSpinner } from '@/components/ui/OuroborosSpinner';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import type { Dream, DreamSymbol } from '@/types/database';
 import { GoDeeper } from '@/components/interpretation/GoDeeper';
+import { BackHeader } from '@/components/ui/BackHeader';
 import { callEdgeFunction } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
 import { ART_STYLES } from '@/constants/art-styles';
@@ -26,8 +27,7 @@ export default function DreamDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getDream, getDreamSymbols, softDeleteDream } = useDreams();
   const { checkLimit, incrementLimit } = useUsageLimits();
-  const [insufficientLumen, setInsufficientLumen] = useState<{ current: number; required: number } | null>(null);
-  const [shopOpen, setShopOpen] = useState(false);
+  const lumenGate = useLumenGate();
   const [dream, setDream] = useState<Dream | null>(null);
   const [symbols, setSymbols] = useState<DreamSymbol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,7 @@ export default function DreamDetail() {
   const shareRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [showShareCard, setShowShareCard] = useState(false);
+  const shareReadyRef = useRef<(() => void) | null>(null);
 
   const loadDream = useCallback(async () => {
     if (!id) return;
@@ -126,7 +127,7 @@ export default function DreamDetail() {
       setDream({ ...dream, image_url: result.image_url });
     } catch (err) {
       if (err instanceof InsufficientLumenError) {
-        setInsufficientLumen({ current: err.current, required: err.required });
+        lumenGate.openInsufficient(err.current, err.required);
       } else {
         Sentry.captureException(err, { tags: { feature: 'dream.retryImage' }, extra: { dreamId: dream.id } });
         setImageError((err as Error).message || 'Image generation failed');
@@ -136,25 +137,25 @@ export default function DreamDetail() {
     }
   }, [dream, generatingImage]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     setShowShareCard(true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(async () => {
-        if (!shareRef.current) {
-          setShowShareCard(false);
-          return;
-        }
-        try {
-          const uri = await captureRef(shareRef, { format: 'png', quality: 1 });
-          await Sharing.shareAsync(uri, { mimeType: 'image/png' });
-        } catch (err) {
-          Sentry.captureException(err, { tags: { feature: 'dream.share' } });
-        } finally {
-          setShowShareCard(false);
-        }
-      });
+    // Wait for the off-screen ShareCardView's onLayout to fire (signals the
+    // view tree is laid out and captureRef will succeed). Previously used
+    // nested requestAnimationFrame, which races with layout on slower devices.
+    await new Promise<void>((resolve) => {
+      shareReadyRef.current = resolve;
     });
-  };
+    try {
+      if (!shareRef.current) return;
+      const uri = await captureRef(shareRef, { format: 'png', quality: 1 });
+      await Sharing.shareAsync(uri, { mimeType: 'image/png' });
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: 'dream.share' } });
+    } finally {
+      setShowShareCard(false);
+      shareReadyRef.current = null;
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -192,30 +193,27 @@ export default function DreamDetail() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header bar */}
-      <View style={styles.headerBar}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-        >
-          <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Animus</Text>
-        <View style={styles.headerActions}>
-          <Pressable
-            onPress={handleDelete}
-            style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-          >
-            <MaterialIcons name="delete-outline" size={22} color={colors.textSecondary} />
-          </Pressable>
-          <Pressable
-            onPress={handleShare}
-            style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-          >
-            <MaterialIcons name="ios-share" size={22} color={colors.primary} />
-          </Pressable>
-        </View>
-      </View>
+      <BackHeader
+        title="Animus"
+        right={
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={handleDelete}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && { opacity: 0.8 }]}
+              accessibilityLabel="Move to trash"
+            >
+              <MaterialIcons name="delete-outline" size={22} color={colors.textSecondary} />
+            </Pressable>
+            <Pressable
+              onPress={handleShare}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && { opacity: 0.8 }]}
+              accessibilityLabel="Share dream"
+            >
+              <MaterialIcons name="ios-share" size={22} color={colors.primary} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Image — Stitch: aspect-[4/5] rounded-xl shadow-2xl */}
@@ -349,20 +347,15 @@ export default function DreamDetail() {
         </View>
 
         {showShareCard && (
-          <View style={{ position: 'absolute', left: -9999 }}>
+          <View
+            style={{ position: 'absolute', left: -9999 }}
+            onLayout={() => shareReadyRef.current?.()}
+          >
             <ShareCardView ref={shareRef} dream={dream} format="1:1" />
           </View>
         )}
       </ScrollView>
-      <InsufficientLumenSheet
-        visible={!!insufficientLumen}
-        current={insufficientLumen?.current ?? 0}
-        required={insufficientLumen?.required ?? 0}
-        action="image_gen"
-        onClose={() => setInsufficientLumen(null)}
-        onBuyLumen={() => setShopOpen(true)}
-      />
-      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
+      <LumenGateSheets gate={lumenGate} action="image_gen" />
     </SafeAreaView>
   );
 }
@@ -431,29 +424,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Header
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  headerBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  headerTitle: {
-    fontFamily: fonts.serifItalic,
-    fontSize: 24,
-    color: colors.textPrimary,
-    letterSpacing: -0.5,
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   scrollContent: {

@@ -6,7 +6,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Sentry from '@sentry/react-native';
 import { useDreams } from '@/hooks/useDreams';
+import { BackHeader } from '@/components/ui/BackHeader';
 import { colors, fonts, spacing, borderRadius } from '@/constants/theme';
+import { formatDreamDate } from '@/lib/formatters';
 import type { Dream } from '@/types/database';
 
 export default function TrashScreen() {
@@ -105,9 +107,7 @@ export default function TrashScreen() {
   };
 
   const renderItem = ({ item }: { item: Dream }) => {
-    const deletedDate = item.deleted_at
-      ? new Date(item.deleted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '';
+    const deletedDate = formatDreamDate(item.deleted_at, 'full');
     const isBusy = busyId === item.id;
 
     return (
@@ -147,22 +147,14 @@ export default function TrashScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.headerBar}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}
-        >
-          <MaterialIcons name="arrow-back" size={24} color={colors.textPrimary} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Trash</Text>
-        {trashed.length > 0 ? (
-          <Pressable onPress={handleEmptyTrash} style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.8 }]}>
+      <BackHeader
+        title="Trash"
+        right={trashed.length > 0 ? (
+          <Pressable onPress={handleEmptyTrash} style={({ pressed }) => [styles.emptyBtnWrap, pressed && { opacity: 0.8 }]}>
             <Text style={styles.emptyBtnText}>Empty</Text>
           </Pressable>
-        ) : (
-          <View style={styles.headerBtn} />
-        )}
-      </View>
+        ) : undefined}
+      />
 
       {loading ? (
         <View style={styles.emptyState}>
@@ -196,24 +188,11 @@ export default function TrashScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  headerBtn: {
+  emptyBtnWrap: {
     minWidth: 56,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerTitle: {
-    fontFamily: fonts.serifItalic,
-    fontSize: 24,
-    color: colors.textPrimary,
-    letterSpacing: -0.5,
   },
   emptyBtnText: {
     fontFamily: fonts.sansMedium,

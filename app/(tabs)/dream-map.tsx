@@ -1,19 +1,20 @@
 import { View, Text, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
 import { useAuth } from '@/hooks/useAuth';
 import { InsufficientLumenError } from '@/hooks/useLumen';
+import { useLumenGate } from '@/hooks/useLumenGate';
 import { supabase } from '@/lib/supabase';
 import { callEdgeFunction } from '@/lib/ai';
 import { HeatmapCalendar } from '@/components/dream-map/HeatmapCalendar';
 import { DreamWeb } from '@/components/dream-map/DreamWeb';
-import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenSheet';
-import { LumenShop } from '@/components/lumen/LumenShop';
+import { LumenGateSheets } from '@/components/lumen/LumenGateSheets';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { colors, fonts, spacing, borderRadius, shadows } from '@/constants/theme';
 import { ARCHETYPES } from '@/constants/archetypes';
+import { formatDreamDate } from '@/lib/formatters';
 import type { DreamSymbol, PatternReport, DreamConnection } from '@/types/database';
 
 type ViewMode = 'web' | 'heatmap';
@@ -26,16 +27,26 @@ export default function DreamMapScreen() {
 
   const [latestReport, setLatestReport] = useState<PatternReport | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
-  const [insufficientLumen, setInsufficientLumen] = useState<{ current: number; required: number } | null>(null);
-  const [shopOpen, setShopOpen] = useState(false);
+  const lumenGate = useLumenGate();
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('dream_symbols').select('*').eq('user_id', user.id)
-      .then(({ data }) => setSymbols(data || []));
-    supabase.from('pattern_reports').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false }).limit(1)
-      .then(({ data }) => { if (data?.[0]) setLatestReport(data[0]); });
+    let cancelled = false;
+    (async () => {
+      const [symbolsRes, reportRes] = await Promise.all([
+        supabase.from('dream_symbols').select('*').eq('user_id', user.id),
+        supabase
+          .from('pattern_reports')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1),
+      ]);
+      if (cancelled) return;
+      setSymbols(symbolsRes.data || []);
+      if (reportRes.data?.[0]) setLatestReport(reportRes.data[0]);
+    })();
+    return () => { cancelled = true; };
   }, [user]);
 
   const generateInsights = useCallback(async (periodType: 'weekly' | 'monthly') => {
@@ -47,12 +58,12 @@ export default function DreamMapScreen() {
       setLatestReport(report);
     } catch (err) {
       if (err instanceof InsufficientLumenError) {
-        setInsufficientLumen({ current: err.current, required: err.required });
+        lumenGate.openInsufficient(err.current, err.required);
       }
     } finally {
       setInsightsLoading(false);
     }
-  }, []);
+  }, [lumenGate]);
 
   const [selectedDreams, setSelectedDreams] = useState<string[]>([]);
   const [connectionResult, setConnectionResult] = useState<DreamConnection | null>(null);
@@ -79,42 +90,44 @@ export default function DreamMapScreen() {
       setSelectedDreams([]);
     } catch (err) {
       if (err instanceof InsufficientLumenError) {
-        setInsufficientLumen({ current: err.current, required: err.required });
+        lumenGate.openInsufficient(err.current, err.required);
       }
     } finally {
       setConnectionLoading(false);
     }
-  }, [selectedDreams]);
+  }, [selectedDreams, lumenGate]);
 
-  // Compute archetype percentages — normalize symbol.archetype (which can be
-  // either a canonical id like "shadow" OR a display name like "Shadow" or
-  // "Wise Old Man/Woman") to the canonical id so counts aggregate correctly.
-  const archetypeCounts: Record<string, number> = {};
-  symbols.forEach(s => {
-    if (!s.archetype) return;
-    const raw = s.archetype.trim();
-    const lower = raw.toLowerCase();
-    const noPrefix = lower.replace(/^the\s+/, '');
-    const match = ARCHETYPES.find(a =>
-      a.id === lower ||
-      a.id === noPrefix ||
-      a.name.toLowerCase() === lower ||
-      a.name.toLowerCase().replace(/^the\s+/, '') === noPrefix ||
-      // "Wise Old Man" → "wise_old" (match prefix of "Wise Old Man/Woman")
-      a.name.toLowerCase().replace(/^the\s+/, '').startsWith(noPrefix.split('/')[0])
-    );
-    if (match) archetypeCounts[match.id] = (archetypeCounts[match.id] || 0) + 1;
-  });
-  const totalArchetypeHits = Object.values(archetypeCounts).reduce((a, b) => a + b, 0);
-  const archetypeRows = ARCHETYPES
-    .map(a => ({
-      id: a.id,
-      name: a.name,
-      symbol: a.symbol,
-      count: archetypeCounts[a.id] || 0,
-      pct: totalArchetypeHits > 0 ? Math.round(((archetypeCounts[a.id] || 0) / totalArchetypeHits) * 100) : 0,
-    }))
-    .sort((a, b) => b.count - a.count);
+  // Normalize symbol.archetype (canonical id like "shadow" OR display name
+  // like "Shadow" / "Wise Old Man/Woman") to the canonical id so counts
+  // aggregate correctly. Memoized — previously recomputed on every render.
+  const { archetypeRows, totalArchetypeHits } = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of symbols) {
+      if (!s.archetype) continue;
+      const lower = s.archetype.trim().toLowerCase();
+      const noPrefix = lower.replace(/^the\s+/, '');
+      const match = ARCHETYPES.find(a =>
+        a.id === lower ||
+        a.id === noPrefix ||
+        a.name.toLowerCase() === lower ||
+        a.name.toLowerCase().replace(/^the\s+/, '') === noPrefix ||
+        // "Wise Old Man" → match "Wise Old Man/Woman" prefix
+        a.name.toLowerCase().replace(/^the\s+/, '').startsWith(noPrefix.split('/')[0])
+      );
+      if (match) counts[match.id] = (counts[match.id] || 0) + 1;
+    }
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const rows = ARCHETYPES
+      .map(a => ({
+        id: a.id,
+        name: a.name,
+        symbol: a.symbol,
+        count: counts[a.id] || 0,
+        pct: total > 0 ? Math.round(((counts[a.id] || 0) / total) * 100) : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+    return { archetypeRows: rows, totalArchetypeHits: total };
+  }, [symbols]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -271,7 +284,7 @@ export default function DreamMapScreen() {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.nodeName}>{dream.title ?? 'Untitled Dream'}</Text>
                       <Text style={styles.nodeMeta}>
-                        {new Date(dream.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                        {formatDreamDate(dream.created_at, 'long')}
                         {dream.mood ? ` • ${dream.mood}` : ''}
                       </Text>
                     </View>
@@ -309,15 +322,7 @@ export default function DreamMapScreen() {
         )}
       </ScrollView>
 
-      <InsufficientLumenSheet
-        visible={!!insufficientLumen}
-        current={insufficientLumen?.current ?? 0}
-        required={insufficientLumen?.required ?? 0}
-        action="connection"
-        onClose={() => setInsufficientLumen(null)}
-        onBuyLumen={() => setShopOpen(true)}
-      />
-      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
+      <LumenGateSheets gate={lumenGate} action="connection" />
     </SafeAreaView>
   );
 }

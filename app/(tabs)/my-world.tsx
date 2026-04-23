@@ -44,10 +44,13 @@ export default function MyWorldScreen() {
   const sections = groupByCategory(entries);
 
   useEffect(() => {
+    // Fetch once per screen mount. Previously depended on entries.length,
+    // which fired a paid AI call on every add/delete. Deletions already
+    // update suggestions client-side via the filter below.
     callEdgeFunction<{ suggestions: { symbol: string; count: number }[] }>('suggest-world-entry', {}, { silent: true })
       .then(res => setSuggestions(res.suggestions))
       .catch(() => {});
-  }, [entries.length]);
+  }, []);
 
   const handleAddFor = (category: string) => {
     setFormCategory(category);

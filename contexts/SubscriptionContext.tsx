@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useRef, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
+import type { PurchasesPackage } from 'react-native-purchases';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -11,9 +12,9 @@ export type PurchaseResult =
 
 interface SubscriptionState {
   isPremium: boolean;
-  packages: any[];
+  packages: PurchasesPackage[];
   loading: boolean;
-  purchase: (pkg: any) => Promise<PurchaseResult>;
+  purchase: (pkg: PurchasesPackage | null | undefined) => Promise<PurchaseResult>;
   restore: () => Promise<boolean>;
 }
 
@@ -30,7 +31,7 @@ const REVENUECAT_API_KEY = Platform.select({
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user, profile: authProfile, refreshProfile } = useAuth();
   const [isPremium, setIsPremium] = useState(false);
-  const [packages, setPackages] = useState<any[]>([]);
+  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const configuredRef = useRef(false);
 
@@ -92,24 +93,21 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         // since migration 19). subscription-sync re-checks the entitlement
         // against RevenueCat's REST API and updates the row via service_role,
         // so a tampered client can't promote itself to premium.
-        try {
-          await supabase.functions.invoke('subscription-sync', { body: {} });
-          await refreshProfile();
-        } catch (syncErr) {
-          if (__DEV__) console.warn('[SubscriptionContext] subscription-sync failed', syncErr);
+        // Monthly grant is idempotent per calendar month, safe to fire every launch.
+        const tasks: Promise<unknown>[] = [
+          supabase.functions.invoke('subscription-sync', { body: {} }),
+        ];
+        if (premium) tasks.push(supabase.functions.invoke('lumen-monthly-grant', { body: {} }));
+        const results = await Promise.allSettled(tasks);
+        if (__DEV__) {
+          results.forEach((r, i) => {
+            if (r.status === 'rejected') {
+              const label = i === 0 ? 'subscription-sync' : 'lumen-monthly-grant';
+              console.warn(`[SubscriptionContext] ${label} failed`, r.reason);
+            }
+          });
         }
-
-        // Premium subscribers get 1500 Lumen/month, capped at a 3000 stockpile.
-        // The RPC is idempotent per calendar month, so calling it on every app
-        // launch is safe — it no-ops after the first claim of the period.
-        if (premium) {
-          try {
-            await supabase.functions.invoke('lumen-monthly-grant', { body: {} });
-            await refreshProfile();
-          } catch (grantErr) {
-            if (__DEV__) console.warn('[SubscriptionContext] monthly grant skipped', grantErr);
-          }
-        }
+        await refreshProfile();
       }
     } catch (err) {
       if (__DEV__) console.warn('[SubscriptionContext] checkPremiumStatus failed', err);
@@ -128,7 +126,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const purchase = async (pkg: any): Promise<PurchaseResult> => {
+  const purchase = useCallback(async (pkg: PurchasesPackage | null | undefined): Promise<PurchaseResult> => {
     if (Platform.OS === 'web') {
       return { status: 'error', message: 'Purchases are not available on web.' };
     }
@@ -147,9 +145,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const message = err?.underlyingErrorMessage || err?.message || 'The purchase could not be completed.';
       return { status: 'error', message };
     }
-  };
+  }, [refreshProfile]);
 
-  const restore = async (): Promise<boolean> => {
+  const restore = useCallback(async (): Promise<boolean> => {
     if (Platform.OS === 'web') return false;
     if (user && authProfile?.is_admin === true) {
       setIsPremium(true);
@@ -175,13 +173,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       if (__DEV__) console.warn('[SubscriptionContext] restore failed', err);
       return false;
     }
-  };
+  }, [user, authProfile?.is_admin, refreshProfile]);
 
-  return (
-    <SubscriptionContext.Provider value={{ isPremium, packages, loading, purchase, restore }}>
-      {children}
-    </SubscriptionContext.Provider>
+  const value = useMemo<SubscriptionState>(
+    () => ({ isPremium, packages, loading, purchase, restore }),
+    [isPremium, packages, loading, purchase, restore]
   );
+
+  return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
 }
 
 export function useSubscription() {

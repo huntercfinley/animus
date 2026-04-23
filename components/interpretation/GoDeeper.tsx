@@ -4,9 +4,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { callEdgeFunction } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
-import { useLumen, InsufficientLumenError } from '@/hooks/useLumen';
-import { InsufficientLumenSheet } from '@/components/lumen/InsufficientLumenSheet';
-import { LumenShop } from '@/components/lumen/LumenShop';
+import { InsufficientLumenError } from '@/hooks/useLumen';
+import { useLumenGate } from '@/hooks/useLumenGate';
+import { LumenGateSheets } from '@/components/lumen/LumenGateSheets';
 import { colors, fonts, spacing } from '@/constants/theme';
 import type { DreamConversation } from '@/types/database';
 
@@ -26,10 +26,8 @@ export function GoDeeper({ dreamId }: GoDeeperProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
-  const [insufficientLumen, setInsufficientLumen] = useState<{ current: number; required: number } | null>(null);
-  const [shopOpen, setShopOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
-  const { costs } = useLumen();
+  const lumenGate = useLumenGate();
 
   useEffect(() => {
     supabase
@@ -57,19 +55,37 @@ export function GoDeeper({ dreamId }: GoDeeperProps) {
         message: msg,
         use_ad_credit: opts?.useAdCredit,
       });
-      const { data } = await supabase
-        .from('dream_conversations')
-        .select('*')
-        .eq('dream_id', dreamId)
-        .order('exchange_number');
-      setMessages(data || []);
+      // Append locally instead of re-fetching every row. Temp IDs are fine —
+      // the effect re-reads from DB if the user navigates away and back.
+      const now = new Date().toISOString();
+      setMessages(prev => {
+        const nextNumber = prev.length + 1;
+        const tempId = Date.now();
+        const userMsg: DreamConversation = {
+          id: `opt-u-${tempId}`,
+          dream_id: dreamId,
+          role: 'user',
+          content: msg,
+          exchange_number: nextNumber,
+          created_at: now,
+        };
+        const aiMsg: DreamConversation = {
+          id: `opt-a-${tempId}`,
+          dream_id: dreamId,
+          role: 'assistant',
+          content: result.reply,
+          exchange_number: nextNumber + 1,
+          created_at: now,
+        };
+        return [...prev, userMsg, aiMsg];
+      });
       setRemaining(result.remaining);
       setPendingMessage(null);
     } catch (err) {
       setInput(msg);
       if (err instanceof InsufficientLumenError) {
         setPendingMessage(msg);
-        setInsufficientLumen({ current: err.current, required: err.required });
+        lumenGate.openInsufficient(err.current, err.required);
       } else if ((err as Error).message.includes('limit reached')) {
         setRemaining(0);
       }
@@ -187,18 +203,13 @@ export function GoDeeper({ dreamId }: GoDeeperProps) {
         </>
       )}
 
-      <InsufficientLumenSheet
-        visible={!!insufficientLumen}
-        current={insufficientLumen?.current ?? 0}
-        required={insufficientLumen?.required ?? costs.go_deeper}
+      <LumenGateSheets
+        gate={lumenGate}
         action="go_deeper"
-        onClose={() => setInsufficientLumen(null)}
         onAdCredited={() => {
           if (pendingMessage) sendMessage(pendingMessage, { useAdCredit: true });
         }}
-        onBuyLumen={() => setShopOpen(true)}
       />
-      <LumenShop visible={shopOpen} onClose={() => setShopOpen(false)} />
     </View>
   );
 }
