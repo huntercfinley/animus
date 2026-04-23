@@ -6,6 +6,18 @@ data/*
 !data/shadow-prompt-pool.json
 .superpowers
 
+# Native build caches — EAS regenerates these. android/ alone is 3.4 GB locally.
+android
+ios
+
+# Local screenshots + scratch — not needed for build
+screenshots
+tmp
+tmp-test
+tmp-screenshots
+.emulator-screenshots
+emulator-screen.png
+
 # Build artifacts
 dist
 web-build
