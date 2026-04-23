@@ -135,6 +135,8 @@ curl -X POST .../functions/v1/lumen-purchase \
 
 **Fix:** Remove `--no-verify-jwt` from both deploy scripts.
 
+**REVERTED 2026-04-22:** The fix broke all user dream saves. Supabase's gateway JWT verifier does not support the ES256 asymmetric algorithm used by the new signing-key system (legacy JWTs disabled 2026-04-12). Every authenticated request returned `UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM` at the gateway before reaching function code. `--no-verify-jwt` restored. Function-level `supabase.auth.getUser()` still enforces auth (supports ES256). Re-apply this fix once Supabase adds ES256 gateway support, or switch to per-function `verify_jwt` in `supabase/config.toml` once that also supports ES256.
+
 ---
 
 ### HIGH-3: Ad Credit Endpoint Lacks Server-Side Ad Verification
